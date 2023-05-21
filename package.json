@@ -1,0 +1,60 @@
+{
+  "name": "POS",
+  "version": "1.0.0",
+  "description": "POS by Federico González",
+  "scripts": {
+    "start": "ts-node -r tsconfig-paths/register -r dotenv/config src/index",
+    "dev": "nodemon --config restart.json",
+    "prebuild": "npm run lint",
+    "build": "tsc -p tsconfig.build.json",
+    "build:watch": "tsc -w -p tsconfig.build.json",
+    "lint": "eslint . --ext .ts,.tsx",
+    "prepare": "husky install"
+  },
+  "author": "Federico González <fede@nazgul.com.ar>",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "commander": "^10.0.1",
+    "express": "^4.18.2",
+    "http-errors": "^2.0.0",
+    "jsonwebtoken": "^9.0.0",
+    "module-alias": "^2.2.2",
+    "path": "^0.12.7",
+    "socket-io": "^1.0.0",
+    "socket.io": "^4.6.1",
+    "tslib": "~2.5.2",
+    "winston": "^3.8.2"
+  },
+  "devDependencies": {
+    "@tsconfig/recommended": "^1.0.2",
+    "@types/bcryptjs": "^2.4.2",
+    "@types/express": "^4.17.17",
+    "@types/http-errors": "^2.0.1",
+    "@types/jsonwebtoken": "^9.0.2",
+    "@types/module-alias": "^2.0.1",
+    "@types/node": "~20.2.1",
+    "@typescript-eslint/eslint-plugin": "~5.59.6",
+    "@typescript-eslint/parser": "~5.59.6",
+    "dotenv": "^16.0.3",
+    "eslint": "~8.41.0",
+    "eslint-config-prettier": "~8.8.0",
+    "husky": "^8.0.0",
+    "nodemon": "^2.0.22",
+    "prettier": "~2.8.8",
+    "rimraf": "^5.0.1",
+    "ts-node": "^10.9.1",
+    "ts-node-dev": "^2.0.0",
+    "tsconfig-paths": "^4.2.0",
+    "tsutils": "~3.21.0",
+    "typescript": "~5.0.4"
+  },
+  "resolutions": {
+    "got": "11.8.5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:FedericoDG/pos.git"
+  },
+  "homepage": "https://github.com/FedericoDG/pos"
+}
