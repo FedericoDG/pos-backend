@@ -6,6 +6,4 @@ export const bcHash = async (password: string) => {
   return await bc.hash(password, salt);
 };
 
-export const bcCompare = async (passwordOne: string, passwordTwo: string) => {
-  return await bc.compare(passwordOne, passwordTwo);
-};
+export const bcCompare = async (passwordOne: string, passwordTwo: string) => await bc.compare(passwordOne, passwordTwo);

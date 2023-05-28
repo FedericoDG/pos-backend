@@ -1,17 +1,14 @@
-import { createServer } from './config/express';
+import { AddressInfo } from 'net';
 import { Server } from 'socket.io';
-import { logger } from './config/logger';
-import * as moduleAlias from 'module-alias';
+import * as dotenv from 'dotenv';
 import http from 'http';
 
-const sourcePath = process.env.NODE_ENV === 'development' ? 'src' : __dirname;
+import { createServer } from './config/express';
+import { logger } from './config/logger';
 
-moduleAlias.addAliases({
-  '@server': sourcePath,
-  '@config': `${sourcePath}/config`,
-  '@domain': `${sourcePath}/domain`,
-});
+dotenv.config();
 
+const host = process.env.HOST;
 const port = process.env.PORT;
 
 async function startServer() {
@@ -25,29 +22,12 @@ async function startServer() {
 
   io.on('connection', (socket) => {
     console.log('User connected: ', socket.id);
-
-    socket.on('join_channel', (data) => {
-      socket.join(data);
-    });
-
-    socket.on('send_transaction', (data) => {
-      socket.to(data.channel).emit('income_transaction', data.message);
-    });
   });
 
-  server.listen(port, () => {
-    logger.info(`Server ready on port: ${port}`);
-  });
+  server.listen({ host, port }, () => {
+    const addressInfo = server.address() as AddressInfo;
 
-  const signalTraps: NodeJS.Signals[] = ['SIGTERM', 'SIGINT', 'SIGUSR2'];
-  signalTraps.forEach((type) => {
-    process.once(type, async () => {
-      logger.info(`process.once ${type}`);
-
-      server.close(() => {
-        logger.debug('HTTP server closed');
-      });
-    });
+    logger.info(`Server ready at http://${addressInfo.address}:${addressInfo.port}`);
   });
 }
 

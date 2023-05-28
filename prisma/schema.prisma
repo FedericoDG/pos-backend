@@ -1,0 +1,212 @@
+enum UserType {
+  SUPERADMIN
+  ADMIN
+  VENDOR
+  USER
+  CLIENT
+}
+
+enum StatusType {
+  ENABLED
+  DISABLED
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+  // directUrl = env("DIRECT_URL")
+}
+
+model Users {
+  id        Int      @id @default(autoincrement())
+  name      String
+  lastname  String
+  email     String   @unique
+  password  String
+  roleId    Int      @default(4)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  // Relations
+  role      Roles    @relation(fields: [roleId], references: [id])
+
+  @@map(name: "users")
+}
+
+model Roles {
+  id          Int       @id @default(autoincrement())
+  name        UserType  @unique @default(USER)
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @default(now()) @updatedAt
+  // Relations
+  users       Users[]
+  clients     Clients[]
+
+  @@map(name: "roles")
+}
+
+model Products {
+  id                 Int        @id @default(autoincrement())
+  code               String     @unique
+  barcode            String     @unique
+  name               String
+  status             StatusType @default(ENABLED)
+  allownegativestock StatusType @default(DISABLED)
+  description        String?
+  categoryId         Int
+  unitId             Int
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @default(now()) @updatedAt
+  // Relations
+  category           Categories @relation(fields: [categoryId], references: [id])
+  units              Units      @relation(fields: [unitId], references: [id])
+  stocks             Stocks[]
+  prices             Prices[]
+
+  @@map(name: "products")
+}
+
+model Categories {
+  id          Int        @id @default(autoincrement())
+  name        String     @unique
+  description String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @default(now()) @updatedAt
+  // Relations
+  products    Products[]
+
+  @@map(name: "categories")
+}
+
+model Units {
+  id        Int        @id @default(autoincrement())
+  code      String     @unique
+  name      String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @default(now()) @updatedAt
+  //Relations
+  products  Products[]
+
+  @@map(name: "units")
+}
+
+model Warehouses {
+  id          Int      @id @default(autoincrement())
+  code        String   @unique
+  description String?
+  address     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+  // Relations
+  stocks      Stocks[]
+
+  @@map(name: "warehouses")
+}
+
+model Stocks {
+  id          Int        @id @default(autoincrement())
+  productId   Int
+  warehouseId Int
+  stock       Float      @default(0)
+  prevstock   Float      @default(0)
+  prevdate    DateTime   @default(now())
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @default(now()) @updatedAt
+  // Relations
+  products    Products   @relation(fields: [productId], references: [id])
+  warehouses  Warehouses @relation(fields: [warehouseId], references: [id])
+
+  @@map(name: "stock")
+}
+
+model Pricelists {
+  id          Int      @id @default(autoincrement())
+  code        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+  // Relations
+  prices      Prices[]
+
+  @@map(name: "pricelists")
+}
+
+model Prices {
+  id          Int        @id @default(autoincrement())
+  productId   Int
+  pricelistId Int
+  price       Float      @default(0)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @default(now()) @updatedAt
+  // Relations
+  products    Products   @relation(fields: [productId], references: [id])
+  pricelists  Pricelists @relation(fields: [pricelistId], references: [id])
+
+  @@map(name: "prices")
+}
+
+// TODO: Modificar una vez desarrollada la funcionalidad de "compra"
+model Suppliers {
+  id        Int      @id @default(autoincrement())
+  cuit      String   @unique
+  name      String?
+  email     String?  @unique
+  phone     String?
+  mobile    String?
+  address   String?
+  info      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@map(name: "suppliers")
+}
+
+// TODO: Modificar una vez desarrollada la funcionalidad de "venta"
+model Clients {
+  id        Int      @id @default(autoincrement())
+  name      String
+  lastname  String
+  document  String   @unique
+  email     String   @unique
+  password  String
+  phone     String?
+  mobile    String?
+  address   String?
+  info      String?
+  roleId    Int      @default(5)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  // Relations
+  role      Roles    @relation(fields: [roleId], references: [id])
+
+  @@map(name: "clients")
+}
+
+// TODO. No hay prioridad
+model Discharges {
+  id          Int      @id @default(autoincrement())
+  reasonId    Int      @default(1)
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+  //Relations
+  reason      Reasons  @relation(fields: [reasonId], references: [id])
+
+  @@map(name: "discharges")
+}
+
+// TODO. No hay prioridad
+model Reasons {
+  id         Int          @id @default(autoincrement())
+  reason     String
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @default(now()) @updatedAt
+  // Relations
+  Discharges Discharges[]
+
+  @@map(name: "reasons")
+}

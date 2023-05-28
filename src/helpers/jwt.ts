@@ -1,12 +1,9 @@
 import jsonWebToken from 'jsonwebtoken';
 
-export const JwtSign = (object: any) => jsonWebToken.sign(object, process.env.SECRET);
+import { User } from 'src/types';
 
-export const JwtDecode = (token: string) => jsonWebToken.decode(token);
+export const jwtSign = (user: User) => jsonWebToken.sign(user, process.env.SECRET || '');
 
-export const JwtVerify = (token: string) =>
-  jsonWebToken.verify(token, process.env.SECRET, (error) => {
-    if (error) return false;
+export const jwtDecode = (token: string) => jsonWebToken.decode(token);
 
-    return true;
-  });
+export const jwtVerify = (token: string) => jsonWebToken.verify(token, process.env.SECRET || '');

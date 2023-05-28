@@ -1,7 +1,5 @@
 {
   "extends": "@tsconfig/recommended/tsconfig.json",
-  "exclude": ["node_modules", "build"],
-  "include": ["src/**/*", "__tests__/**/*"],
   "compilerOptions": {
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
@@ -10,7 +8,7 @@
     "forceConsistentCasingInFileNames": true,
     "importHelpers": true,
     "jsx": "react",
-    "module": "commonjs",
+    "module": "CommonJS",
     "moduleResolution": "node",
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": false,
@@ -20,13 +18,11 @@
     "noUnusedParameters": true,
     "outDir": "./build",
     "sourceMap": true,
-    "strictNullChecks": false,
+    "strict": true,
+    "strictNullChecks": true,
     "target": "ES6",
-    "typeRoots": ["./types"]
-    /* "paths": {
-      "@server/*": ["src/*"],
-      "@tests/*": ["__tests__/*"],
-      "@config/*": ["src/config/*"]
-    } */
-  }
+    "typeRoots": ["./src/types", "./node_modules/@types"]
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "build"]
 }
