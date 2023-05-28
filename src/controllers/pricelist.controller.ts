@@ -1,13 +1,12 @@
 import { NextFunction, Response, Request } from 'express';
-import { Categories, PrismaClient, Products, Units } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import createHttpError from 'http-errors';
 
 import { asyncHandler } from '../helpers/asyncHandler';
 import { endpointResponse } from '../helpers/endpointResponse';
 
 import { CreatePriceListType, UpdatePriceListType } from 'src/schemas/pricelist.schema';
-
-type ProductExtended = Products & Categories & Units;
+import { getList } from 'src/helpers/getList';
 
 const prisma = new PrismaClient();
 
@@ -62,65 +61,7 @@ export const getByIdAndWarehouseId = asyncHandler(
         },
       });
 
-      const reducedObject = pricelist?.prices.reduce((acc, price) => {
-        const productId = price.productId;
-        if (!acc[productId]) {
-          acc[productId] = {
-            id: price.products.id,
-            code: price.products.code,
-            barcode: price.products.barcode,
-            name: price.products.name,
-            status: price.products.status,
-            allownegativestock: price.products.allownegativestock,
-            description: price.products.description,
-            price: price.price,
-            category: {
-              id: price.products.category.id,
-              name: price.products.category.name,
-              description: price.products.category.description,
-            },
-            units: {
-              id: price.products.units.id,
-              code: price.products.units.code,
-              name: price.products.units.name,
-            },
-          };
-        }
-        return acc;
-      }, {});
-
-      const products: ProductExtended[] = Object.values(reducedObject!);
-
-      const mergedArray = stocks
-        .map((stock) => {
-          const productId = stock.productId;
-          const existingObj = products.find((obj) => obj.id === productId);
-
-          if (existingObj) {
-            return {
-              ...existingObj,
-              stock: stock.stock,
-              warehouses: {
-                id: stock.warehouses.id,
-                code: stock.warehouses.code,
-                description: stock.warehouses.description,
-                address: stock.warehouses.address,
-              },
-            };
-          }
-
-          return null;
-        })
-        .filter((obj) => obj !== null);
-
-      const list = {
-        id: pricelist?.id,
-        code: pricelist?.code,
-        description: pricelist?.description,
-        createdAt: pricelist?.createdAt,
-        updatedAt: pricelist?.updatedAt,
-        products: mergedArray,
-      };
+      const list = getList(pricelist, stocks, 'products');
 
       endpointResponse({
         res,
@@ -169,65 +110,7 @@ export const getByIdWarehouseIdAndProductId = asyncHandler(
         },
       });
 
-      const reducedObject = pricelist?.prices.reduce((acc, price) => {
-        const productId = price.productId;
-        if (!acc[productId]) {
-          acc[productId] = {
-            id: price.products.id,
-            code: price.products.code,
-            barcode: price.products.barcode,
-            name: price.products.name,
-            status: price.products.status,
-            allownegativestock: price.products.allownegativestock,
-            description: price.products.description,
-            price: price.price,
-            category: {
-              id: price.products.category.id,
-              name: price.products.category.name,
-              description: price.products.category.description,
-            },
-            units: {
-              id: price.products.units.id,
-              code: price.products.units.code,
-              name: price.products.units.name,
-            },
-          };
-        }
-        return acc;
-      }, {});
-
-      const products: ProductExtended[] = Object.values(reducedObject!);
-
-      const mergedArray = stocks
-        .map((stock) => {
-          const productId = stock.productId;
-          const existingObj = products.find((obj) => obj.id === productId);
-
-          if (existingObj) {
-            return {
-              ...existingObj,
-              stock: stock.stock,
-              warehouses: {
-                id: stock.warehouses.id,
-                code: stock.warehouses.code,
-                description: stock.warehouses.description,
-                address: stock.warehouses.address,
-              },
-            };
-          }
-
-          return null;
-        })
-        .filter((obj) => obj !== null);
-
-      const list = {
-        id: pricelist?.id,
-        code: pricelist?.code,
-        description: pricelist?.description,
-        createdAt: pricelist?.createdAt,
-        updatedAt: pricelist?.updatedAt,
-        product: mergedArray[0],
-      };
+      const list = getList(pricelist, stocks, 'product');
 
       endpointResponse({
         res,
@@ -278,7 +161,7 @@ export const update = asyncHandler(
       const { id } = req.params;
       const { description } = req.body;
 
-      const pricelist = await prisma.warehouses.update({
+      const pricelist = await prisma.pricelists.update({
         where: { id: Number(id) },
         data: { description },
       });

@@ -10,6 +10,7 @@ import warehouse from './warehouse.route';
 import pricelist from './pricelist.route';
 import supplier from './supplier.route';
 import client from './client.route';
+import price from './price.route';
 
 const router = Router();
 
@@ -23,5 +24,6 @@ router.use('/warehouses', warehouse);
 router.use('/pricelists', pricelist);
 router.use('/suppliers', supplier);
 router.use('/clients', client);
+router.use('/prices', price);
 
 export default router;

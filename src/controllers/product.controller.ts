@@ -72,6 +72,7 @@ export const getById = asyncHandler(
         const fede = await prisma.prices.findMany({
           where: { productId: Number(id), pricelistId: idx },
           include: {
+            products: true,
             pricelists: { select: { code: true, description: true, createdAt: true } },
           },
           orderBy: [
