@@ -1,7 +1,7 @@
 enum UserType {
   SUPERADMIN
   ADMIN
-  VENDOR
+  SELLER
   USER
   CLIENT
 }
@@ -50,22 +50,23 @@ model Roles {
 }
 
 model Products {
-  id                 Int        @id @default(autoincrement())
-  code               String     @unique
-  barcode            String     @unique
+  id                 Int          @id @default(autoincrement())
+  code               String       @unique
+  barcode            String       @unique
   name               String
-  status             StatusType @default(ENABLED)
-  allownegativestock StatusType @default(DISABLED)
+  status             StatusType   @default(ENABLED)
+  allownegativestock StatusType   @default(DISABLED)
   description        String?
   categoryId         Int
   unitId             Int
-  createdAt          DateTime   @default(now())
-  updatedAt          DateTime   @default(now()) @updatedAt
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @default(now()) @updatedAt
   // Relations
-  category           Categories @relation(fields: [categoryId], references: [id])
-  units              Units      @relation(fields: [unitId], references: [id])
+  category           Categories   @relation(fields: [categoryId], references: [id])
+  units              Units        @relation(fields: [unitId], references: [id])
   stocks             Stocks[]
   prices             Prices[]
+  discharges         Discharges[]
 
   @@map(name: "products")
 }
@@ -95,14 +96,15 @@ model Units {
 }
 
 model Warehouses {
-  id          Int      @id @default(autoincrement())
-  code        String   @unique
+  id          Int          @id @default(autoincrement())
+  code        String       @unique
   description String?
   address     String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @default(now()) @updatedAt
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @default(now()) @updatedAt
   // Relations
   stocks      Stocks[]
+  discharges  Discharges[]
 
   @@map(name: "warehouses")
 }
@@ -188,13 +190,17 @@ model Clients {
 
 // TODO. No hay prioridad
 model Discharges {
-  id          Int      @id @default(autoincrement())
-  reasonId    Int      @default(1)
+  id          Int        @id @default(autoincrement())
+  productId   Int
+  warehouseId Int
+  reasonId    Int        @default(1)
   description String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @default(now()) @updatedAt
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @default(now()) @updatedAt
   //Relations
-  reason      Reasons  @relation(fields: [reasonId], references: [id])
+  reason      Reasons    @relation(fields: [reasonId], references: [id])
+  products    Products   @relation(fields: [productId], references: [id])
+  warehouses  Warehouses @relation(fields: [warehouseId], references: [id])
 
   @@map(name: "discharges")
 }
@@ -206,7 +212,7 @@ model Reasons {
   createdAt  DateTime     @default(now())
   updatedAt  DateTime     @default(now()) @updatedAt
   // Relations
-  Discharges Discharges[]
+  discharges Discharges[]
 
   @@map(name: "reasons")
 }

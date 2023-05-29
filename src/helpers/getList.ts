@@ -86,7 +86,7 @@ export const getList = (pricelist: PriceListExtended, stocks: StockExtended, pro
       description: pricelist?.description,
       createdAt: pricelist?.createdAt,
       updatedAt: pricelist?.updatedAt,
-      product: mergedArray,
+      products: mergedArray,
     };
   }
 };

@@ -8,7 +8,7 @@ export const roles = [
     name: UserType.ADMIN,
   },
   {
-    name: UserType.VENDOR,
+    name: UserType.SELLER,
   },
   {
     name: UserType.USER,

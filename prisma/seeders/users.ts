@@ -16,7 +16,7 @@ export const users = [
   {
     name: 'Daniel',
     lastname: 'Gaía',
-    email: 'vendor@gmail.com',
+    email: 'seller@gmail.com',
     password: '$2a$10$ZM6gFPu6tMAU4wr79TFDn.2IZbon0i/iGeNygxtGxdnVqEz1jkr4q',
     roleId: 3,
   },

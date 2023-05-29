@@ -6,7 +6,7 @@ import { asyncHandler } from '../helpers/asyncHandler';
 import { endpointResponse } from '../helpers/endpointResponse';
 
 import { CreatePriceListType, UpdatePriceListType } from 'src/schemas/pricelist.schema';
-import { getList } from 'src/helpers/getList';
+import { getList } from '../helpers/getList';
 
 const prisma = new PrismaClient();
 

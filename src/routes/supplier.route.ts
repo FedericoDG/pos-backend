@@ -11,11 +11,11 @@ import { schemaValidator } from '../middlewares/schemaValidator.middleware';
 import { valueIsAlreadyInUse } from '../middlewares/valueIsAlreadyInUse';
 
 // Schema
-import { createSupplierSchema, updateSupplierSchema } from 'src/schemas/supplier.schema';
+import { createSupplierSchema, updateSupplierSchema } from '../schemas/supplier.schema';
 
 // Routes
-user.get('/', [validToken, accessLevel('VENDOR')], getAll);
-user.get('/:id', [validToken, accessLevel('VENDOR')], getById);
+user.get('/', [validToken, accessLevel('SELLER')], getAll);
+user.get('/:id', [validToken, accessLevel('SELLER')], getById);
 user.post(
   '/',
   [

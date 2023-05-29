@@ -1,9 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
-import { JwtPayload } from 'jsonwebtoken';
 
 import { jwtVerify } from '../helpers/jwt';
 
-import { UserType } from '../types';
+import { User, UserType } from '../types';
 
 export const validToken = (req: Request, res: Response, next: NextFunction) => {
   const { authorization } = req.headers;
@@ -29,7 +28,7 @@ export const validToken = (req: Request, res: Response, next: NextFunction) => {
   try {
     const decoded = jwtVerify(token);
 
-    const user = decoded as JwtPayload;
+    const user = decoded as User;
 
     req.user = user;
 
@@ -55,7 +54,7 @@ export const accessLevel = (level: UserType) => (req: Request, res: Response, ne
     case 'ADMIN':
       accLvl = 2;
       break;
-    case 'VENDOR':
+    case 'SELLER':
       accLvl = 3;
       break;
     case 'USER':

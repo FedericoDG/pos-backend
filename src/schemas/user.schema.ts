@@ -5,7 +5,7 @@ export const createUserSchema = z.object({
   lastname: z.string().nonempty(),
   email: z.string().email(),
   password: z.string().min(6),
-  roleId: z.coerce.number().min(1).max(4).optional(), // 1: SUPERADMIN, 2: ADMIN, 3: VENDOR, 4: USER
+  roleId: z.coerce.number().min(1).max(4).optional(), // 1: SUPERADMIN, 2: ADMIN, 3: SELLER, 4: USER
 });
 
 export const updateUserSchema = z.object({

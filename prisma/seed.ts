@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import {
   categories,
   clients,
-  discharges,
+  // discharges,
   products,
   reasons,
   roles,
@@ -42,7 +42,7 @@ async function main() {
 
   await prisma.prices.createMany({ data: prices });
 
-  await prisma.discharges.createMany({ data: discharges });
+  // await prisma.discharges.createMany({ data: discharges });
 }
 
 main()
