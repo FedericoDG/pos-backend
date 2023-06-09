@@ -84,11 +84,11 @@ export const update = asyncHandler(
   async (req: Request<{ id?: number }, unknown, UpdateUnitType>, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
-      const { name } = req.body;
+      const { code, name } = req.body;
 
       const unit = await prisma.units.update({
         where: { id: Number(id) },
-        data: { name },
+        data: { code, name },
       });
 
       endpointResponse({

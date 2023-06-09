@@ -6,7 +6,8 @@ export const createUnitSchema = z.object({
 });
 
 export const updateUnitSchema = z.object({
-  name: z.string().nonempty().optional(),
+  name: z.string().optional(),
+  code: z.string().optional(),
 });
 
 export type CreateUnitType = z.infer<typeof createUnitSchema>;

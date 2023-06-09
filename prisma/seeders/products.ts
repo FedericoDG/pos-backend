@@ -8,7 +8,8 @@ export const products = [
     status: StatusType.ENABLED,
     allownegativestock: StatusType.DISABLED,
     categoryId: 1,
-    unitId: 1,
+    unitId: 2,
+    description: '',
   },
   {
     code: 'lechu',
@@ -17,6 +18,7 @@ export const products = [
     status: StatusType.ENABLED,
     allownegativestock: StatusType.DISABLED,
     categoryId: 1,
-    unitId: 1,
+    unitId: 2,
+    description: '',
   },
 ];

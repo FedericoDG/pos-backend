@@ -54,16 +54,18 @@ model Products {
   code               String       @unique
   barcode            String       @unique
   name               String
+  alertlowstock      StatusType   @default(DISABLED)
+  lowstock           Int          @default(0)
   status             StatusType   @default(ENABLED)
   allownegativestock StatusType   @default(DISABLED)
-  description        String?
+  description        String?      @default("")
   categoryId         Int
   unitId             Int
   createdAt          DateTime     @default(now())
   updatedAt          DateTime     @default(now()) @updatedAt
   // Relations
   category           Categories   @relation(fields: [categoryId], references: [id])
-  units              Units        @relation(fields: [unitId], references: [id])
+  unit               Units        @relation(fields: [unitId], references: [id])
   stocks             Stocks[]
   prices             Prices[]
   discharges         Discharges[]

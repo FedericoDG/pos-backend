@@ -19,8 +19,9 @@ export const getAll = asyncHandler(
           },
         ],
         include: {
+          unit: true,
+          category: true,
           stocks: { include: { warehouses: true } },
-          // prices: { include: { pricelists: true } },
         },
       });
 
@@ -60,6 +61,8 @@ export const getById = asyncHandler(
       const product = await prisma.products.findFirst({
         where: { id: Number(id) },
         include: {
+          unit: true,
+          category: true,
           stocks: { include: { warehouses: true } },
         },
       });
@@ -69,7 +72,7 @@ export const getById = asyncHandler(
       const priceDetails: Prices[][] = [];
       const prices: Prices[] = [];
       for (const idx of ids) {
-        const fede = await prisma.prices.findMany({
+        const price = await prisma.prices.findMany({
           where: { productId: Number(id), pricelistId: idx },
           include: {
             products: true,
@@ -83,8 +86,13 @@ export const getById = asyncHandler(
           take: 10,
         });
 
-        if (fede !== null) prices.push(fede[0]);
-        if (fede !== null) priceDetails.push(fede.sort((a, b) => a.id - b.id));
+        if (price.length > 0) {
+          const filteredPrice = price.filter((el) => el.price > 0);
+          if (filteredPrice.length > 0) {
+            prices.push(price[0]);
+            priceDetails.push(price.sort((a, b) => a.id - b.id));
+          }
+        }
       }
 
       /* const result = priceDetails.flat().reduce((acc, obj) => {
@@ -123,6 +131,7 @@ export const create = asyncHandler(
   async (req: Request<unknown, unknown, CreateProductType>, res: Response, next: NextFunction) => {
     try {
       const data = req.body;
+      console.log(data);
 
       // Insert a product
       const product = await prisma.products.create({ data });
@@ -138,15 +147,17 @@ export const create = asyncHandler(
       // Insert stocks
       await prisma.stocks.createMany({ data: stocks });
 
+      /* CREO QUE ESTA PARTE NO HACE FALTA */
       // Get pricelists ids
-      const pricelists = await prisma.pricelists.findMany({ select: { id: true } });
-      const pricelistsIds = pricelists.map((warehouse) => warehouse.id);
+      //const pricelists = await prisma.pricelists.findMany({ select: { id: true } });
+      //const pricelistsIds = pricelists.map((warehouse) => warehouse.id);
 
       // Create prices array
-      const prices = pricelistsIds.map((prId) => ({ productId: id, pricelistId: prId }));
+      //const prices = pricelistsIds.map((prId) => ({ productId: id, pricelistId: prId }));
 
       // Insert prices
-      await prisma.prices.createMany({ data: prices });
+      //await prisma.prices.createMany({ data: prices });
+      /*  */
 
       endpointResponse({
         res,
@@ -170,11 +181,33 @@ export const update = asyncHandler(
   async (req: Request<{ id?: number }, unknown, UpdateProductType>, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
-      const { name, description, status, allownegativestock, categoryId, unitId } = req.body;
+      const {
+        name,
+        code,
+        barcode,
+        description,
+        status,
+        allownegativestock,
+        categoryId,
+        unitId,
+        alertlowstock,
+        lowstock,
+      } = req.body;
 
       const product = await prisma.products.update({
         where: { id: Number(id) },
-        data: { name, description, status, allownegativestock, categoryId, unitId },
+        data: {
+          name,
+          code,
+          barcode,
+          description,
+          status,
+          allownegativestock,
+          categoryId,
+          unitId,
+          alertlowstock,
+          lowstock,
+        },
       });
 
       endpointResponse({

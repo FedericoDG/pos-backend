@@ -30,6 +30,8 @@ export const validToken = (req: Request, res: Response, next: NextFunction) => {
 
     const user = decoded as User;
 
+    delete user.password;
+
     req.user = user;
 
     return next();

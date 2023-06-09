@@ -48,7 +48,7 @@ export const getByIdAndWarehouseId = asyncHandler(
         where: { id: Number(id) },
         include: {
           prices: {
-            include: { products: { include: { units: true, category: true } } },
+            include: { products: { include: { unit: true, category: true } } },
             orderBy: [{ createdAt: 'desc' }],
           },
         },
@@ -74,7 +74,7 @@ export const getByIdAndWarehouseId = asyncHandler(
       });
     } catch (error) {
       if (error instanceof Error) {
-        const httpError = createHttpError(500, `[PriceLists - GET ONEdfg]: ${error.message}`);
+        const httpError = createHttpError(500, `[PriceLists - GET ONE]: ${error.message}`);
         next(httpError);
       }
     }
@@ -97,7 +97,7 @@ export const getByIdWarehouseIdAndProductId = asyncHandler(
             where: {
               productId: Number(productId),
             },
-            include: { products: { include: { units: true, category: true } } },
+            include: { products: { include: { unit: true, category: true } } },
             orderBy: [{ createdAt: 'desc' }],
           },
         },

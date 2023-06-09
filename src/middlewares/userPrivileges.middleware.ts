@@ -21,7 +21,7 @@ export const userExist = async (req: Request, res: Response, next: NextFunction)
 
     if (!user) {
       return res.status(403).json({
-        code: 400,
+        code: 403,
         status: false,
         message: 'Usuario y/o contraseña incorrecta',
       });
@@ -31,7 +31,7 @@ export const userExist = async (req: Request, res: Response, next: NextFunction)
 
     if (!match) {
       return res.status(403).json({
-        code: 400,
+        code: 403,
         status: false,
         message: 'Usuario y/o contraseña incorrecta',
       });
@@ -61,7 +61,7 @@ export const clientExist = async (req: Request, res: Response, next: NextFunctio
 
     if (!client) {
       return res.status(403).json({
-        code: 400,
+        code: 403,
         status: false,
         message: 'Usuario y/o contraseña incorrecta',
       });
@@ -71,7 +71,7 @@ export const clientExist = async (req: Request, res: Response, next: NextFunctio
 
     if (!match) {
       return res.status(403).json({
-        code: 400,
+        code: 403,
         status: false,
         message: 'Usuario y/o contraseña incorrecta',
       });

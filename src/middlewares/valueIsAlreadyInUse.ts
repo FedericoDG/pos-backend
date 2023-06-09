@@ -13,16 +13,16 @@ export const valueIsAlreadyInUse =
   async (req: Request, res: Response, next: NextFunction) => {
     const value = req.body[`${column}`];
 
-    const fede = {
+    const where = {
       [column]: value,
     };
 
-    const row = await prisma[`${model}`].findFirst({ where: fede });
+    const row = await prisma[`${model}`].findFirst({ where });
 
     if (row) {
       return res.status(403).json({
-        code: 200,
-        status: true,
+        code: 403,
+        status: false,
         message: `El ${column} ya se encuentra en uso`,
       });
     }

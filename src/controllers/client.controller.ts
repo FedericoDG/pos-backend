@@ -3,7 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import createHttpError from 'http-errors';
 
 import { asyncHandler } from '../helpers/asyncHandler';
-import { bcHash } from '../helpers/bcrypt';
+// import { bcHash } from '../helpers/bcrypt';
 import { endpointResponse } from '../helpers/endpointResponse';
 
 import { CreateClientType, UpdateClientType } from '../schemas/client.schema';
@@ -94,7 +94,7 @@ export const update = asyncHandler(
   async (req: Request<{ id?: number }, unknown, UpdateClientType>, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
-      const { name, lastname, phone, mobile, address, info, password } = req.body;
+      const { name, lastname, phone, mobile, address, info /* password */ } = req.body;
 
       const data: UpdateClientType = {
         name,
@@ -105,10 +105,10 @@ export const update = asyncHandler(
         info,
       };
 
-      if (password) {
+      /*  if (password) {
         const hashedPassword = await bcHash(password);
         data.password = hashedPassword;
-      }
+      } */
 
       const client = await prisma.clients.update({
         where: { id: Number(id) },

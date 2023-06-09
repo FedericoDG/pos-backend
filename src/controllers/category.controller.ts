@@ -12,7 +12,7 @@ const prisma = new PrismaClient();
 export const getAll = asyncHandler(
   async (_req: Request<unknown, unknown, unknown>, res: Response, next: NextFunction) => {
     try {
-      const categories = await prisma.categories.findMany({ include: { products: { include: { units: true } } } });
+      const categories = await prisma.categories.findMany({ include: { products: { include: { unit: true } } } });
 
       endpointResponse({
         res,
@@ -40,7 +40,7 @@ export const getById = asyncHandler(
         where: { id: Number(id) },
         include: {
           products: {
-            include: { units: true },
+            include: { unit: true },
           },
         },
       });
@@ -92,11 +92,11 @@ export const update = asyncHandler(
   async (req: Request<{ id?: number }, unknown, UpdateCategoryType>, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
-      const { description } = req.body;
+      const { name, description } = req.body;
 
       const category = await prisma.categories.update({
         where: { id: Number(id) },
-        data: { description },
+        data: { name, description },
       });
 
       endpointResponse({

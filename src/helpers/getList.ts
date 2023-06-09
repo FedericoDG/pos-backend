@@ -10,7 +10,7 @@ type PriceListExtended =
   | (Pricelists & {
       prices: (Prices & {
         products: Products & {
-          units: Units;
+          unit: Units;
           category: Categories;
         };
       })[];
@@ -35,10 +35,10 @@ export const getList = (pricelist: PriceListExtended, stocks: StockExtended, pro
           name: price.products.category.name,
           description: price.products.category.description,
         },
-        units: {
-          id: price.products.units.id,
-          code: price.products.units.code,
-          name: price.products.units.name,
+        unit: {
+          id: price.products.unit.id,
+          code: price.products.unit.code,
+          name: price.products.unit.name,
         },
       };
     }
