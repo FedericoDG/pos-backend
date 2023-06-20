@@ -4,6 +4,7 @@ import {
   clients,
   costs,
   discharges,
+  dischargeDetails,
   movements,
   pricelists,
   prices,
@@ -55,6 +56,8 @@ async function main() {
   await prisma.movements.createMany({ data: movements });
 
   await prisma.discharges.createMany({ data: discharges });
+
+  await prisma.dischargeDetails.createMany({ data: dischargeDetails });
 }
 
 main()

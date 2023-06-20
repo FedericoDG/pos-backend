@@ -215,10 +215,22 @@ CREATE TABLE `movements` (
 -- CreateTable
 CREATE TABLE `discharges` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `productId` INTEGER NOT NULL,
     `warehouseId` INTEGER NOT NULL,
-    `reasonId` INTEGER NOT NULL DEFAULT 1,
+    `cost` DOUBLE NOT NULL,
+    `userId` INTEGER NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `dischargedetails` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `dischargeId` INTEGER NOT NULL,
+    `productId` INTEGER NOT NULL,
     `quantity` INTEGER NOT NULL,
+    `reasonId` INTEGER NOT NULL DEFAULT 1,
     `info` VARCHAR(191) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
@@ -282,10 +294,16 @@ ALTER TABLE `purchasedetails` ADD CONSTRAINT `purchasedetails_productId_fkey` FO
 ALTER TABLE `movements` ADD CONSTRAINT `movements_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `discharges` ADD CONSTRAINT `discharges_reasonId_fkey` FOREIGN KEY (`reasonId`) REFERENCES `reasons`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE `discharges` ADD CONSTRAINT `discharges_productId_fkey` FOREIGN KEY (`productId`) REFERENCES `products`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE `discharges` ADD CONSTRAINT `discharges_warehouseId_fkey` FOREIGN KEY (`warehouseId`) REFERENCES `warehouses`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `discharges` ADD CONSTRAINT `discharges_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `dischargedetails` ADD CONSTRAINT `dischargedetails_dischargeId_fkey` FOREIGN KEY (`dischargeId`) REFERENCES `discharges`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `dischargedetails` ADD CONSTRAINT `dischargedetails_reasonId_fkey` FOREIGN KEY (`reasonId`) REFERENCES `reasons`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `dischargedetails` ADD CONSTRAINT `dischargedetails_productId_fkey` FOREIGN KEY (`productId`) REFERENCES `products`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;

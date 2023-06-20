@@ -27,18 +27,19 @@ datasource db {
 }
 
 model Users {
-  id        Int         @id @default(autoincrement())
-  name      String
-  lastname  String
-  email     String      @unique
-  password  String
-  roleId    Int         @default(4)
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @default(now()) @updatedAt
+  id         Int          @id @default(autoincrement())
+  name       String
+  lastname   String
+  email      String       @unique
+  password   String
+  roleId     Int          @default(4)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @default(now()) @updatedAt
   // Relations
-  role      Roles       @relation(fields: [roleId], references: [id])
-  Purchases Purchases[]
-  Movements Movements[]
+  role       Roles        @relation(fields: [roleId], references: [id])
+  Purchases  Purchases[]
+  Movements  Movements[]
+  Discharges Discharges[]
 
   @@map(name: "users")
 }
@@ -57,27 +58,27 @@ model Roles {
 }
 
 model Products {
-  id                 Int               @id @default(autoincrement())
-  code               String            @unique
-  barcode            String            @unique
+  id                 Int                @id @default(autoincrement())
+  code               String             @unique
+  barcode            String             @unique
   name               String
-  alertlowstock      StatusType        @default(DISABLED)
-  lowstock           Int               @default(0)
-  status             StatusType        @default(ENABLED)
-  allownegativestock StatusType        @default(DISABLED)
-  description        String?           @default("")
+  alertlowstock      StatusType         @default(DISABLED)
+  lowstock           Int                @default(0)
+  status             StatusType         @default(ENABLED)
+  allownegativestock StatusType         @default(DISABLED)
+  description        String?            @default("")
   categoryId         Int
   unitId             Int
-  createdAt          DateTime          @default(now())
-  updatedAt          DateTime          @default(now()) @updatedAt
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @default(now()) @updatedAt
   // Relations
-  category           Categories        @relation(fields: [categoryId], references: [id])
-  unit               Units             @relation(fields: [unitId], references: [id])
+  category           Categories         @relation(fields: [categoryId], references: [id])
+  unit               Units              @relation(fields: [unitId], references: [id])
   stocks             Stocks[]
   prices             Prices[]
   costs              Costs[]
-  discharges         Discharges[]
   PurchaseDetails    PurchaseDetails[]
+  DischargeDetails   DischargeDetails[]
 
   @@map(name: "products")
 }
@@ -262,29 +263,44 @@ model Movements {
 }
 
 model Discharges {
-  id          Int        @id @default(autoincrement())
-  productId   Int
-  warehouseId Int
-  reasonId    Int        @default(1)
-  quantity    Int
-  info        String?
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @default(now()) @updatedAt
+  id               Int                @id @default(autoincrement())
+  warehouseId      Int
+  cost             Float
+  userId           Int
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @default(now()) @updatedAt
   //Relations
-  reason      Reasons    @relation(fields: [reasonId], references: [id])
-  products    Products   @relation(fields: [productId], references: [id])
-  warehouses  Warehouses @relation(fields: [warehouseId], references: [id])
+  Warehouses       Warehouses         @relation(fields: [warehouseId], references: [id])
+  User             Users              @relation(fields: [userId], references: [id])
+  DischargeDetails DischargeDetails[]
 
   @@map(name: "discharges")
 }
 
+model DischargeDetails {
+  id          Int        @id @default(autoincrement())
+  dischargeId Int
+  productId   Int
+  quantity    Int
+  reasonId    Int        @default(1)
+  info        String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @default(now()) @updatedAt
+  //Relations
+  discharge   Discharges @relation(fields: [dischargeId], references: [id])
+  reason      Reasons    @relation(fields: [reasonId], references: [id])
+  products    Products   @relation(fields: [productId], references: [id])
+
+  @@map(name: "dischargedetails")
+}
+
 model Reasons {
-  id         Int          @id @default(autoincrement())
-  reason     String
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @default(now()) @updatedAt
+  id               Int                @id @default(autoincrement())
+  reason           String
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @default(now()) @updatedAt
   // Relations
-  discharges Discharges[]
+  DischargeDetails DischargeDetails[]
 
   @@map(name: "reasons")
 }

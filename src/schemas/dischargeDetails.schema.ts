@@ -7,7 +7,6 @@ export const createDischargeSchema = z.object({
       productId: z.number().nonnegative(),
       reasonId: z.number().nonnegative(),
       quantity: z.number().nonnegative(),
-      cost: z.number().nonnegative(),
       info: z.string().optional(),
     }),
   ),

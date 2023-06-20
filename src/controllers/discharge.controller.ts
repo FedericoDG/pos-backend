@@ -5,7 +5,7 @@ import createHttpError from 'http-errors';
 import { asyncHandler } from '../helpers/asyncHandler';
 import { endpointResponse } from '../helpers/endpointResponse';
 
-import { CreateDischargeType, UpdateDischargeType } from 'src/schemas/discharge.schema';
+import { CreateDischargeType } from 'src/schemas/discharge.schema';
 
 const prisma = new PrismaClient();
 
@@ -13,7 +13,7 @@ export const getAll = asyncHandler(
   async (_req: Request<unknown, unknown, unknown>, res: Response, next: NextFunction) => {
     try {
       const discharges = await prisma.discharges.findMany({
-        include: { products: true, reason: true, warehouses: true },
+        include: { User: true, DischargeDetails: true, Warehouses: true },
         orderBy: [{ createdAt: 'desc' }],
       });
 
@@ -41,7 +41,7 @@ export const getById = asyncHandler(
       const { id } = req.params;
       const discharge = await prisma.discharges.findFirst({
         where: { id: Number(id) },
-        include: { products: true, reason: true, warehouses: true },
+        include: { User: true, DischargeDetails: true, Warehouses: true },
         orderBy: [{ createdAt: 'desc' }],
       });
 
@@ -71,13 +71,27 @@ export const create = asyncHandler(
       cart.sort((a, b) => a.productId - b.productId);
 
       // Discharge
+      const cost = cart.reduce((acc, item) => acc + Number(item.quantity) * Number(item.cost), 0);
+
+      const { id } = await prisma.discharges.create({ data: { warehouseId, userId, cost } });
+
+      // Balance
+      await prisma.movements.create({ data: { amount: cost, type: 'OUT', userId } });
+
+      // Discharge Details
       const productsIds = cart.map((item) => item.productId).sort();
 
       const cartWithWarehouseId = cart
-        .map((item) => ({ warehouseId, ...item }))
+        .map((item) => ({
+          dischargeId: id,
+          reasonId: item.reasonId,
+          productId: item.productId,
+          quantity: item.quantity,
+          info: item.info,
+        }))
         .sort((a, b) => a.productId - b.productId);
 
-      const discharge = await prisma.discharges.createMany({ data: cartWithWarehouseId });
+      const discharge = await prisma.dischargeDetails.createMany({ data: cartWithWarehouseId });
 
       const stocks = await prisma.stocks.findMany({
         where: { productId: { in: productsIds }, warehouseId: warehouseId },
@@ -106,18 +120,6 @@ export const create = asyncHandler(
         ),
       );
 
-      // Balance
-      const products = await prisma.products.findMany({
-        where: { id: { in: productsIds } },
-        select: { costs: { select: { price: true, productId: true }, orderBy: [{ id: 'desc' }], take: 1 } },
-        orderBy: [{ id: 'asc' }],
-      });
-
-      const cost = products
-        .map((el) => ({ price: el.costs[0].price }))
-        .reduce((acc, item, idx) => acc + item.price * cart[idx].quantity, 0);
-      await prisma.movements.create({ data: { amount: cost, type: 'OUT', userId } });
-
       endpointResponse({
         res,
         code: 200,
@@ -131,35 +133,6 @@ export const create = asyncHandler(
     } catch (error) {
       if (error instanceof Error) {
         const httpError = createHttpError(500, `[Discharges - CREATE]: ${error.message}`);
-        next(httpError);
-      }
-    }
-  },
-);
-
-export const update = asyncHandler(
-  async (req: Request<{ id?: number }, unknown, UpdateDischargeType>, res: Response, next: NextFunction) => {
-    try {
-      const { id } = req.params;
-      const { info } = req.body;
-
-      const unit = await prisma.discharges.update({
-        where: { id: Number(id) },
-        data: { info },
-      });
-
-      endpointResponse({
-        res,
-        code: 200,
-        status: true,
-        message: 'Bajar de producto actualizada',
-        body: {
-          unit,
-        },
-      });
-    } catch (error) {
-      if (error instanceof Error) {
-        const httpError = createHttpError(500, `[Discharges - UPDATE]: ${error.message}`);
         next(httpError);
       }
     }
