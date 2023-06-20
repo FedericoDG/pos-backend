@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-const user = Router();
+const warehouse = Router();
 
 // Controller
 import { create, getAll, getById, remove, update } from '../controllers/warehouse.controller';
@@ -14,9 +14,9 @@ import { valueIsAlreadyInUse } from '../middlewares/valueIsAlreadyInUse';
 import { createWarehouseSchema, updateWarehouseSchema } from '../schemas/warehouse.schema';
 
 // Routes
-user.get('/', [validToken, accessLevel('USER')], getAll);
-user.get('/:id', [validToken, accessLevel('USER')], getById);
-user.post(
+warehouse.get('/', [validToken, accessLevel('USER')], getAll);
+warehouse.get('/:id', [validToken, accessLevel('USER')], getById);
+warehouse.post(
   '/',
   [
     validToken,
@@ -26,7 +26,7 @@ user.post(
   ],
   create,
 );
-user.put('/:id', [validToken, accessLevel('SUPERADMIN'), schemaValidator(updateWarehouseSchema)], update);
-user.delete('/:id', [validToken, accessLevel('SUPERADMIN')], remove);
+warehouse.put('/:id', [validToken, accessLevel('SUPERADMIN'), schemaValidator(updateWarehouseSchema)], update);
+warehouse.delete('/:id', [validToken, accessLevel('SUPERADMIN')], remove);
 
-export default user;
+export default warehouse;

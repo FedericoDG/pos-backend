@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-const user = Router();
+const role = Router();
 
 // Controller
 import { getAll, getById, update } from '../controllers/role.controller';
@@ -13,8 +13,8 @@ import { schemaValidator } from '../middlewares/schemaValidator.middleware';
 import { updateRoleSchema } from '../schemas/role.schema';
 
 // Routes
-user.get('/', [validToken, accessLevel('ADMIN')], getAll);
-user.get('/:id', [validToken, accessLevel('ADMIN')], getById);
-user.put('/:id', [validToken, accessLevel('ADMIN'), schemaValidator(updateRoleSchema)], update);
+role.get('/', [validToken, accessLevel('ADMIN')], getAll);
+role.get('/:id', [validToken, accessLevel('ADMIN')], getById);
+role.put('/:id', [validToken, accessLevel('ADMIN'), schemaValidator(updateRoleSchema)], update);
 
-export default user;
+export default role;

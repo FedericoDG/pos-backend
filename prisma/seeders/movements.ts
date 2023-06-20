@@ -1,14 +1,13 @@
+import { MovementType } from '@prisma/client';
 import { DateTime } from 'luxon';
 
 const now = DateTime.now();
 
-export const discharges = [
+export const movements = [
   {
-    productId: 1,
-    warehouseId: 1,
-    reasonId: 2,
-    quantity: 12,
-    info: 'Entraron a Robar',
+    amount: 28770,
+    type: MovementType.OUT,
+    userId: 3,
     createdAt: now.plus({ minutes: 1 }).toString(),
     updatedAt: now.plus({ minutes: 1 }).toString(),
   },

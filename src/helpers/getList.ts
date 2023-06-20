@@ -3,7 +3,7 @@ import { Categories, Pricelists, Prices, Products, Stocks, Units, Warehouses } f
 type ProductExtended = Products & Categories & Units;
 
 type StockExtended = (Stocks & {
-  warehouses: Warehouses;
+  warehouse: Warehouses;
 })[];
 
 type PriceListExtended =
@@ -55,11 +55,11 @@ export const getList = (pricelist: PriceListExtended, stocks: StockExtended, pro
         return {
           ...existingObj,
           stock: stock.stock,
-          warehouses: {
-            id: stock.warehouses.id,
-            code: stock.warehouses.code,
-            description: stock.warehouses.description,
-            address: stock.warehouses.address,
+          warehouse: {
+            id: stock.warehouse.id,
+            code: stock.warehouse.code,
+            description: stock.warehouse.description,
+            address: stock.warehouse.address,
           },
         };
       }

@@ -5,33 +5,27 @@ import createHttpError from 'http-errors';
 import { asyncHandler } from '../helpers/asyncHandler';
 import { endpointResponse } from '../helpers/endpointResponse';
 
-import { CreateSupplierType, UpdateSupplierType } from 'src/schemas/supplier.schema';
+import { CreateReasonType, UpdateReasonType } from 'src/schemas/reason.schema';
 
 const prisma = new PrismaClient();
 
 export const getAll = asyncHandler(
   async (_req: Request<unknown, unknown, unknown>, res: Response, next: NextFunction) => {
     try {
-      const suppliers = await prisma.suppliers.findMany({
-        orderBy: [
-          {
-            updatedAt: 'desc',
-          },
-        ],
-      });
+      const reasons = await prisma.reasons.findMany();
 
       endpointResponse({
         res,
         code: 200,
         status: true,
-        message: 'Proveedores recuperados',
+        message: 'Razones recuperadas',
         body: {
-          suppliers,
+          reasons,
         },
       });
     } catch (error) {
       if (error instanceof Error) {
-        const httpError = createHttpError(500, `[Suppliers - GET ALL]: ${error.message}`);
+        const httpError = createHttpError(500, `[Reasons - GET ALL]: ${error.message}`);
         next(httpError);
       }
     }
@@ -42,7 +36,7 @@ export const getById = asyncHandler(
   async (req: Request<{ id?: number }, unknown, unknown>, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
-      const supplier = await prisma.suppliers.findFirst({
+      const reason = await prisma.reasons.findFirst({
         where: { id: Number(id) },
       });
 
@@ -50,14 +44,14 @@ export const getById = asyncHandler(
         res,
         code: 200,
         status: true,
-        message: 'Proveedor recuperado',
+        message: 'Razón recuperada',
         body: {
-          supplier,
+          reason,
         },
       });
     } catch (error) {
       if (error instanceof Error) {
-        const httpError = createHttpError(500, `[Suppliers - GET ONE]: ${error.message}`);
+        const httpError = createHttpError(500, `[Reasons - GET ONE]: ${error.message}`);
         next(httpError);
       }
     }
@@ -65,24 +59,24 @@ export const getById = asyncHandler(
 );
 
 export const create = asyncHandler(
-  async (req: Request<unknown, unknown, CreateSupplierType>, res: Response, next: NextFunction) => {
+  async (req: Request<unknown, unknown, CreateReasonType>, res: Response, next: NextFunction) => {
     try {
       const data = req.body;
 
-      const supplier = await prisma.suppliers.create({ data });
+      const category = await prisma.reasons.create({ data });
 
       endpointResponse({
         res,
         code: 200,
         status: true,
-        message: 'Proveedor creado',
+        message: 'Categoría creada',
         body: {
-          supplier,
+          category,
         },
       });
     } catch (error) {
       if (error instanceof Error) {
-        const httpError = createHttpError(500, `[Suppliers - CREATE]: ${error.message}`);
+        const httpError = createHttpError(500, `[Category - CREATE]: ${error.message}`);
         next(httpError);
       }
     }
@@ -90,28 +84,28 @@ export const create = asyncHandler(
 );
 
 export const update = asyncHandler(
-  async (req: Request<{ id?: number }, unknown, UpdateSupplierType>, res: Response, next: NextFunction) => {
+  async (req: Request<{ id?: number }, unknown, UpdateReasonType>, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
-      const { name, email, phone, mobile, address, info } = req.body;
+      const { reason: info } = req.body;
 
-      const supplier = await prisma.suppliers.update({
+      const reason = await prisma.reasons.update({
         where: { id: Number(id) },
-        data: { name, email, phone, mobile, address, info },
+        data: { reason: info },
       });
 
       endpointResponse({
         res,
         code: 200,
         status: true,
-        message: 'Proveedor actualizado',
+        message: 'Razón actualizada',
         body: {
-          supplier,
+          reason,
         },
       });
     } catch (error) {
       if (error instanceof Error) {
-        const httpError = createHttpError(500, `[Suppliers - UPDATE]: ${error.message}`);
+        const httpError = createHttpError(500, `[Reasons - UPDATE]: ${error.message}`);
         next(httpError);
       }
     }
@@ -122,8 +116,7 @@ export const remove = asyncHandler(
   async (req: Request<{ id?: number }, unknown, unknown>, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
-
-      const supplier = await prisma.suppliers.delete({
+      const reason = await prisma.reasons.delete({
         where: { id: Number(id) },
       });
 
@@ -131,14 +124,14 @@ export const remove = asyncHandler(
         res,
         code: 200,
         status: true,
-        message: 'Proveedor eliminado',
+        message: 'Razón eliminada',
         body: {
-          supplier,
+          reason,
         },
       });
     } catch (error) {
       if (error instanceof Error) {
-        const httpError = createHttpError(500, `[Suppliers - DELETE]: ${error.message}`);
+        const httpError = createHttpError(500, `[Reasons - DELETE]: ${error.message}`);
         next(httpError);
       }
     }

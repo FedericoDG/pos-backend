@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-const user = Router();
+const category = Router();
 
 // Controller
 import { create, getAll, getById, remove, update } from '../controllers/category.controller';
@@ -14,9 +14,9 @@ import { schemaValidator } from '../middlewares/schemaValidator.middleware';
 import { createCategorySchema, updateCategorySchema } from '../schemas/category.schema';
 
 // Routes
-user.get('/', [validToken, accessLevel('CLIENT')], getAll);
-user.get('/:id', [validToken, accessLevel('CLIENT')], getById);
-user.post(
+category.get('/', [validToken, accessLevel('CLIENT')], getAll);
+category.get('/:id', [validToken, accessLevel('CLIENT')], getById);
+category.post(
   '/',
   [
     validToken,
@@ -26,7 +26,7 @@ user.post(
   ],
   create,
 );
-user.put('/:id', [validToken, accessLevel('ADMIN'), schemaValidator(updateCategorySchema)], update);
-user.delete('/:id', [validToken, accessLevel('ADMIN')], remove);
+category.put('/:id', [validToken, accessLevel('ADMIN'), schemaValidator(updateCategorySchema)], update);
+category.delete('/:id', [validToken, accessLevel('ADMIN')], remove);
 
-export default user;
+export default category;

@@ -2,13 +2,15 @@ import { DateTime } from 'luxon';
 
 const now = DateTime.now();
 
-export const discharges = [
+export const purchases = [
   {
-    productId: 1,
+    supplierId: 1,
     warehouseId: 1,
-    reasonId: 2,
-    quantity: 12,
-    info: 'Entraron a Robar',
+    total: 28770,
+    date: new Date(),
+    driver: 'Carlos Pérez',
+    transport: 'Transporte Cruz del Sur',
+    userId: 3,
     createdAt: now.plus({ minutes: 1 }).toString(),
     updatedAt: now.plus({ minutes: 1 }).toString(),
   },

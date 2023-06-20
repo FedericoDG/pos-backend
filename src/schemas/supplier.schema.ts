@@ -1,8 +1,8 @@
 import { z } from 'zod';
 
 export const createSupplierSchema = z.object({
-  name: z.string().nonempty(),
   cuit: z.string().nonempty(),
+  name: z.string().nonempty(),
   email: z.string().email().optional(),
   phone: z.string().optional(),
   mobile: z.string().optional(),
@@ -12,6 +12,7 @@ export const createSupplierSchema = z.object({
 
 export const updateSupplierSchema = z.object({
   name: z.string().optional(),
+  email: z.string().email().optional(),
   phone: z.string().optional(),
   mobile: z.string().optional(),
   address: z.string().optional(),

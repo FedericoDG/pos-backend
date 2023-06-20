@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-const user = Router();
+const unit = Router();
 
 // Controller
 import { create, getAll, getById, remove, update } from '../controllers/unit.controller';
@@ -14,9 +14,9 @@ import { createUnitSchema, updateUnitSchema } from '../schemas/unit.schema';
 import { valueIsAlreadyInUse } from '../middlewares/valueIsAlreadyInUse';
 
 // Routes
-user.get('/', [validToken, accessLevel('USER')], getAll);
-user.get('/:id', [validToken, accessLevel('USER')], getById);
-user.post(
+unit.get('/', [validToken, accessLevel('USER')], getAll);
+unit.get('/:id', [validToken, accessLevel('USER')], getById);
+unit.post(
   '/',
   [
     validToken,
@@ -26,7 +26,7 @@ user.post(
   ],
   create,
 );
-user.put('/:id', [validToken, accessLevel('ADMIN'), schemaValidator(updateUnitSchema)], update);
-user.delete('/:id', [validToken, accessLevel('ADMIN')], remove);
+unit.put('/:id', [validToken, accessLevel('ADMIN'), schemaValidator(updateUnitSchema)], update);
+unit.delete('/:id', [validToken, accessLevel('ADMIN')], remove);
 
-export default user;
+export default unit;

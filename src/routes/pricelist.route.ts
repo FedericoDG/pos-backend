@@ -1,10 +1,11 @@
 import { Router } from 'express';
 
-const user = Router();
+const priceList = Router();
 
 // Controller
 import {
   create,
+  federico,
   getAll,
   getByIdAndWarehouseId,
   getByIdWarehouseIdAndProductId,
@@ -21,10 +22,11 @@ import { valueIsAlreadyInUse } from '../middlewares/valueIsAlreadyInUse';
 import { createPriceListSchema, updatePriceListSchema } from '../schemas/pricelist.schema';
 
 // Routes
-user.get('/', [validToken, accessLevel('USER')], getAll);
-user.get('/:id/:warehouseId', [validToken, accessLevel('USER')], getByIdAndWarehouseId);
-user.get('/:id/:warehouseId/:productId', [validToken, accessLevel('USER')], getByIdWarehouseIdAndProductId);
-user.post(
+priceList.get('/', [validToken, accessLevel('USER')], getAll);
+priceList.get('/report', [validToken, accessLevel('USER')], federico);
+priceList.get('/:id/:warehouseId', [validToken, accessLevel('USER')], getByIdAndWarehouseId);
+priceList.get('/:id/:warehouseId/:productId', [validToken, accessLevel('USER')], getByIdWarehouseIdAndProductId);
+priceList.post(
   '/',
   [
     validToken,
@@ -34,7 +36,7 @@ user.post(
   ],
   create,
 );
-user.put('/:id', [validToken, accessLevel('SUPERADMIN'), schemaValidator(updatePriceListSchema)], update);
-user.delete('/:id', [validToken, accessLevel('SUPERADMIN')], remove);
+priceList.put('/:id', [validToken, accessLevel('SUPERADMIN'), schemaValidator(updatePriceListSchema)], update);
+priceList.delete('/:id', [validToken, accessLevel('SUPERADMIN')], remove);
 
-export default user;
+export default priceList;

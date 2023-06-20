@@ -10,12 +10,33 @@ import { CreateWarehouseType, UpdateWarehouseType } from '../schemas/warehouse.s
 const prisma = new PrismaClient();
 
 export const getAll = asyncHandler(
-  async (_req: Request<unknown, unknown, unknown>, res: Response, next: NextFunction) => {
+  async (req: Request<unknown, unknown, unknown, { nostock?: string }>, res: Response, next: NextFunction) => {
     try {
+      const { nostock } = req.query;
+
+      if (nostock) {
+        const warehouses = await prisma.warehouses.findMany({
+          orderBy: [
+            {
+              id: 'asc', // OJO
+            },
+          ],
+        });
+
+        return endpointResponse({
+          res,
+          code: 200,
+          status: true,
+          message: 'Depósitos/Almacenes recuperados',
+          body: {
+            warehouses,
+          },
+        });
+      }
       const warehouses = await prisma.warehouses.findMany({
         orderBy: [
           {
-            updatedAt: 'desc',
+            id: 'asc',
           },
         ],
         include: {
@@ -83,7 +104,19 @@ export const create = asyncHandler(
     try {
       const data = req.body;
 
-      const product = await prisma.warehouses.create({ data });
+      const warehouse = await prisma.warehouses.create({ data });
+
+      const productsIds = await prisma.products.findMany({ select: { id: true } });
+
+      const stocks = productsIds.map((el) => ({
+        productId: el.id,
+        warehouseId: 3,
+        stock: 0,
+        prevstock: 0,
+        prevdate: new Date(),
+      }));
+
+      await prisma.stocks.createMany({ data: stocks });
 
       endpointResponse({
         res,
@@ -91,7 +124,7 @@ export const create = asyncHandler(
         status: true,
         message: 'Depósito/Almacén creado',
         body: {
-          product,
+          warehouse,
         },
       });
     } catch (error) {

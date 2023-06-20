@@ -1,13 +1,19 @@
 import { z } from 'zod';
 
 export const createDischargeSchema = z.object({
-  reasonId: z.number().optional(),
-  description: z.string().optional(),
+  warehouseId: z.number().nonnegative(),
+  cart: z.array(
+    z.object({
+      productId: z.number().nonnegative(),
+      reasonId: z.number().nonnegative(),
+      quantity: z.number().nonnegative(),
+      info: z.string().optional(),
+    }),
+  ),
 });
 
 export const updateDischargeSchema = z.object({
-  reasonId: z.number().optional(),
-  description: z.string().optional(),
+  info: z.string().nonempty(),
 });
 
 export type CreateDischargeType = z.infer<typeof createDischargeSchema>;

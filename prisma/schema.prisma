@@ -11,6 +11,11 @@ enum StatusType {
   DISABLED
 }
 
+enum MovementType {
+  IN
+  OUT
+}
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -22,16 +27,18 @@ datasource db {
 }
 
 model Users {
-  id        Int      @id @default(autoincrement())
+  id        Int         @id @default(autoincrement())
   name      String
   lastname  String
-  email     String   @unique
+  email     String      @unique
   password  String
-  roleId    Int      @default(4)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+  roleId    Int         @default(4)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @default(now()) @updatedAt
   // Relations
-  role      Roles    @relation(fields: [roleId], references: [id])
+  role      Roles       @relation(fields: [roleId], references: [id])
+  Purchases Purchases[]
+  Movements Movements[]
 
   @@map(name: "users")
 }
@@ -50,25 +57,27 @@ model Roles {
 }
 
 model Products {
-  id                 Int          @id @default(autoincrement())
-  code               String       @unique
-  barcode            String       @unique
+  id                 Int               @id @default(autoincrement())
+  code               String            @unique
+  barcode            String            @unique
   name               String
-  alertlowstock      StatusType   @default(DISABLED)
-  lowstock           Int          @default(0)
-  status             StatusType   @default(ENABLED)
-  allownegativestock StatusType   @default(DISABLED)
-  description        String?      @default("")
+  alertlowstock      StatusType        @default(DISABLED)
+  lowstock           Int               @default(0)
+  status             StatusType        @default(ENABLED)
+  allownegativestock StatusType        @default(DISABLED)
+  description        String?           @default("")
   categoryId         Int
   unitId             Int
-  createdAt          DateTime     @default(now())
-  updatedAt          DateTime     @default(now()) @updatedAt
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @default(now()) @updatedAt
   // Relations
-  category           Categories   @relation(fields: [categoryId], references: [id])
-  unit               Units        @relation(fields: [unitId], references: [id])
+  category           Categories        @relation(fields: [categoryId], references: [id])
+  unit               Units             @relation(fields: [unitId], references: [id])
   stocks             Stocks[]
   prices             Prices[]
+  costs              Costs[]
   discharges         Discharges[]
+  PurchaseDetails    PurchaseDetails[]
 
   @@map(name: "products")
 }
@@ -107,6 +116,7 @@ model Warehouses {
   // Relations
   stocks      Stocks[]
   discharges  Discharges[]
+  Purchases   Purchases[]
 
   @@map(name: "warehouses")
 }
@@ -122,7 +132,7 @@ model Stocks {
   updatedAt   DateTime   @default(now()) @updatedAt
   // Relations
   products    Products   @relation(fields: [productId], references: [id])
-  warehouses  Warehouses @relation(fields: [warehouseId], references: [id])
+  warehouse   Warehouses @relation(fields: [warehouseId], references: [id])
 
   @@map(name: "stock")
 }
@@ -153,18 +163,31 @@ model Prices {
   @@map(name: "prices")
 }
 
-// TODO: Modificar una vez desarrollada la funcionalidad de "compra"
-model Suppliers {
+model Costs {
   id        Int      @id @default(autoincrement())
-  cuit      String   @unique
+  productId Int
+  price     Float    @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  // Relations
+  products  Products @relation(fields: [productId], references: [id])
+
+  @@map(name: "costs")
+}
+
+model Suppliers {
+  id        Int         @id @default(autoincrement())
+  cuit      String      @unique
   name      String?
-  email     String?  @unique
+  email     String?     @unique
   phone     String?
   mobile    String?
   address   String?
   info      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @default(now()) @updatedAt
+  //Relations
+  purchase  Purchases[]
 
   @@map(name: "suppliers")
 }
@@ -190,13 +213,61 @@ model Clients {
   @@map(name: "clients")
 }
 
-// TODO. No hay prioridad
+model Purchases {
+  id              Int               @id @default(autoincrement())
+  supplierId      Int
+  warehouseId     Int
+  total           Float
+  date            DateTime          @default(now())
+  driver          String
+  transport       String
+  userId          Int
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @default(now()) @updatedAt
+  // Relations
+  supplier        Suppliers         @relation(fields: [supplierId], references: [id])
+  warehouse       Warehouses        @relation(fields: [warehouseId], references: [id])
+  user            Users             @relation(fields: [userId], references: [id])
+  purchaseDetails PurchaseDetails[]
+
+  @@map(name: "purchases")
+}
+
+model PurchaseDetails {
+  id         Int       @id @default(autoincrement())
+  purchaseId Int
+  productId  Int
+  price      Float
+  quantity   Int
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @default(now()) @updatedAt
+  // Relations
+  purchase   Purchases @relation(fields: [purchaseId], references: [id])
+  product    Products  @relation(fields: [productId], references: [id])
+
+  @@map(name: "purchasedetails")
+}
+
+model Movements {
+  id        Int          @id @default(autoincrement())
+  amount    Float
+  type      MovementType
+  userId    Int
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @default(now()) @updatedAt
+  // Relations
+  user      Users        @relation(fields: [userId], references: [id])
+
+  @@map(name: "movements")
+}
+
 model Discharges {
   id          Int        @id @default(autoincrement())
   productId   Int
   warehouseId Int
   reasonId    Int        @default(1)
-  description String?
+  quantity    Int
+  info        String?
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @default(now()) @updatedAt
   //Relations
@@ -207,7 +278,6 @@ model Discharges {
   @@map(name: "discharges")
 }
 
-// TODO. No hay prioridad
 model Reasons {
   id         Int          @id @default(autoincrement())
   reason     String

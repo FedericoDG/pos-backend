@@ -10,8 +10,32 @@ import { CreateProductType, UpdateProductType } from '../schemas/product.schema'
 const prisma = new PrismaClient();
 
 export const getAll = asyncHandler(
-  async (_req: Request<unknown, unknown, unknown>, res: Response, next: NextFunction) => {
+  async (req: Request<unknown, unknown, unknown, { nostock?: string }>, res: Response, next: NextFunction) => {
     try {
+      const { nostock } = req.query;
+
+      if (nostock) {
+        const products = await prisma.products.findMany({
+          orderBy: [
+            {
+              updatedAt: 'desc',
+            },
+          ],
+          include: {
+            unit: true,
+            category: true,
+          },
+        });
+        return endpointResponse({
+          res,
+          code: 200,
+          status: true,
+          message: 'Productos recuperados',
+          body: {
+            products,
+          },
+        });
+      }
       const products = await prisma.products.findMany({
         orderBy: [
           {
@@ -21,7 +45,8 @@ export const getAll = asyncHandler(
         include: {
           unit: true,
           category: true,
-          stocks: { include: { warehouses: true } },
+          costs: { orderBy: [{ id: 'desc' }], take: 1 },
+          stocks: { include: { warehouse: true }, orderBy: [{ id: 'desc' }] },
         },
       });
 
@@ -36,13 +61,35 @@ export const getAll = asyncHandler(
         };
       });
 
+      const productsWithTotalStock2 = products.map((product) => {
+        const warehouseStocks = product.stocks.reduce((acc, stock) => {
+          const { warehouseId } = stock;
+          if (!acc[warehouseId]) {
+            acc[warehouseId] = stock;
+          } else {
+            acc[warehouseId].stock += stock.stock;
+          }
+          return acc;
+        }, {});
+
+        const mergedStocks: any[] = Object.values(warehouseStocks);
+
+        const totalStock = mergedStocks.reduce((sum, stock) => sum + stock.stock, 0);
+
+        return {
+          ...product,
+          stocks: mergedStocks,
+          totalStock,
+        };
+      });
+
       endpointResponse({
         res,
         code: 200,
         status: true,
         message: 'Productos recuperados',
         body: {
-          products: productsWithTotalStock,
+          products: productsWithTotalStock2,
         },
       });
     } catch (error) {
@@ -63,11 +110,29 @@ export const getById = asyncHandler(
         include: {
           unit: true,
           category: true,
-          stocks: { include: { warehouses: true } },
+          costs: { orderBy: [{ id: 'desc' }] },
+          /*  costs: { orderBy: [{ id: 'desc' }], take: 1 }, */
+          stocks: { include: { warehouse: true }, orderBy: [{ id: 'desc' }] },
         },
       });
 
-      const ids = [1, 2, 3];
+      const uniqueStocks = product?.stocks.reduce((acc, stock) => {
+        const { warehouseId } = stock;
+        if (!acc[warehouseId]) {
+          acc[warehouseId] = stock;
+        }
+        return acc;
+      }, {});
+
+      const mergedStocks = Object.values(uniqueStocks!);
+
+      const updatedProduct = {
+        ...product,
+        stocks: mergedStocks,
+      };
+
+      const rawIds = await prisma.pricelists.findMany({ select: { id: true } });
+      const ids = rawIds.map((el) => el.id).sort((a, b) => a - b);
 
       const priceDetails: Prices[][] = [];
       const prices: Prices[] = [];
@@ -95,18 +160,6 @@ export const getById = asyncHandler(
         }
       }
 
-      /* const result = priceDetails.flat().reduce((acc, obj) => {
-        const key = obj['pricelists'].code;
-        if (acc[key]) {
-          acc[key].push(obj);
-        } else {
-          acc[key] = [obj];
-        }
-        return acc;
-      }, {});
-
-      console.log(result); */
-
       const totalStock = product?.stocks.reduce((sum, stock) => sum + stock.stock, 0);
 
       endpointResponse({
@@ -115,7 +168,7 @@ export const getById = asyncHandler(
         status: true,
         message: 'Producto recuperado',
         body: {
-          product: { ...product, totalStock, prices, priceDetails },
+          product: { ...updatedProduct, totalStock, prices, priceDetails },
         },
       });
     } catch (error) {
@@ -127,11 +180,11 @@ export const getById = asyncHandler(
   },
 );
 
+// TODO: Create costs
 export const create = asyncHandler(
   async (req: Request<unknown, unknown, CreateProductType>, res: Response, next: NextFunction) => {
     try {
       const data = req.body;
-      console.log(data);
 
       // Insert a product
       const product = await prisma.products.create({ data });
@@ -147,17 +200,18 @@ export const create = asyncHandler(
       // Insert stocks
       await prisma.stocks.createMany({ data: stocks });
 
-      /* CREO QUE ESTA PARTE NO HACE FALTA */
       // Get pricelists ids
-      //const pricelists = await prisma.pricelists.findMany({ select: { id: true } });
-      //const pricelistsIds = pricelists.map((warehouse) => warehouse.id);
+      const pricelists = await prisma.pricelists.findMany({ select: { id: true } });
+      const pricelistsIds = pricelists.map((warehouse) => warehouse.id);
 
       // Create prices array
-      //const prices = pricelistsIds.map((prId) => ({ productId: id, pricelistId: prId }));
+      const prices = pricelistsIds.map((prId) => ({ productId: id, pricelistId: prId }));
 
       // Insert prices
-      //await prisma.prices.createMany({ data: prices });
-      /*  */
+      await prisma.prices.createMany({ data: prices });
+
+      // Create cost
+      await prisma.costs.create({ data: { productId: id, price: 0 } });
 
       endpointResponse({
         res,

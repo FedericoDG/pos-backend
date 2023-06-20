@@ -2,8 +2,14 @@ import { PrismaClient } from '@prisma/client';
 import {
   categories,
   clients,
-  // discharges,
+  costs,
+  discharges,
+  movements,
+  pricelists,
+  prices,
   products,
+  purchaseDetails,
+  purchases,
   reasons,
   roles,
   stocks,
@@ -11,8 +17,6 @@ import {
   units,
   users,
   warehouses,
-  pricelists,
-  prices,
 } from './seeders';
 
 const prisma = new PrismaClient();
@@ -42,7 +46,15 @@ async function main() {
 
   await prisma.prices.createMany({ data: prices });
 
-  // await prisma.discharges.createMany({ data: discharges });
+  await prisma.purchases.createMany({ data: purchases });
+
+  await prisma.purchaseDetails.createMany({ data: purchaseDetails });
+
+  await prisma.costs.createMany({ data: costs });
+
+  await prisma.movements.createMany({ data: movements });
+
+  await prisma.discharges.createMany({ data: discharges });
 }
 
 main()

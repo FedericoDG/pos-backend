@@ -1,3 +1,7 @@
+import { DateTime } from 'luxon';
+
+const now = DateTime.now();
+
 export const clients = [
   {
     name: 'Consumidor',
@@ -9,5 +13,7 @@ export const clients = [
     mobile: '',
     address: '',
     info: '',
+    createdAt: now.plus({ minutes: 1 }).toString(),
+    updatedAt: now.plus({ minutes: 1 }).toString(),
   },
 ];

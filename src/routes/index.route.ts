@@ -11,6 +11,10 @@ import pricelist from './pricelist.route';
 import supplier from './supplier.route';
 import client from './client.route';
 import price from './price.route';
+import purchase from './purchase.route';
+import stock from './stock.route';
+import discharge from './discharge.route';
+import reason from './reason.route';
 
 const router = Router();
 
@@ -25,5 +29,9 @@ router.use('/pricelists', pricelist);
 router.use('/suppliers', supplier);
 router.use('/clients', client);
 router.use('/prices', price);
+router.use('/purchases', purchase);
+router.use('/stocks', stock);
+router.use('/discharges', discharge);
+router.use('/reasons', reason);
 
 export default router;

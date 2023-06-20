@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-const user = Router();
+const client = Router();
 
 // Controller
 import { create, getAll, getById, remove, update } from '../controllers/client.controller';
@@ -14,9 +14,9 @@ import { valueIsAlreadyInUse } from '../middlewares/valueIsAlreadyInUse';
 import { createClientSchema, updateClientSchema } from '../schemas/client.schema';
 
 // Routes
-user.get('/', [validToken, accessLevel('SELLER')], getAll);
-user.get('/:id', [validToken, accessLevel('SELLER')], getById);
-user.post(
+client.get('/', [validToken, accessLevel('SELLER')], getAll);
+client.get('/:id', [validToken, accessLevel('SELLER')], getById);
+client.post(
   '/',
   [
     validToken,
@@ -27,7 +27,7 @@ user.post(
   ],
   create,
 );
-user.put('/:id', [validToken, accessLevel('ADMIN'), schemaValidator(updateClientSchema)], update);
-user.delete('/:id', [validToken, accessLevel('ADMIN')], remove);
+client.put('/:id', [validToken, accessLevel('ADMIN'), schemaValidator(updateClientSchema)], update);
+client.delete('/:id', [validToken, accessLevel('ADMIN')], remove);
 
-export default user;
+export default client;

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-const user = Router();
+const price = Router();
 
 // Controller
 import { create, remove } from '../controllers/price.controller';
@@ -13,7 +13,7 @@ import { schemaValidator } from '../middlewares/schemaValidator.middleware';
 import { createPriceSchema } from '../schemas/price.schema';
 
 // Routes
-user.post('/', [validToken, accessLevel('ADMIN'), schemaValidator(createPriceSchema)], create);
-user.delete('/:id', [validToken, accessLevel('ADMIN')], remove);
+price.post('/', [validToken, accessLevel('ADMIN'), schemaValidator(createPriceSchema)], create);
+price.delete('/:id', [validToken, accessLevel('ADMIN')], remove);
 
-export default user;
+export default price;

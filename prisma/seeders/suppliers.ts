@@ -1,17 +1,28 @@
+import { DateTime } from 'luxon';
+
+const now = DateTime.now();
+
 export const suppliers = [
   {
+    cuit: '11111111111',
     name: 'Proveedor Uno',
-    cuit: '11111111',
+    email: 'proveedoruno@gmail.com',
     phone: '3514258258',
     mobile: '3516114150',
     address: '24 de Septiembre 358',
-    email: 'proveedoruno@gmail.com',
+    info: '',
+    createdAt: now.plus({ minutes: 1 }).toString(),
+    updatedAt: now.plus({ minutes: 1 }).toString(),
   },
   {
+    cuit: '22222222222',
     name: 'Proveedor Dos',
-    cuit: '22222222',
-    phone: '3514920499',
-    address: 'Viamonte 879',
     email: 'proveedordos@gmail.com',
+    phone: '3514920499',
+    mobile: '',
+    address: 'Viamonte 879',
+    info: '',
+    createdAt: now.plus({ minutes: 2 }).toString(),
+    updatedAt: now.plus({ minutes: 2 }).toString(),
   },
 ];
