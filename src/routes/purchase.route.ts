@@ -10,7 +10,7 @@ import { accessLevel, validToken } from '../middlewares/auth.middleware';
 import { schemaValidator } from '../middlewares/schemaValidator.middleware';
 
 // Schema
-import { createPurchaseSchema, updatePurchaseSchema } from 'src/schemas/purchase.schema';
+import { createPurchaseSchema, updatePurchaseSchema } from '../schemas/purchase.schema';
 
 // Routes
 purchase.get('/', [validToken, accessLevel('ADMIN')], getAll);

@@ -14,7 +14,23 @@ export const getAll = asyncHandler(
   async (_req: Request<unknown, unknown, unknown>, res: Response, next: NextFunction) => {
     try {
       const purchases = await prisma.purchases.findMany({
-        include: { purchaseDetails: { include: { product: { include: { category: true, unit: true } } } } },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              lastname: true,
+              email: true,
+              roleId: true,
+              createdAt: true,
+              updatedAt: true,
+              role: true,
+            },
+          },
+          warehouse: true,
+          supplier: true,
+          purchaseDetails: { include: { product: { include: { category: true, unit: true } } } },
+        },
       });
 
       endpointResponse({
@@ -41,7 +57,23 @@ export const getById = asyncHandler(
       const { id } = req.params;
       const purchase = await prisma.purchases.findFirst({
         where: { id: Number(id) },
-        include: { purchaseDetails: { include: { product: { include: { category: true, unit: true } } } } },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              lastname: true,
+              email: true,
+              roleId: true,
+              createdAt: true,
+              updatedAt: true,
+              role: true,
+            },
+          },
+          warehouse: true,
+          supplier: true,
+          purchaseDetails: { include: { product: { include: { category: true, unit: true } } } },
+        },
       });
 
       endpointResponse({

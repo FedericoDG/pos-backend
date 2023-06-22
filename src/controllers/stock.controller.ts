@@ -96,24 +96,90 @@ export const getAll = asyncHandler(
   },
 );
 
-export const getById = asyncHandler(
+export const getByWarehouseId = asyncHandler(
   async (req: Request<{ id?: number }, unknown, unknown>, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
-      const unit = await prisma.units.findFirst({ where: { id: Number(id) } });
+      const stocks = await prisma.stocks.findMany({
+        where: { warehouseId: Number(id) },
+        include: {
+          products: {
+            include: {
+              category: true,
+              unit: true,
+              stocks: {
+                where: { warehouseId: Number(id) },
+                select: {
+                  id: true,
+                  productId: true,
+                  warehouseId: true,
+                  stock: true,
+                  prevstock: true,
+                  prevdate: true,
+                  createdAt: true,
+                  updatedAt: true,
+                },
+                orderBy: [{ id: 'desc' }],
+              },
+              costs: {
+                select: { price: true, productId: true, createdAt: true, updatedAt: true },
+                take: 1,
+                orderBy: [{ id: 'desc' }],
+              },
+            },
+          },
+        },
+        orderBy: [{ updatedAt: 'desc' }],
+      });
+
+      const mergedStocks = stocks.reduce((acc: any, curr) => {
+        const existingStock = acc.find((item) => item.productId === curr.productId);
+        if (existingStock) {
+          existingStock.stock += curr.stock;
+        } else {
+          acc.push(curr);
+        }
+        return acc;
+      }, []);
+
+      const uniqueStocksArray: any[] = [];
+
+      for (const stock of mergedStocks) {
+        const uniqueStocks = {};
+
+        for (const stockItem of stock.products.stocks) {
+          const warehouseId = stockItem.warehouseId;
+
+          if (!uniqueStocks[warehouseId]) {
+            uniqueStocks[warehouseId] = stockItem;
+          } else {
+            uniqueStocks[warehouseId].stock += stockItem.stock - stockItem.stock;
+          }
+        }
+
+        const updatedStocksObject = {
+          ...stock,
+          products: {
+            ...stock.products,
+            stocks: Object.values(uniqueStocks),
+          },
+        };
+
+        uniqueStocksArray.push(updatedStocksObject);
+      }
 
       endpointResponse({
         res,
         code: 200,
         status: true,
-        message: 'Unidad recuperada',
+        message: 'Unidades recuperados',
         body: {
-          unit,
+          stocks: uniqueStocksArray,
         },
       });
     } catch (error) {
       if (error instanceof Error) {
-        const httpError = createHttpError(500, `[Units - GET ONE]: ${error.message}`);
+        const httpError = createHttpError(500, `[Stocks - GET ALL]: ${error.message}`);
         next(httpError);
       }
     }

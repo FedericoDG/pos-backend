@@ -230,6 +230,7 @@ CREATE TABLE `dischargedetails` (
     `dischargeId` INTEGER NOT NULL,
     `productId` INTEGER NOT NULL,
     `quantity` INTEGER NOT NULL,
+    `cost` DOUBLE NOT NULL,
     `reasonId` INTEGER NOT NULL DEFAULT 1,
     `info` VARCHAR(191) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),

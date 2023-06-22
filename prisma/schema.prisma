@@ -37,9 +37,9 @@ model Users {
   updatedAt  DateTime     @default(now()) @updatedAt
   // Relations
   role       Roles        @relation(fields: [roleId], references: [id])
-  Purchases  Purchases[]
-  Movements  Movements[]
-  Discharges Discharges[]
+  purchases  Purchases[]
+  movements  Movements[]
+  discharges Discharges[]
 
   @@map(name: "users")
 }
@@ -77,8 +77,8 @@ model Products {
   stocks             Stocks[]
   prices             Prices[]
   costs              Costs[]
-  PurchaseDetails    PurchaseDetails[]
-  DischargeDetails   DischargeDetails[]
+  purchaseDetails    PurchaseDetails[]
+  dischargeDetails   DischargeDetails[]
 
   @@map(name: "products")
 }
@@ -117,7 +117,7 @@ model Warehouses {
   // Relations
   stocks      Stocks[]
   discharges  Discharges[]
-  Purchases   Purchases[]
+  purchases   Purchases[]
 
   @@map(name: "warehouses")
 }
@@ -270,9 +270,9 @@ model Discharges {
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @default(now()) @updatedAt
   //Relations
-  Warehouses       Warehouses         @relation(fields: [warehouseId], references: [id])
-  User             Users              @relation(fields: [userId], references: [id])
-  DischargeDetails DischargeDetails[]
+  warehouses       Warehouses         @relation(fields: [warehouseId], references: [id])
+  user             Users              @relation(fields: [userId], references: [id])
+  dischargeDetails DischargeDetails[]
 
   @@map(name: "discharges")
 }
@@ -282,6 +282,7 @@ model DischargeDetails {
   dischargeId Int
   productId   Int
   quantity    Int
+  cost        Float
   reasonId    Int        @default(1)
   info        String?
   createdAt   DateTime   @default(now())
@@ -300,7 +301,7 @@ model Reasons {
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @default(now()) @updatedAt
   // Relations
-  DischargeDetails DischargeDetails[]
+  dischargeDetails DischargeDetails[]
 
   @@map(name: "reasons")
 }

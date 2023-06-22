@@ -13,7 +13,22 @@ export const getAll = asyncHandler(
   async (_req: Request<unknown, unknown, unknown>, res: Response, next: NextFunction) => {
     try {
       const discharges = await prisma.discharges.findMany({
-        include: { User: true, DischargeDetails: true, Warehouses: true },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              lastname: true,
+              email: true,
+              roleId: true,
+              createdAt: true,
+              updatedAt: true,
+              role: true,
+            },
+          },
+          dischargeDetails: { include: { reason: true } },
+          warehouses: true,
+        },
         orderBy: [{ createdAt: 'desc' }],
       });
 
@@ -41,7 +56,22 @@ export const getById = asyncHandler(
       const { id } = req.params;
       const discharge = await prisma.discharges.findFirst({
         where: { id: Number(id) },
-        include: { User: true, DischargeDetails: true, Warehouses: true },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              lastname: true,
+              email: true,
+              roleId: true,
+              createdAt: true,
+              updatedAt: true,
+              role: true,
+            },
+          },
+          dischargeDetails: { include: { products: { include: { category: true, unit: true } }, reason: true } },
+          warehouses: true,
+        },
         orderBy: [{ createdAt: 'desc' }],
       });
 
@@ -84,6 +114,7 @@ export const create = asyncHandler(
       const cartWithWarehouseId = cart
         .map((item) => ({
           dischargeId: id,
+          cost: item.cost,
           reasonId: item.reasonId,
           productId: item.productId,
           quantity: item.quantity,
