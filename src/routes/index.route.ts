@@ -15,6 +15,7 @@ import purchase from './purchase.route';
 import stock from './stock.route';
 import discharge from './discharge.route';
 import reason from './reason.route';
+import transfer from './transfer.route';
 
 const router = Router();
 
@@ -33,5 +34,6 @@ router.use('/purchases', purchase);
 router.use('/stocks', stock);
 router.use('/discharges', discharge);
 router.use('/reasons', reason);
+router.use('/transfers', transfer);
 
 export default router;

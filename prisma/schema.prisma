@@ -40,6 +40,7 @@ model Users {
   purchases  Purchases[]
   movements  Movements[]
   discharges Discharges[]
+  transfer   Transfer[]
 
   @@map(name: "users")
 }
@@ -79,6 +80,7 @@ model Products {
   costs              Costs[]
   purchaseDetails    PurchaseDetails[]
   dischargeDetails   DischargeDetails[]
+  transferDetails    TransferDetails[]
 
   @@map(name: "products")
 }
@@ -118,6 +120,8 @@ model Warehouses {
   stocks      Stocks[]
   discharges  Discharges[]
   purchases   Purchases[]
+  transferO   Transfer[]   @relation(name: "WarehouseOrigin")
+  transferD   Transfer[]   @relation(name: "WarehouseDestination")
 
   @@map(name: "warehouses")
 }
@@ -304,4 +308,34 @@ model Reasons {
   dischargeDetails DischargeDetails[]
 
   @@map(name: "reasons")
+}
+
+model Transfer {
+  id                     Int               @id @default(autoincrement())
+  warehouseOriginId      Int
+  warehouseDestinationId Int
+  userId                 Int
+  createdAt              DateTime          @default(now())
+  updatedAt              DateTime          @default(now()) @updatedAt
+  //Relations
+  warehouseOrigin        Warehouses        @relation(fields: [warehouseOriginId], references: [id], name: "WarehouseOrigin")
+  warehouseDestination   Warehouses        @relation(fields: [warehouseDestinationId], references: [id], name: "WarehouseDestination")
+  user                   Users             @relation(fields: [userId], references: [id])
+  transferDetails        TransferDetails[]
+
+  @@map(name: "transfer")
+}
+
+model TransferDetails {
+  id         Int      @id @default(autoincrement())
+  transferId Int
+  productId  Int
+  quantity   Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now()) @updatedAt
+  //Relations
+  transfer   Transfer @relation(fields: [transferId], references: [id])
+  products   Products @relation(fields: [productId], references: [id])
+
+  @@map(name: "transferdetails")
 }

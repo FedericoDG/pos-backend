@@ -249,6 +249,30 @@ CREATE TABLE `reasons` (
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+-- CreateTable
+CREATE TABLE `transfer` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `warehouseOriginId` INTEGER NOT NULL,
+    `warehouseDestinationId` INTEGER NOT NULL,
+    `userId` INTEGER NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `transferdetails` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `transferId` INTEGER NOT NULL,
+    `productId` INTEGER NOT NULL,
+    `quantity` INTEGER NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
 -- AddForeignKey
 ALTER TABLE `users` ADD CONSTRAINT `users_roleId_fkey` FOREIGN KEY (`roleId`) REFERENCES `roles`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
@@ -308,3 +332,18 @@ ALTER TABLE `dischargedetails` ADD CONSTRAINT `dischargedetails_reasonId_fkey` F
 
 -- AddForeignKey
 ALTER TABLE `dischargedetails` ADD CONSTRAINT `dischargedetails_productId_fkey` FOREIGN KEY (`productId`) REFERENCES `products`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `transfer` ADD CONSTRAINT `transfer_warehouseOriginId_fkey` FOREIGN KEY (`warehouseOriginId`) REFERENCES `warehouses`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `transfer` ADD CONSTRAINT `transfer_warehouseDestinationId_fkey` FOREIGN KEY (`warehouseDestinationId`) REFERENCES `warehouses`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `transfer` ADD CONSTRAINT `transfer_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `transferdetails` ADD CONSTRAINT `transferdetails_transferId_fkey` FOREIGN KEY (`transferId`) REFERENCES `transfer`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `transferdetails` ADD CONSTRAINT `transferdetails_productId_fkey` FOREIGN KEY (`productId`) REFERENCES `products`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;

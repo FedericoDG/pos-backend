@@ -5,7 +5,6 @@ import createHttpError from 'http-errors';
 import { asyncHandler } from '../helpers/asyncHandler';
 import { endpointResponse } from '../helpers/endpointResponse';
 
-import { UpdateCategoryType } from '../schemas/category.schema';
 import { CreatePurchaseType } from 'src/schemas/purchase.schema';
 
 const prisma = new PrismaClient();
@@ -87,7 +86,7 @@ export const getById = asyncHandler(
       });
     } catch (error) {
       if (error instanceof Error) {
-        const httpError = createHttpError(500, `[Compra - GET ONE]: ${error.message}`);
+        const httpError = createHttpError(500, `[Purchases - GET ONE]: ${error.message}`);
         next(httpError);
       }
     }
@@ -137,8 +136,6 @@ export const create = asyncHandler(
       cart.sort((a, b) => a.productId - b.productId);
 
       const newStock = uniqueStocks.map((item, idx) => {
-        console.log(item);
-        console.log(cart[idx]);
         return {
           id: item.id,
           productId: item.productId,
@@ -170,62 +167,7 @@ export const create = asyncHandler(
       });
     } catch (error) {
       if (error instanceof Error) {
-        const httpError = createHttpError(500, `[Compra - CREATE]: ${error.message}`);
-        next(httpError);
-      }
-    }
-  },
-);
-
-export const update = asyncHandler(
-  async (req: Request<{ id?: number }, unknown, UpdateCategoryType>, res: Response, next: NextFunction) => {
-    try {
-      const { id } = req.params;
-      const { name, description } = req.body;
-
-      const category = await prisma.categories.update({
-        where: { id: Number(id) },
-        data: { name, description },
-      });
-
-      endpointResponse({
-        res,
-        code: 200,
-        status: true,
-        message: 'Categoría actualizada',
-        body: {
-          category,
-        },
-      });
-    } catch (error) {
-      if (error instanceof Error) {
-        const httpError = createHttpError(500, `[Category - UPDATE]: ${error.message}`);
-        next(httpError);
-      }
-    }
-  },
-);
-
-export const remove = asyncHandler(
-  async (req: Request<{ id?: number }, unknown, unknown>, res: Response, next: NextFunction) => {
-    try {
-      const { id } = req.params;
-      const category = await prisma.categories.delete({
-        where: { id: Number(id) },
-      });
-
-      endpointResponse({
-        res,
-        code: 200,
-        status: true,
-        message: 'Categoría eliminada',
-        body: {
-          category,
-        },
-      });
-    } catch (error) {
-      if (error instanceof Error) {
-        const httpError = createHttpError(500, `[Category - DELETE]: ${error.message}`);
+        const httpError = createHttpError(500, `[Purchases - CREATE]: ${error.message}`);
         next(httpError);
       }
     }

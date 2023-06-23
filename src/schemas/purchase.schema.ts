@@ -16,13 +16,4 @@ export const createPurchaseSchema = z.object({
   ),
 });
 
-export const updatePurchaseSchema = z.object({
-  supplierId: z.number().nonnegative(),
-  warehouseId: z.number().nonnegative(),
-  total: z.number().nonnegative(),
-  date: z.date(),
-});
-
 export type CreatePurchaseType = z.infer<typeof createPurchaseSchema>;
-
-export type UpdatePurchaseType = z.infer<typeof updatePurchaseSchema>;

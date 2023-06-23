@@ -14,6 +14,8 @@ export * from './reasons';
 export * from './roles';
 export * from './stocks';
 export * from './suppliers';
+export * from './transfer';
+export * from './transferDetails';
 export * from './units';
 export * from './users';
 export * from './warehouses';

@@ -3,8 +3,8 @@ import {
   categories,
   clients,
   costs,
-  discharges,
   dischargeDetails,
+  discharges,
   movements,
   pricelists,
   prices,
@@ -15,6 +15,8 @@ import {
   roles,
   stocks,
   suppliers,
+  transfer,
+  transferDetails,
   units,
   users,
   warehouses,
@@ -58,6 +60,10 @@ async function main() {
   await prisma.discharges.createMany({ data: discharges });
 
   await prisma.dischargeDetails.createMany({ data: dischargeDetails });
+
+  await prisma.transfer.createMany({ data: transfer });
+
+  await prisma.transferDetails.createMany({ data: transferDetails });
 }
 
 main()
