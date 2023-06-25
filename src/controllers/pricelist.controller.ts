@@ -404,6 +404,8 @@ export const remove = asyncHandler(
     try {
       const { id } = req.params;
 
+      await prisma.prices.deleteMany({ where: { pricelistId: Number(id) } });
+
       const pricelist = await prisma.pricelists.delete({
         where: { id: Number(id) },
       });
