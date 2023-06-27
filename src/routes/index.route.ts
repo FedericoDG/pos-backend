@@ -17,6 +17,8 @@ import discharge from './discharge.route';
 import reason from './reason.route';
 import transfer from './transfer.route';
 import cost from './cost.route';
+import cashRegister from './cashRegister.route';
+import cashMovement from './cashMovement.route';
 
 const router = Router();
 
@@ -37,5 +39,7 @@ router.use('/discharges', discharge);
 router.use('/reasons', reason);
 router.use('/transfers', transfer);
 router.use('/costs', cost);
+router.use('/cashregisters', cashRegister);
+router.use('/cashmovements', cashMovement);
 
 export default router;

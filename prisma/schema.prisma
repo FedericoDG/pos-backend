@@ -27,20 +27,22 @@ datasource db {
 }
 
 model Users {
-  id         Int          @id @default(autoincrement())
-  name       String
-  lastname   String
-  email      String       @unique
-  password   String
-  roleId     Int          @default(4)
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @default(now()) @updatedAt
+  id            Int             @id @default(autoincrement())
+  name          String
+  lastname      String
+  email         String          @unique
+  password      String
+  roleId        Int             @default(4)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @default(now()) @updatedAt
   // Relations
-  role       Roles        @relation(fields: [roleId], references: [id])
-  purchases  Purchases[]
-  movements  Movements[]
-  discharges Discharges[]
-  transfer   Transfer[]
+  role          Roles           @relation(fields: [roleId], references: [id])
+  purchases     Purchases[]
+  movements     Movements[]
+  discharges    Discharges[]
+  transfer      Transfer[]
+  cashRegisters CashRegisters[]
+  cashMovements CashMovements[]
 
   @@map(name: "users")
 }
@@ -59,28 +61,29 @@ model Roles {
 }
 
 model Products {
-  id                 Int                @id @default(autoincrement())
-  code               String             @unique
-  barcode            String             @unique
-  name               String
-  alertlowstock      StatusType         @default(DISABLED)
-  lowstock           Int                @default(0)
-  status             StatusType         @default(ENABLED)
-  allownegativestock StatusType         @default(DISABLED)
-  description        String?            @default("")
-  categoryId         Int
-  unitId             Int
-  createdAt          DateTime           @default(now())
-  updatedAt          DateTime           @default(now()) @updatedAt
+  id                   Int                    @id @default(autoincrement())
+  code                 String                 @unique
+  barcode              String                 @unique
+  name                 String
+  alertlowstock        StatusType             @default(DISABLED)
+  lowstock             Int                    @default(0)
+  status               StatusType             @default(ENABLED)
+  allownegativestock   StatusType             @default(DISABLED)
+  description          String?                @default("")
+  categoryId           Int
+  unitId               Int
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @default(now()) @updatedAt
   // Relations
-  category           Categories         @relation(fields: [categoryId], references: [id])
-  unit               Units              @relation(fields: [unitId], references: [id])
-  stocks             Stocks[]
-  prices             Prices[]
-  costs              Costs[]
-  purchaseDetails    PurchaseDetails[]
-  dischargeDetails   DischargeDetails[]
-  transferDetails    TransferDetails[]
+  category             Categories             @relation(fields: [categoryId], references: [id])
+  unit                 Units                  @relation(fields: [unitId], references: [id])
+  stocks               Stocks[]
+  prices               Prices[]
+  costs                Costs[]
+  purchaseDetails      PurchaseDetails[]
+  dischargeDetails     DischargeDetails[]
+  transferDetails      TransferDetails[]
+  cashMovementsDetails CashMovementsDetails[]
 
   @@map(name: "products")
 }
@@ -110,18 +113,19 @@ model Units {
 }
 
 model Warehouses {
-  id          Int          @id @default(autoincrement())
-  code        String       @unique
-  description String?
-  address     String?
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @default(now()) @updatedAt
+  id            Int             @id @default(autoincrement())
+  code          String          @unique
+  description   String?
+  address       String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @default(now()) @updatedAt
   // Relations
-  stocks      Stocks[]
-  discharges  Discharges[]
-  purchases   Purchases[]
-  transferO   Transfer[]   @relation(name: "WarehouseOrigin")
-  transferD   Transfer[]   @relation(name: "WarehouseDestination")
+  stocks        Stocks[]
+  discharges    Discharges[]
+  purchases     Purchases[]
+  transferO     Transfer[]      @relation(name: "WarehouseOrigin")
+  transferD     Transfer[]      @relation(name: "WarehouseDestination")
+  cashMovements CashMovements[]
 
   @@map(name: "warehouses")
 }
@@ -199,21 +203,22 @@ model Suppliers {
 
 // TODO: Modificar una vez desarrollada la funcionalidad de "venta"
 model Clients {
-  id        Int      @id @default(autoincrement())
-  name      String
-  lastname  String
-  document  String   @unique
-  email     String   @unique
-  password  String
-  phone     String?
-  mobile    String?
-  address   String?
-  info      String?
-  roleId    Int      @default(5)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+  id            Int             @id @default(autoincrement())
+  name          String
+  lastname      String
+  document      String          @unique
+  email         String          @unique
+  password      String
+  phone         String?
+  mobile        String?
+  address       String?
+  info          String?
+  roleId        Int             @default(5)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @default(now()) @updatedAt
   // Relations
-  role      Roles    @relation(fields: [roleId], references: [id])
+  role          Roles           @relation(fields: [roleId], references: [id])
+  cashMovements CashMovements[]
 
   @@map(name: "clients")
 }
@@ -338,4 +343,54 @@ model TransferDetails {
   products   Products @relation(fields: [productId], references: [id])
 
   @@map(name: "transferdetails")
+}
+
+model CashRegisters {
+  id             Int             @id @default(autoincrement())
+  openingDate    DateTime
+  closingDate    DateTime?
+  initialBalance Float
+  finalBalance   Float?
+  userId         Int
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @default(now()) @updatedAt
+  //Relations
+  user           Users           @relation(fields: [userId], references: [id])
+  cashMovements  CashMovements[]
+
+  @@map(name: "cashregisters")
+}
+
+model CashMovements {
+  id                   Int                    @id @default(autoincrement())
+  amount               Float
+  cashRegisterId       Int
+  clientId             Int
+  warehouseId          Int
+  userId               Int
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @default(now()) @updatedAt
+  //Relations
+  user                 Users                  @relation(fields: [userId], references: [id])
+  cashRegister         CashRegisters          @relation(fields: [cashRegisterId], references: [id])
+  warehouse            Warehouses             @relation(fields: [warehouseId], references: [id])
+  client               Clients                @relation(fields: [clientId], references: [id])
+  cashMovementsDetails CashMovementsDetails[]
+
+  @@map(name: "cashmovements")
+}
+
+model CashMovementsDetails {
+  id             Int           @id @default(autoincrement())
+  cashMovementId Int
+  productId      Int
+  price          Float
+  quantity       Int
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @default(now()) @updatedAt
+  // Relations
+  cashMovement   CashMovements @relation(fields: [cashMovementId], references: [id])
+  product        Products      @relation(fields: [productId], references: [id])
+
+  @@map(name: "cashmovementsdetails")
 }

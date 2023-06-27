@@ -1,5 +1,8 @@
 import { PrismaClient } from '@prisma/client';
 import {
+  cashMovementDetails,
+  cashMovements,
+  cashRegisters,
   categories,
   clients,
   costs,
@@ -64,6 +67,12 @@ async function main() {
   await prisma.transfer.createMany({ data: transfer });
 
   await prisma.transferDetails.createMany({ data: transferDetails });
+
+  await prisma.cashRegisters.createMany({ data: cashRegisters });
+
+  await prisma.cashMovements.createMany({ data: cashMovements });
+
+  await prisma.cashMovementsDetails.createMany({ data: cashMovementDetails });
 }
 
 main()

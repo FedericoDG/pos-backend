@@ -1,3 +1,6 @@
+export * from './cashMovementDetails';
+export * from './cashMovements';
+export * from './cashRegisters';
 export * from './categories';
 export * from './clients';
 export * from './costs';
