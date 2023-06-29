@@ -7,7 +7,6 @@ export const createCashRegisterSchema = z.object({
 
 export const updateCashRegisterSchema = z.object({
   closingDate: z.string().datetime(),
-  finalBalance: z.number().nonnegative().optional(),
 });
 
 export type CreateCashRegisterType = z.infer<typeof createCashRegisterSchema>;

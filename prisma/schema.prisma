@@ -155,7 +155,7 @@ model Pricelists {
   // Relations
   prices      Prices[]
 
-  @@map(name: "pricelists")
+  @@map(name: "price_lists")
 }
 
 model Prices {
@@ -255,7 +255,7 @@ model PurchaseDetails {
   purchase   Purchases @relation(fields: [purchaseId], references: [id])
   product    Products  @relation(fields: [productId], references: [id])
 
-  @@map(name: "purchasedetails")
+  @@map(name: "purchase_details")
 }
 
 model Movements {
@@ -301,7 +301,7 @@ model DischargeDetails {
   reason      Reasons    @relation(fields: [reasonId], references: [id])
   products    Products   @relation(fields: [productId], references: [id])
 
-  @@map(name: "dischargedetails")
+  @@map(name: "discharge_details")
 }
 
 model Reasons {
@@ -342,7 +342,7 @@ model TransferDetails {
   transfer   Transfer @relation(fields: [transferId], references: [id])
   products   Products @relation(fields: [productId], references: [id])
 
-  @@map(name: "transferdetails")
+  @@map(name: "transfer_details")
 }
 
 model CashRegisters {
@@ -358,7 +358,7 @@ model CashRegisters {
   user           Users           @relation(fields: [userId], references: [id])
   cashMovements  CashMovements[]
 
-  @@map(name: "cashregisters")
+  @@map(name: "cash_registers")
 }
 
 model CashMovements {
@@ -377,7 +377,7 @@ model CashMovements {
   client               Clients                @relation(fields: [clientId], references: [id])
   cashMovementsDetails CashMovementsDetails[]
 
-  @@map(name: "cashmovements")
+  @@map(name: "cash_movements")
 }
 
 model CashMovementsDetails {
@@ -392,5 +392,5 @@ model CashMovementsDetails {
   cashMovement   CashMovements @relation(fields: [cashMovementId], references: [id])
   product        Products      @relation(fields: [productId], references: [id])
 
-  @@map(name: "cashmovementsdetails")
+  @@map(name: "cash_movements_details")
 }

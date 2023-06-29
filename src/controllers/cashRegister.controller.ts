@@ -99,7 +99,10 @@ export const status = asyncHandler(
           status: true,
           message: 'Estado de la Caja',
           body: {
-            isOpen: false,
+            cashRegister: {
+              ...cashRegister,
+              isOpen: false,
+            },
           },
         });
       } else {
@@ -152,13 +155,14 @@ export const open = asyncHandler(
 );
 
 export const close = asyncHandler(
-  async (req: Request<{ id?: number }, unknown, UpdateCashRegisterType>, res: Response, next: NextFunction) => {
+  async (req: Request<unknown, unknown, UpdateCashRegisterType>, res: Response, next: NextFunction) => {
     try {
-      const { id } = req.params;
       const data = req.body;
 
+      const actualCashRegister = await prisma.cashRegisters.findFirst({ orderBy: [{ id: 'desc' }] });
+
       const cashRegister = await prisma.cashRegisters.update({
-        where: { id: Number(id) },
+        where: { id: Number(actualCashRegister?.id) },
         data,
       });
 

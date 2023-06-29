@@ -17,6 +17,6 @@ purchase.get('/', [validToken, accessLevel('ADMIN')], getAll);
 purchase.get('/status', [validToken, accessLevel('ADMIN')], status);
 purchase.get('/:id', [validToken, accessLevel('ADMIN')], getById);
 purchase.post('/', [validToken, accessLevel('ADMIN'), schemaValidator(createCashRegisterSchema)], open);
-purchase.put('/:id', [validToken, accessLevel('ADMIN'), schemaValidator(updateCashRegisterSchema)], close);
+purchase.put('/', [validToken, accessLevel('ADMIN'), schemaValidator(updateCashRegisterSchema)], close);
 
 export default purchase;
