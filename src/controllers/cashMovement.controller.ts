@@ -13,7 +13,7 @@ export const getAll = asyncHandler(
   async (_req: Request<unknown, unknown, unknown>, res: Response, next: NextFunction) => {
     try {
       const cashMovements = await prisma.cashMovements.findMany({
-        include: { user: { include: { role: true } }, warehouse: true },
+        include: { user: { include: { role: true } }, warehouse: true, paymentMethod: true },
         orderBy: [{ id: 'desc' }],
       });
 
@@ -41,7 +41,7 @@ export const getById = asyncHandler(
       const { id } = req.params;
       const cashMovement = await prisma.cashMovements.findFirst({
         where: { id: Number(id) },
-        include: { user: { include: { role: true } }, warehouse: true },
+        include: { user: { include: { role: true } }, warehouse: true, paymentMethod: true },
         orderBy: [{ id: 'desc' }],
       });
 
@@ -72,7 +72,7 @@ export const getById = asyncHandler(
 export const create = asyncHandler(
   async (req: Request<unknown, unknown, CreateCashMovementsType>, res: Response, next: NextFunction) => {
     try {
-      const { warehouseId, clientId, cart } = req.body;
+      const { warehouseId, clientId, paymentMethodId, cart } = req.body;
       const { id: userId } = req.user;
 
       const cashRegister = await prisma.cashRegisters.findFirst({ orderBy: [{ id: 'desc' }] });
@@ -90,7 +90,7 @@ export const create = asyncHandler(
 
       // Create Cash Movement
       const cashMovement = await prisma.cashMovements.create({
-        data: { cashRegisterId, amount: total, warehouseId, clientId, userId },
+        data: { cashRegisterId, amount: total, warehouseId, clientId, userId, paymentMethodId },
       });
 
       // Create Cash Movement Details

@@ -88,11 +88,12 @@ export const getById = asyncHandler(
 );
 
 export const status = asyncHandler(
-  async (_req: Request<unknown, unknown, unknown>, res: Response, next: NextFunction) => {
+  async (req: Request<unknown, unknown, unknown>, res: Response, next: NextFunction) => {
     try {
-      const cashRegister = await prisma.cashRegisters.findFirst({ orderBy: [{ id: 'desc' }] });
+      const { id: userId } = req.user;
+      const cashRegister = await prisma.cashRegisters.findFirst({ where: { userId }, orderBy: [{ id: 'desc' }] });
 
-      if (cashRegister?.closingDate) {
+      if (!cashRegister || cashRegister?.closingDate) {
         endpointResponse({
           res,
           code: 200,
@@ -157,9 +158,10 @@ export const open = asyncHandler(
 export const close = asyncHandler(
   async (req: Request<unknown, unknown, UpdateCashRegisterType>, res: Response, next: NextFunction) => {
     try {
+      const { id: userId } = req.user;
       const data = req.body;
 
-      const actualCashRegister = await prisma.cashRegisters.findFirst({ orderBy: [{ id: 'desc' }] });
+      const actualCashRegister = await prisma.cashRegisters.findFirst({ where: { userId }, orderBy: [{ id: 'desc' }] });
 
       const cashRegister = await prisma.cashRegisters.update({
         where: { id: Number(actualCashRegister?.id) },
@@ -170,7 +172,7 @@ export const close = asyncHandler(
         res,
         code: 200,
         status: true,
-        message: 'Caja actualizada',
+        message: 'Caja cerrada',
         body: {
           cashRegister,
         },

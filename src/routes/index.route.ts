@@ -19,6 +19,7 @@ import transfer from './transfer.route';
 import cost from './cost.route';
 import cashRegister from './cashRegister.route';
 import cashMovement from './cashMovement.route';
+import paymentMethods from './paymentMethod.route';
 
 const router = Router();
 
@@ -41,5 +42,6 @@ router.use('/transfers', transfer);
 router.use('/costs', cost);
 router.use('/cashregisters', cashRegister);
 router.use('/cashmovements', cashMovement);
+router.use('/paymentmethods', paymentMethods);
 
 export default router;

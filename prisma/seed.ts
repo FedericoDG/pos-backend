@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { paymentMethods } from './seeders/paymentMethods';
 import {
   cashMovementDetails,
   cashMovements,
@@ -67,6 +68,8 @@ async function main() {
   await prisma.transfer.createMany({ data: transfer });
 
   await prisma.transferDetails.createMany({ data: transferDetails });
+
+  await prisma.paymentMethods.createMany({ data: paymentMethods });
 
   await prisma.cashRegisters.createMany({ data: cashRegisters });
 

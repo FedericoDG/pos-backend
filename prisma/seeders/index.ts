@@ -8,6 +8,7 @@ export * from './dischargeDetails';
 export * from './discharges';
 export * from './index';
 export * from './movements';
+export * from './paymentMethods';
 export * from './pricelist';
 export * from './prices';
 export * from './products';

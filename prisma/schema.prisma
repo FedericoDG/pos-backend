@@ -368,6 +368,7 @@ model CashMovements {
   clientId             Int
   warehouseId          Int
   userId               Int
+  paymentMethodId      Int
   createdAt            DateTime               @default(now())
   updatedAt            DateTime               @default(now()) @updatedAt
   //Relations
@@ -375,6 +376,7 @@ model CashMovements {
   cashRegister         CashRegisters          @relation(fields: [cashRegisterId], references: [id])
   warehouse            Warehouses             @relation(fields: [warehouseId], references: [id])
   client               Clients                @relation(fields: [clientId], references: [id])
+  paymentMethod        PaymentMethods         @relation(fields: [paymentMethodId], references: [id])
   cashMovementsDetails CashMovementsDetails[]
 
   @@map(name: "cash_movements")
@@ -393,4 +395,16 @@ model CashMovementsDetails {
   product        Products      @relation(fields: [productId], references: [id])
 
   @@map(name: "cash_movements_details")
+}
+
+model PaymentMethods {
+  id            Int             @id @default(autoincrement())
+  code          String
+  description   String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @default(now()) @updatedAt
+  // Relations
+  cashMovements CashMovements[]
+
+  @@map(name: "payment_methods")
 }

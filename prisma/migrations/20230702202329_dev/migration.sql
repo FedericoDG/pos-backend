@@ -98,14 +98,14 @@ CREATE TABLE `stock` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `pricelists` (
+CREATE TABLE `price_lists` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `code` VARCHAR(191) NOT NULL,
     `description` VARCHAR(191) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
-    UNIQUE INDEX `pricelists_code_key`(`code`),
+    UNIQUE INDEX `price_lists_code_key`(`code`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -188,7 +188,7 @@ CREATE TABLE `purchases` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `purchasedetails` (
+CREATE TABLE `purchase_details` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `purchaseId` INTEGER NOT NULL,
     `productId` INTEGER NOT NULL,
@@ -225,7 +225,7 @@ CREATE TABLE `discharges` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `dischargedetails` (
+CREATE TABLE `discharge_details` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `dischargeId` INTEGER NOT NULL,
     `productId` INTEGER NOT NULL,
@@ -262,7 +262,7 @@ CREATE TABLE `transfer` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `transferdetails` (
+CREATE TABLE `transfer_details` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `transferId` INTEGER NOT NULL,
     `productId` INTEGER NOT NULL,
@@ -274,7 +274,7 @@ CREATE TABLE `transferdetails` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `cashregisters` (
+CREATE TABLE `cash_registers` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `openingDate` DATETIME(3) NOT NULL,
     `closingDate` DATETIME(3) NULL,
@@ -288,13 +288,14 @@ CREATE TABLE `cashregisters` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `cashmovements` (
+CREATE TABLE `cash_movements` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `amount` DOUBLE NOT NULL,
     `cashRegisterId` INTEGER NOT NULL,
     `clientId` INTEGER NOT NULL,
     `warehouseId` INTEGER NOT NULL,
     `userId` INTEGER NOT NULL,
+    `paymentMethodId` INTEGER NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
@@ -302,12 +303,23 @@ CREATE TABLE `cashmovements` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `cashmovementsdetails` (
+CREATE TABLE `cash_movements_details` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `cashMovementId` INTEGER NOT NULL,
     `productId` INTEGER NOT NULL,
     `price` DOUBLE NOT NULL,
     `quantity` INTEGER NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `payment_methods` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `code` VARCHAR(191) NOT NULL,
+    `description` VARCHAR(191) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
@@ -333,7 +345,7 @@ ALTER TABLE `stock` ADD CONSTRAINT `stock_warehouseId_fkey` FOREIGN KEY (`wareho
 ALTER TABLE `prices` ADD CONSTRAINT `prices_productId_fkey` FOREIGN KEY (`productId`) REFERENCES `products`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `prices` ADD CONSTRAINT `prices_pricelistId_fkey` FOREIGN KEY (`pricelistId`) REFERENCES `pricelists`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `prices` ADD CONSTRAINT `prices_pricelistId_fkey` FOREIGN KEY (`pricelistId`) REFERENCES `price_lists`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `costs` ADD CONSTRAINT `costs_productId_fkey` FOREIGN KEY (`productId`) REFERENCES `products`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -351,10 +363,10 @@ ALTER TABLE `purchases` ADD CONSTRAINT `purchases_warehouseId_fkey` FOREIGN KEY 
 ALTER TABLE `purchases` ADD CONSTRAINT `purchases_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `purchasedetails` ADD CONSTRAINT `purchasedetails_purchaseId_fkey` FOREIGN KEY (`purchaseId`) REFERENCES `purchases`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `purchase_details` ADD CONSTRAINT `purchase_details_purchaseId_fkey` FOREIGN KEY (`purchaseId`) REFERENCES `purchases`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `purchasedetails` ADD CONSTRAINT `purchasedetails_productId_fkey` FOREIGN KEY (`productId`) REFERENCES `products`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `purchase_details` ADD CONSTRAINT `purchase_details_productId_fkey` FOREIGN KEY (`productId`) REFERENCES `products`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `movements` ADD CONSTRAINT `movements_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -366,13 +378,13 @@ ALTER TABLE `discharges` ADD CONSTRAINT `discharges_warehouseId_fkey` FOREIGN KE
 ALTER TABLE `discharges` ADD CONSTRAINT `discharges_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `dischargedetails` ADD CONSTRAINT `dischargedetails_dischargeId_fkey` FOREIGN KEY (`dischargeId`) REFERENCES `discharges`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `discharge_details` ADD CONSTRAINT `discharge_details_dischargeId_fkey` FOREIGN KEY (`dischargeId`) REFERENCES `discharges`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `dischargedetails` ADD CONSTRAINT `dischargedetails_reasonId_fkey` FOREIGN KEY (`reasonId`) REFERENCES `reasons`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `discharge_details` ADD CONSTRAINT `discharge_details_reasonId_fkey` FOREIGN KEY (`reasonId`) REFERENCES `reasons`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `dischargedetails` ADD CONSTRAINT `dischargedetails_productId_fkey` FOREIGN KEY (`productId`) REFERENCES `products`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `discharge_details` ADD CONSTRAINT `discharge_details_productId_fkey` FOREIGN KEY (`productId`) REFERENCES `products`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `transfer` ADD CONSTRAINT `transfer_warehouseOriginId_fkey` FOREIGN KEY (`warehouseOriginId`) REFERENCES `warehouses`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -384,28 +396,31 @@ ALTER TABLE `transfer` ADD CONSTRAINT `transfer_warehouseDestinationId_fkey` FOR
 ALTER TABLE `transfer` ADD CONSTRAINT `transfer_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `transferdetails` ADD CONSTRAINT `transferdetails_transferId_fkey` FOREIGN KEY (`transferId`) REFERENCES `transfer`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `transfer_details` ADD CONSTRAINT `transfer_details_transferId_fkey` FOREIGN KEY (`transferId`) REFERENCES `transfer`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `transferdetails` ADD CONSTRAINT `transferdetails_productId_fkey` FOREIGN KEY (`productId`) REFERENCES `products`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `transfer_details` ADD CONSTRAINT `transfer_details_productId_fkey` FOREIGN KEY (`productId`) REFERENCES `products`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `cashregisters` ADD CONSTRAINT `cashregisters_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `cash_registers` ADD CONSTRAINT `cash_registers_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `cashmovements` ADD CONSTRAINT `cashmovements_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `cash_movements` ADD CONSTRAINT `cash_movements_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `cashmovements` ADD CONSTRAINT `cashmovements_cashRegisterId_fkey` FOREIGN KEY (`cashRegisterId`) REFERENCES `cashregisters`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `cash_movements` ADD CONSTRAINT `cash_movements_cashRegisterId_fkey` FOREIGN KEY (`cashRegisterId`) REFERENCES `cash_registers`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `cashmovements` ADD CONSTRAINT `cashmovements_warehouseId_fkey` FOREIGN KEY (`warehouseId`) REFERENCES `warehouses`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `cash_movements` ADD CONSTRAINT `cash_movements_warehouseId_fkey` FOREIGN KEY (`warehouseId`) REFERENCES `warehouses`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `cashmovements` ADD CONSTRAINT `cashmovements_clientId_fkey` FOREIGN KEY (`clientId`) REFERENCES `clients`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `cash_movements` ADD CONSTRAINT `cash_movements_clientId_fkey` FOREIGN KEY (`clientId`) REFERENCES `clients`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `cashmovementsdetails` ADD CONSTRAINT `cashmovementsdetails_cashMovementId_fkey` FOREIGN KEY (`cashMovementId`) REFERENCES `cashmovements`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `cash_movements` ADD CONSTRAINT `cash_movements_paymentMethodId_fkey` FOREIGN KEY (`paymentMethodId`) REFERENCES `payment_methods`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `cashmovementsdetails` ADD CONSTRAINT `cashmovementsdetails_productId_fkey` FOREIGN KEY (`productId`) REFERENCES `products`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `cash_movements_details` ADD CONSTRAINT `cash_movements_details_cashMovementId_fkey` FOREIGN KEY (`cashMovementId`) REFERENCES `cash_movements`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `cash_movements_details` ADD CONSTRAINT `cash_movements_details_productId_fkey` FOREIGN KEY (`productId`) REFERENCES `products`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
