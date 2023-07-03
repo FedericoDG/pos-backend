@@ -13,7 +13,7 @@ export const getAll = asyncHandler(
   async (_req: Request<unknown, unknown, unknown>, res: Response, next: NextFunction) => {
     try {
       const cashMovements = await prisma.cashMovements.findMany({
-        include: { user: { include: { role: true } }, warehouse: true, paymentMethod: true },
+        include: { client: true, user: { include: { role: true } }, warehouse: true, paymentMethod: true },
         orderBy: [{ id: 'desc' }],
       });
 
@@ -41,7 +41,7 @@ export const getById = asyncHandler(
       const { id } = req.params;
       const cashMovement = await prisma.cashMovements.findFirst({
         where: { id: Number(id) },
-        include: { user: { include: { role: true } }, warehouse: true, paymentMethod: true },
+        include: { client: true, user: { include: { role: true } }, warehouse: true, paymentMethod: true },
         orderBy: [{ id: 'desc' }],
       });
 
