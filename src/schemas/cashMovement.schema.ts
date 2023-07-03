@@ -11,6 +11,8 @@ export const createCashMovementsSchema = z.object({
       quantity: z.number().nonnegative(),
     }),
   ),
+  discount: z.number().nonnegative(),
+  recharge: z.number().nonnegative(),
 });
 
 export type CreateCashMovementsType = z.infer<typeof createCashMovementsSchema>;

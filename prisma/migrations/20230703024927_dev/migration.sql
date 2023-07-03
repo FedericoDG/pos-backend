@@ -290,7 +290,10 @@ CREATE TABLE `cash_registers` (
 -- CreateTable
 CREATE TABLE `cash_movements` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `amount` DOUBLE NOT NULL,
+    `subtotal` DOUBLE NOT NULL,
+    `discount` DOUBLE NOT NULL,
+    `recharge` DOUBLE NOT NULL,
+    `total` DOUBLE NOT NULL,
     `cashRegisterId` INTEGER NOT NULL,
     `clientId` INTEGER NOT NULL,
     `warehouseId` INTEGER NOT NULL,

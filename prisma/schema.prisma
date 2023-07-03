@@ -363,7 +363,10 @@ model CashRegisters {
 
 model CashMovements {
   id                   Int                    @id @default(autoincrement())
-  amount               Float
+  subtotal             Float
+  discount             Float
+  recharge             Float
+  total                Float
   cashRegisterId       Int
   clientId             Int
   warehouseId          Int

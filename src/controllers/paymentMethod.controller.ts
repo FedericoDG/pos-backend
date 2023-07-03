@@ -13,7 +13,7 @@ export const getAll = asyncHandler(
       const paymentMethods = await prisma.paymentMethods.findMany({
         orderBy: [
           {
-            updatedAt: 'desc',
+            id: 'asc',
           },
         ],
       });

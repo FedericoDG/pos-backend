@@ -92,13 +92,20 @@ export const getByIdAndWarehouseId = asyncHandler(
 
       const list = getList(pricelist, stocks, 'products');
 
+      const filteredList = {
+        ...list,
+        products: list.products?.filter((item: any) => item.price > 0),
+      }; /* OJO */
+
+      console.log(list);
+
       endpointResponse({
         res,
         code: 200,
         status: true,
         message: 'Lista de precio recuperada',
         body: {
-          pricelist: list,
+          pricelist: filteredList,
         },
       });
     } catch (error) {
