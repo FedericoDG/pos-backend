@@ -97,8 +97,6 @@ export const getByIdAndWarehouseId = asyncHandler(
         products: list.products?.filter((item: any) => item.price > 0),
       }; /* OJO */
 
-      console.log(list);
-
       endpointResponse({
         res,
         code: 200,
