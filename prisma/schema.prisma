@@ -350,7 +350,7 @@ model CashRegisters {
   openingDate    DateTime
   closingDate    DateTime?
   initialBalance Float
-  finalBalance   Float?
+  finalBalance   Float
   userId         Int
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @default(now()) @updatedAt

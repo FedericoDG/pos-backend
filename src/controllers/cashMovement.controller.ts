@@ -1,5 +1,5 @@
 import { NextFunction, Response, Request } from 'express';
-import { CashMovements, PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import createHttpError from 'http-errors';
 
 import { asyncHandler } from '../helpers/asyncHandler';

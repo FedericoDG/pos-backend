@@ -15,7 +15,7 @@ export const getAll = asyncHandler(
       const cashRegisters = await prisma.cashRegisters.findMany({
         include: {
           user: { include: { role: true } },
-          cashMovements: {
+          /*   cashMovements: {
             include: {
               user: { include: { role: true } },
               cashMovementsDetails: {
@@ -24,7 +24,7 @@ export const getAll = asyncHandler(
               },
             },
             orderBy: [{ id: 'desc' }],
-          },
+          }, */
         },
         orderBy: [{ id: 'desc' }],
       });
@@ -57,7 +57,6 @@ export const getById = asyncHandler(
           user: { include: { role: true } },
           cashMovements: {
             include: {
-              user: { include: { role: true } },
               cashMovementsDetails: {
                 include: { product: { include: { category: true, unit: true } } },
                 orderBy: [{ id: 'desc' }],
@@ -91,7 +90,11 @@ export const status = asyncHandler(
   async (req: Request<unknown, unknown, unknown>, res: Response, next: NextFunction) => {
     try {
       const { id: userId } = req.user;
-      const cashRegister = await prisma.cashRegisters.findFirst({ where: { userId }, orderBy: [{ id: 'desc' }] });
+      const cashRegister = await prisma.cashRegisters.findFirst({
+        where: { userId },
+        include: { user: true },
+        orderBy: [{ id: 'desc' }],
+      });
 
       if (!cashRegister || cashRegister?.closingDate) {
         endpointResponse({
@@ -135,7 +138,7 @@ export const open = asyncHandler(
       const data = req.body;
       const { id: userId } = req.user;
 
-      const cashRegister = await prisma.cashRegisters.create({ data: { ...data, userId } });
+      const cashRegister = await prisma.cashRegisters.create({ data: { ...data, finalBalance: 0, userId } });
 
       endpointResponse({
         res,
