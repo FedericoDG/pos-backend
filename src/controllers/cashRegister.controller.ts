@@ -57,6 +57,8 @@ export const getById = asyncHandler(
           user: { include: { role: true } },
           cashMovements: {
             include: {
+              client: true,
+              warehouse: true,
               cashMovementsDetails: {
                 include: { product: { include: { category: true, unit: true } } },
                 orderBy: [{ id: 'desc' }],
