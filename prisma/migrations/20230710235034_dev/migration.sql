@@ -279,7 +279,7 @@ CREATE TABLE `cash_registers` (
     `openingDate` DATETIME(3) NOT NULL,
     `closingDate` DATETIME(3) NULL,
     `initialBalance` DOUBLE NOT NULL,
-    `finalBalance` DOUBLE NULL,
+    `finalBalance` DOUBLE NOT NULL,
     `userId` INTEGER NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
@@ -298,7 +298,7 @@ CREATE TABLE `cash_movements` (
     `clientId` INTEGER NOT NULL,
     `warehouseId` INTEGER NOT NULL,
     `userId` INTEGER NOT NULL,
-    `paymentMethodId` INTEGER NOT NULL,
+    `info` VARCHAR(191) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
@@ -323,6 +323,18 @@ CREATE TABLE `payment_methods` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `code` VARCHAR(191) NOT NULL,
     `description` VARCHAR(191) NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `payment_method_details` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `cashMovementId` INTEGER NOT NULL,
+    `amount` DOUBLE NOT NULL,
+    `paymentMethodId` INTEGER NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
@@ -420,10 +432,13 @@ ALTER TABLE `cash_movements` ADD CONSTRAINT `cash_movements_warehouseId_fkey` FO
 ALTER TABLE `cash_movements` ADD CONSTRAINT `cash_movements_clientId_fkey` FOREIGN KEY (`clientId`) REFERENCES `clients`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `cash_movements` ADD CONSTRAINT `cash_movements_paymentMethodId_fkey` FOREIGN KEY (`paymentMethodId`) REFERENCES `payment_methods`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE `cash_movements_details` ADD CONSTRAINT `cash_movements_details_cashMovementId_fkey` FOREIGN KEY (`cashMovementId`) REFERENCES `cash_movements`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `cash_movements_details` ADD CONSTRAINT `cash_movements_details_productId_fkey` FOREIGN KEY (`productId`) REFERENCES `products`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `payment_method_details` ADD CONSTRAINT `payment_method_details_cashMovementId_fkey` FOREIGN KEY (`cashMovementId`) REFERENCES `cash_movements`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `payment_method_details` ADD CONSTRAINT `payment_method_details_paymentMethodId_fkey` FOREIGN KEY (`paymentMethodId`) REFERENCES `payment_methods`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;

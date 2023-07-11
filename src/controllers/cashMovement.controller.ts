@@ -13,7 +13,7 @@ export const getAll = asyncHandler(
   async (_req: Request<unknown, unknown, unknown>, res: Response, next: NextFunction) => {
     try {
       const cashMovements = await prisma.cashMovements.findMany({
-        include: { client: true, user: { include: { role: true } }, warehouse: true, paymentMethod: true },
+        include: { client: true, user: { include: { role: true } }, warehouse: true, paymentMethodDetails: true },
         orderBy: [{ id: 'desc' }],
       });
 
@@ -41,7 +41,7 @@ export const getById = asyncHandler(
       const { id } = req.params;
       const cashMovement = await prisma.cashMovements.findFirst({
         where: { id: Number(id) },
-        include: { client: true, user: { include: { role: true } }, warehouse: true, paymentMethod: true },
+        include: { client: true, user: { include: { role: true } }, warehouse: true, paymentMethodDetails: true },
         orderBy: [{ id: 'desc' }],
       });
 
@@ -72,7 +72,7 @@ export const getById = asyncHandler(
 export const create = asyncHandler(
   async (req: Request<unknown, unknown, CreateCashMovementsType>, res: Response, next: NextFunction) => {
     try {
-      const { warehouseId, clientId, paymentMethodId, discount, recharge, cart } = req.body;
+      const { warehouseId, clientId, discount, recharge, cart, payments, info } = req.body;
       const { id: userId } = req.user;
 
       const cashRegister = await prisma.cashRegisters.findFirst({ orderBy: [{ id: 'desc' }] });
@@ -99,7 +99,7 @@ export const create = asyncHandler(
           warehouseId,
           clientId,
           userId,
-          paymentMethodId,
+          info,
         },
       });
 
@@ -109,6 +109,11 @@ export const create = asyncHandler(
       const cartWithcashMovementId = cart.map((item) => ({ ...item, cashMovementId }));
 
       await prisma.cashMovementsDetails.createMany({ data: cartWithcashMovementId });
+
+      // Create Payments Details
+      const mappedPayments = payments.map((item) => ({ ...item, cashMovementId }));
+
+      await prisma.paymentMethodDetails.createMany({ data: mappedPayments });
 
       // Stock Origin
       const stocks = await prisma.stocks.findMany({

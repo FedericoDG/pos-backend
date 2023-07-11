@@ -362,25 +362,26 @@ model CashRegisters {
 }
 
 model CashMovements {
-  id                   Int                    @id @default(autoincrement())
-  subtotal             Float
-  discount             Float
-  recharge             Float
-  total                Float
-  cashRegisterId       Int
-  clientId             Int
-  warehouseId          Int
-  userId               Int
-  paymentMethodId      Int
-  createdAt            DateTime               @default(now())
-  updatedAt            DateTime               @default(now()) @updatedAt
+  id             Int           @id @default(autoincrement())
+  subtotal       Float
+  discount       Float
+  recharge       Float
+  total          Float
+  cashRegisterId Int
+  clientId       Int
+  warehouseId    Int
+  userId         Int
+  info           String
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @default(now()) @updatedAt
   //Relations
-  user                 Users                  @relation(fields: [userId], references: [id])
-  cashRegister         CashRegisters          @relation(fields: [cashRegisterId], references: [id])
-  warehouse            Warehouses             @relation(fields: [warehouseId], references: [id])
-  client               Clients                @relation(fields: [clientId], references: [id])
-  paymentMethod        PaymentMethods         @relation(fields: [paymentMethodId], references: [id])
+  user           Users         @relation(fields: [userId], references: [id])
+  cashRegister   CashRegisters @relation(fields: [cashRegisterId], references: [id])
+  warehouse      Warehouses    @relation(fields: [warehouseId], references: [id])
+  client         Clients       @relation(fields: [clientId], references: [id])
+
   cashMovementsDetails CashMovementsDetails[]
+  paymentMethodDetails PaymentMethodDetails[]
 
   @@map(name: "cash_movements")
 }
@@ -401,13 +402,27 @@ model CashMovementsDetails {
 }
 
 model PaymentMethods {
-  id            Int             @id @default(autoincrement())
-  code          String
-  description   String?
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @default(now()) @updatedAt
+  id                   Int                    @id @default(autoincrement())
+  code                 String
+  description          String?
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @default(now()) @updatedAt
   // Relations
-  cashMovements CashMovements[]
+  paymentMethodDetails PaymentMethodDetails[]
 
   @@map(name: "payment_methods")
+}
+
+model PaymentMethodDetails {
+  id              Int            @id @default(autoincrement())
+  cashMovementId  Int
+  amount          Float
+  paymentMethodId Int
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @default(now()) @updatedAt
+  // Relations
+  cashMovement    CashMovements  @relation(fields: [cashMovementId], references: [id])
+  paymentMethod   PaymentMethods @relation(fields: [paymentMethodId], references: [id])
+
+  @@map(name: "payment_method_details")
 }

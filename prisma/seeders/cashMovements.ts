@@ -12,7 +12,7 @@ export const cashMovements = [
     warehouseId: 1,
     clientId: 1,
     userId: 3,
-    paymentMethodId: 1,
+    info: '',
     createdAt: now.plus({ minutes: 1 }).toString(),
     updatedAt: now.plus({ minutes: 1 }).toString(),
   },

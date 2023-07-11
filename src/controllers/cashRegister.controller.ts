@@ -59,6 +59,7 @@ export const getById = asyncHandler(
             include: {
               client: true,
               warehouse: true,
+              paymentMethodDetails: true,
               cashMovementsDetails: {
                 include: { product: { include: { category: true, unit: true } } },
                 orderBy: [{ id: 'desc' }],

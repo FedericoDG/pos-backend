@@ -10,6 +10,7 @@ import {
   dischargeDetails,
   discharges,
   movements,
+  paymentMethodDetails,
   pricelists,
   prices,
   products,
@@ -76,6 +77,8 @@ async function main() {
   await prisma.cashMovements.createMany({ data: cashMovements });
 
   await prisma.cashMovementsDetails.createMany({ data: cashMovementDetails });
+
+  await prisma.paymentMethodDetails.createMany({ data: paymentMethodDetails });
 }
 
 main()
