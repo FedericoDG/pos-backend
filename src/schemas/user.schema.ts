@@ -16,6 +16,12 @@ export const updateUserSchema = z.object({
   roleId: z.coerce.number().min(1).max(4).optional(),
 });
 
+export const resetPasswordUserSchema = z.object({
+  password: z.string().min(6),
+});
+
 export type CreateUserType = z.infer<typeof createUserSchema>;
 
 export type UpdateUserType = z.infer<typeof updateUserSchema>;
+
+export type ResetPasswordUserType = z.infer<typeof resetPasswordUserSchema>;

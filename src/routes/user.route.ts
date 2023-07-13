@@ -3,7 +3,7 @@ import { Router } from 'express';
 const user = Router();
 
 // Controller
-import { create, getAll, getById, remove, update } from '../controllers/user.controller';
+import { create, getAll, getById, remove, resetPassword, update } from '../controllers/user.controller';
 
 // Middlewares
 import { accessLevel, validToken } from '../middlewares/auth.middleware';
@@ -11,7 +11,7 @@ import { valueIsAlreadyInUse } from '../middlewares/valueIsAlreadyInUse';
 import { schemaValidator } from '../middlewares/schemaValidator.middleware';
 
 // Schema
-import { createUserSchema, updateUserSchema } from '../schemas/user.schema';
+import { createUserSchema, updateUserSchema, resetPasswordUserSchema } from '../schemas/user.schema';
 
 // Routes
 user.get('/', [validToken, accessLevel('ADMIN')], getAll);
@@ -27,6 +27,11 @@ user.post(
   create,
 );
 user.put('/:id', [validToken, accessLevel('ADMIN'), schemaValidator(updateUserSchema)], update);
+user.put(
+  '/resetpassword/:id',
+  [validToken, accessLevel('ADMIN'), schemaValidator(resetPasswordUserSchema)],
+  resetPassword,
+);
 user.delete('/:id', [validToken, accessLevel('ADMIN')], remove);
 
 export default user;

@@ -41,7 +41,12 @@ export const getById = asyncHandler(
       const { id } = req.params;
       const cashMovement = await prisma.cashMovements.findFirst({
         where: { id: Number(id) },
-        include: { client: true, user: { include: { role: true } }, warehouse: true, paymentMethodDetails: true },
+        include: {
+          client: true,
+          user: { include: { role: true } },
+          warehouse: true,
+          paymentMethodDetails: { include: { paymentMethod: true } },
+        },
         orderBy: [{ id: 'desc' }],
       });
 
@@ -55,7 +60,7 @@ export const getById = asyncHandler(
         res,
         code: 200,
         status: true,
-        message: 'Caja recuperada',
+        message: 'Movimiento recuperado',
         body: {
           cashMovement: { ...cashMovement, cashMovementDetails },
         },

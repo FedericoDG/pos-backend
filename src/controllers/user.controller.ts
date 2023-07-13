@@ -6,7 +6,7 @@ import { asyncHandler } from '../helpers/asyncHandler';
 import { bcHash } from '../helpers/bcrypt';
 import { endpointResponse } from '../helpers/endpointResponse';
 
-import { CreateUserType, UpdateUserType } from '../schemas/user.schema';
+import { CreateUserType, UpdateUserType, ResetPasswordUserType } from '../schemas/user.schema';
 
 const prisma = new PrismaClient();
 
@@ -122,6 +122,37 @@ export const update = asyncHandler(
       const user = await prisma.users.update({
         where: { id: Number(id) },
         data,
+      });
+
+      endpointResponse({
+        res,
+        code: 200,
+        status: true,
+        message: 'Usuario actualizado',
+        body: {
+          user,
+        },
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        const httpError = createHttpError(500, `[Users - UPDATE]: ${error.message}`);
+        next(httpError);
+      }
+    }
+  },
+);
+
+export const resetPassword = asyncHandler(
+  async (req: Request<{ id?: number }, unknown, ResetPasswordUserType>, res: Response, next: NextFunction) => {
+    try {
+      const { id } = req.params;
+      const { password } = req.body;
+
+      const hashedPassword = await bcHash(password);
+
+      const user = await prisma.users.update({
+        where: { id: Number(id) },
+        data: { password: hashedPassword },
       });
 
       endpointResponse({
