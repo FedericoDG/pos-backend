@@ -71,13 +71,29 @@ export const getById = asyncHandler(
         orderBy: [{ id: 'desc' }],
       });
 
+      const cash = cashRegister?.cashMovements.map((el) =>
+        el.paymentMethodDetails.filter((el) => el.paymentMethodId === 1).reduce((acc, el) => acc + el.amount, 0),
+      )[0];
+      const debit = cashRegister?.cashMovements.map((el) =>
+        el.paymentMethodDetails.filter((el) => el.paymentMethodId === 2).reduce((acc, el) => acc + el.amount, 0),
+      )[0];
+      const credit = cashRegister?.cashMovements.map((el) =>
+        el.paymentMethodDetails.filter((el) => el.paymentMethodId === 3).reduce((acc, el) => acc + el.amount, 0),
+      )[0];
+      const transfer = cashRegister?.cashMovements.map((el) =>
+        el.paymentMethodDetails.filter((el) => el.paymentMethodId === 4).reduce((acc, el) => acc + el.amount, 0),
+      )[0];
+      const mercadoPago = cashRegister?.cashMovements.map((el) =>
+        el.paymentMethodDetails.filter((el) => el.paymentMethodId === 5).reduce((acc, el) => acc + el.amount, 0),
+      )[0];
+
       endpointResponse({
         res,
         code: 200,
         status: true,
         message: 'Caja recuperada',
         body: {
-          cashRegister,
+          cashRegister: { ...cashRegister, cash, debit, credit, transfer, mercadoPago },
         },
       });
     } catch (error) {

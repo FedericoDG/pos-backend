@@ -287,13 +287,13 @@ export const remove = asyncHandler(
     try {
       const { id } = req.params;
 
-      await prisma.stocks.deleteMany({ where: { productId: Number(id) } });
-
-      await prisma.prices.deleteMany({ where: { productId: Number(id) } });
-
       const product = await prisma.products.delete({
         where: { id: Number(id) },
       });
+
+      await prisma.stocks.deleteMany({ where: { productId: Number(id) } });
+
+      await prisma.prices.deleteMany({ where: { productId: Number(id) } });
 
       endpointResponse({
         res,

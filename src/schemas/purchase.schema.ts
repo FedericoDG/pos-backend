@@ -5,8 +5,8 @@ export const createPurchaseSchema = z.object({
   warehouseId: z.number().nonnegative(),
   total: z.number().nonnegative(),
   date: z.string().datetime(),
-  driver: z.string().nonempty(),
-  transport: z.string().nonempty(),
+  driver: z.string(),
+  transport: z.string(),
   cart: z.array(
     z.object({
       productId: z.number().nonnegative(),

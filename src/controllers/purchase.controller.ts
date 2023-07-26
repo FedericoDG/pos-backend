@@ -112,7 +112,7 @@ export const create = asyncHandler(
       await prisma.movements.create({ data: { amount: rest.total, type: 'OUT', userId } });
 
       // Update Costs
-      const costs = cart.map((el) => ({ productId: el.productId, price: el.price }));
+      const costs = cart.filter((el) => el.price !== 0).map((el) => ({ productId: el.productId, price: el.price }));
       await prisma.costs.createMany({ data: costs });
 
       // Stock

@@ -4,7 +4,7 @@ const StatusType = ['ENABLED', 'DISABLED'] as const;
 
 export const createProductSchema = z.object({
   code: z.string().nonempty(),
-  barcode: z.string().nonempty(),
+  barcode: z.string(),
   name: z.string().nonempty(),
   description: z.string().optional(),
   status: z.enum(StatusType).optional(),

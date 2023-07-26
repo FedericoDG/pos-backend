@@ -12,6 +12,9 @@ export const valueIsAlreadyInUse =
   ({ model, column }: Props) =>
   async (req: Request, res: Response, next: NextFunction) => {
     const value = req.body[`${column}`];
+    console.log({ value });
+
+    if (value === '') return next();
 
     const where = {
       [column]: value,
