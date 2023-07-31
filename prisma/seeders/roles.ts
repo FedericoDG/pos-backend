@@ -20,7 +20,7 @@ export const roles = [
     updatedAt: now.plus({ minutes: 3 }).toString(),
   },
   {
-    name: UserType.USER,
+    name: UserType.DRIVER,
     createdAt: now.plus({ minutes: 4 }).toString(),
     updatedAt: now.plus({ minutes: 4 }).toString(),
   },

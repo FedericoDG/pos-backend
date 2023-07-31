@@ -59,8 +59,11 @@ export const accessLevel = (level: UserType) => (req: Request, res: Response, ne
     case 'SELLER':
       accLvl = 3;
       break;
-    case 'USER':
+    case 'DRIVER':
       accLvl = 4;
+      break;
+    case 'USER':
+      accLvl = 5;
       break;
     default:
       accLvl = 5;

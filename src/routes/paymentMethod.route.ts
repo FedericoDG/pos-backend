@@ -9,6 +9,6 @@ import { getAll } from '../controllers/paymentMethod.controller';
 import { accessLevel, validToken } from '../middlewares/auth.middleware';
 
 // Routes
-paymentMethods.get('/', [validToken, accessLevel('SELLER')], getAll);
+paymentMethods.get('/', [validToken, accessLevel('DRIVER')], getAll);
 
 export default paymentMethods;

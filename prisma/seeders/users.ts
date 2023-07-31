@@ -33,7 +33,7 @@ export const users = [
   {
     name: 'Roberto',
     lastname: 'Quintana',
-    email: 'user@gmail.com',
+    email: 'driver@gmail.com',
     password: '$2a$10$ZM6gFPu6tMAU4wr79TFDn.2IZbon0i/iGeNygxtGxdnVqEz1jkr4q',
     roleId: 4,
     createdAt: now.plus({ minutes: 4 }).toString(),

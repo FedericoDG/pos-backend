@@ -15,6 +15,6 @@ import { createCashMovementsSchema } from '../schemas/cashMovement.schema';
 // Routes
 purchase.get('/', [validToken, accessLevel('ADMIN')], getAll);
 purchase.get('/:id', [validToken, accessLevel('ADMIN')], getById);
-purchase.post('/', [validToken, accessLevel('ADMIN'), schemaValidator(createCashMovementsSchema)], create);
+purchase.post('/', [validToken, accessLevel('DRIVER'), schemaValidator(createCashMovementsSchema)], create);
 
 export default purchase;

@@ -2,6 +2,7 @@ enum UserType {
   SUPERADMIN
   ADMIN
   SELLER
+  DRIVER
   USER
   CLIENT
 }
@@ -43,13 +44,14 @@ model Users {
   transfer      Transfer[]
   cashRegisters CashRegisters[]
   cashMovements CashMovements[]
+  warehouses    Warehouses[]
 
   @@map(name: "users")
 }
 
 model Roles {
   id          Int       @id @default(autoincrement())
-  name        UserType  @unique @default(USER)
+  name        UserType  @unique @default(SELLER)
   description String?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @default(now()) @updatedAt
@@ -115,6 +117,8 @@ model Units {
 model Warehouses {
   id            Int             @id @default(autoincrement())
   code          String          @unique
+  driver        Int             @default(0)
+  userId        Int             @default(1)
   description   String?
   address       String?
   createdAt     DateTime        @default(now())
@@ -126,6 +130,7 @@ model Warehouses {
   transferO     Transfer[]      @relation(name: "WarehouseOrigin")
   transferD     Transfer[]      @relation(name: "WarehouseDestination")
   cashMovements CashMovements[]
+  user          Users           @relation(fields: [userId], references: [id])
 
   @@map(name: "warehouses")
 }

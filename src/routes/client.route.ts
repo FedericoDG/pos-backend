@@ -14,8 +14,8 @@ import { valueIsAlreadyInUse } from '../middlewares/valueIsAlreadyInUse';
 import { createClientSchema, updateClientSchema } from '../schemas/client.schema';
 
 // Routes
-client.get('/', [validToken, accessLevel('SELLER')], getAll);
-client.get('/:id', [validToken, accessLevel('SELLER')], getById);
+client.get('/', [validToken, accessLevel('DRIVER')], getAll);
+client.get('/:id', [validToken, accessLevel('DRIVER')], getById);
 client.post(
   '/',
   [

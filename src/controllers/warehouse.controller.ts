@@ -1,10 +1,11 @@
 import { NextFunction, Response, Request } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Warehouses } from '@prisma/client';
 import createHttpError from 'http-errors';
 
 import { asyncHandler } from '../helpers/asyncHandler';
 import { endpointResponse } from '../helpers/endpointResponse';
 
+import { bcHash } from 'src/helpers/bcrypt';
 import { CreateWarehouseType, UpdateWarehouseType } from '../schemas/warehouse.schema';
 
 const prisma = new PrismaClient();
@@ -16,6 +17,7 @@ export const getAll = asyncHandler(
 
       if (nostock) {
         const warehouses = await prisma.warehouses.findMany({
+          include: { user: true },
           orderBy: [
             {
               id: 'asc', // OJO
@@ -45,6 +47,7 @@ export const getAll = asyncHandler(
               products: true,
             },
           },
+          user: true,
         },
       });
 
@@ -78,6 +81,7 @@ export const getById = asyncHandler(
               products: true,
             },
           },
+          user: true,
         },
       });
 
@@ -104,13 +108,36 @@ export const create = asyncHandler(
     try {
       const data = req.body;
 
-      const warehouse = await prisma.warehouses.create({ data });
+      let warehouse: Warehouses;
+      if (data.driver === 1) {
+        console.log('CREAR CHOFER');
+        /*  */
+        console.log(data);
+        const hashedPassword = await bcHash(data.password!);
+
+        const user = await prisma.users.create({
+          data: {
+            name: data.name!,
+            lastname: data.lastname!,
+            email: data.email!,
+            roleId: 4,
+            password: hashedPassword,
+          },
+        });
+        /*  */
+        warehouse = await prisma.warehouses.create({
+          data: { code: data.code, description: data.description, userId: user.id, driver: 1 },
+        });
+      } else {
+        console.log('CREAR DEPÓSITO');
+        warehouse = await prisma.warehouses.create({ data });
+      }
 
       const productsIds = await prisma.products.findMany({ select: { id: true } });
 
       const stocks = productsIds.map((el) => ({
         productId: el.id,
-        warehouseId: 3,
+        warehouseId: warehouse.id,
         stock: 0,
         prevstock: 0,
         prevdate: new Date(),
@@ -122,14 +149,14 @@ export const create = asyncHandler(
         res,
         code: 200,
         status: true,
-        message: 'Depósito/Almacén creado',
+        message: 'Depósito/Almacén/Chofer creado',
         body: {
           warehouse,
         },
       });
     } catch (error) {
       if (error instanceof Error) {
-        const httpError = createHttpError(500, `[Warehouse - CREATE]: ${error.message}`);
+        const httpError = createHttpError(500, `[Warehouse/Driver - CREATE]: ${error.message}`);
         next(httpError);
       }
     }
@@ -140,12 +167,31 @@ export const update = asyncHandler(
   async (req: Request<{ id?: number }, unknown, UpdateWarehouseType>, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
-      const { address, description } = req.body;
+      const { driver, ...rest } = req.body;
 
-      const warehouse = await prisma.warehouses.update({
-        where: { id: Number(id) },
-        data: { address, description },
-      });
+      let warehouse: Warehouses;
+      if (driver === 1) {
+        console.log('CHOFER');
+        warehouse = await prisma.warehouses.update({
+          where: { id: Number(id) },
+          data: { description: rest.description },
+        });
+
+        await prisma.users.update({
+          where: { id: Number(warehouse.userId) },
+          data: {
+            name: rest.name,
+            lastname: rest.lastname,
+            email: rest.email,
+          },
+        });
+      } else {
+        console.log('DEPÓSITO');
+        warehouse = await prisma.warehouses.update({
+          where: { id: Number(id) },
+          data: { address: rest.address, description: rest.description },
+        });
+      }
 
       endpointResponse({
         res,

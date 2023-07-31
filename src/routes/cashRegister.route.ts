@@ -14,9 +14,9 @@ import { createCashRegisterSchema, updateCashRegisterSchema } from '../schemas/c
 
 // Routes
 purchase.get('/', [validToken, accessLevel('ADMIN')], getAll);
-purchase.get('/status', [validToken, accessLevel('SELLER')], status);
-purchase.get('/:id', [validToken, accessLevel('ADMIN')], getById);
-purchase.post('/', [validToken, accessLevel('SELLER'), schemaValidator(createCashRegisterSchema)], open);
-purchase.put('/', [validToken, accessLevel('SELLER'), schemaValidator(updateCashRegisterSchema)], close);
+purchase.get('/status', [validToken, accessLevel('DRIVER')], status);
+purchase.get('/:id', [validToken, accessLevel('DRIVER')], getById);
+purchase.post('/', [validToken, accessLevel('DRIVER'), schemaValidator(createCashRegisterSchema)], open);
+purchase.put('/', [validToken, accessLevel('DRIVER'), schemaValidator(updateCashRegisterSchema)], close);
 
 export default purchase;
