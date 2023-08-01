@@ -156,6 +156,52 @@ export const status = asyncHandler(
   },
 );
 
+export const statusByUserId = asyncHandler(
+  async (req: Request<{ id?: number }, unknown, unknown>, res: Response, next: NextFunction) => {
+    try {
+      const { id } = req.params;
+      const cashRegister = await prisma.cashRegisters.findFirst({
+        where: { userId: Number(id) },
+        include: { user: true },
+        orderBy: [{ id: 'desc' }],
+      });
+
+      if (!cashRegister || cashRegister?.closingDate) {
+        endpointResponse({
+          res,
+          code: 200,
+          status: true,
+          message: 'Estado de la Caja',
+          body: {
+            cashRegister: {
+              ...cashRegister,
+              isOpen: false,
+            },
+          },
+        });
+      } else {
+        endpointResponse({
+          res,
+          code: 200,
+          status: true,
+          message: 'Estado de la Caja',
+          body: {
+            cashRegister: {
+              ...cashRegister,
+              isOpen: true,
+            },
+          },
+        });
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        const httpError = createHttpError(500, `[Cash Register - GET ONE]: ${error.message}`);
+        next(httpError);
+      }
+    }
+  },
+);
+
 export const open = asyncHandler(
   async (req: Request<unknown, unknown, CreateCashRegisterType>, res: Response, next: NextFunction) => {
     try {

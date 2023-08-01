@@ -78,10 +78,16 @@ export const getById = asyncHandler(
         include: {
           stocks: {
             include: {
-              products: true,
+              products: {
+                include: { category: true, unit: true },
+              },
             },
           },
-          user: true,
+          user: {
+            include: {
+              role: true,
+            },
+          },
         },
       });
 
