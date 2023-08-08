@@ -149,7 +149,7 @@ export const stocks = [
   },
   // DRIVERS
   {
-    stock: 0,
+    stock: 10,
     prevstock: 0,
     prevdate: new Date(),
     productId: 1,
@@ -158,7 +158,7 @@ export const stocks = [
     updatedAt: now.plus({ minutes: 16 }).toString(),
   },
   {
-    stock: 0,
+    stock: 12,
     prevstock: 0,
     prevdate: new Date(),
     productId: 2,

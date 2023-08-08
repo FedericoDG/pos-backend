@@ -109,6 +109,46 @@ export const getById = asyncHandler(
   },
 );
 
+export const getByUserId = asyncHandler(
+  async (req: Request<{ id?: number }, unknown, unknown>, res: Response, next: NextFunction) => {
+    try {
+      const { id } = req.params;
+      const warehouse = await prisma.warehouses.findFirst({
+        where: { userId: Number(id) },
+        include: {
+          stocks: {
+            include: {
+              products: {
+                include: { category: true, unit: true },
+              },
+            },
+          },
+          user: {
+            include: {
+              role: true,
+            },
+          },
+        },
+      });
+
+      endpointResponse({
+        res,
+        code: 200,
+        status: true,
+        message: 'Depósito/Almacén recuperado',
+        body: {
+          warehouse,
+        },
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        const httpError = createHttpError(500, `[Warehouse - GET ONE]: ${error.message}`);
+        next(httpError);
+      }
+    }
+  },
+);
+
 export const create = asyncHandler(
   async (req: Request<unknown, unknown, CreateWarehouseType>, res: Response, next: NextFunction) => {
     try {

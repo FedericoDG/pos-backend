@@ -3,7 +3,7 @@ import { Router } from 'express';
 const warehouse = Router();
 
 // Controller
-import { create, getAll, getById, remove, update } from '../controllers/warehouse.controller';
+import { create, getAll, getById, getByUserId, remove, update } from '../controllers/warehouse.controller';
 
 // Middlewares
 import { accessLevel, validToken } from '../middlewares/auth.middleware';
@@ -16,6 +16,7 @@ import { createWarehouseSchema, updateWarehouseSchema } from '../schemas/warehou
 // Routes
 warehouse.get('/', [validToken, accessLevel('USER')], getAll);
 warehouse.get('/:id', [validToken, accessLevel('USER')], getById);
+warehouse.get('/user/:id', [validToken, accessLevel('USER')], getByUserId);
 warehouse.post(
   '/',
   [

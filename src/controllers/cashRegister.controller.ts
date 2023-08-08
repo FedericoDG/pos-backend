@@ -5,7 +5,11 @@ import createHttpError from 'http-errors';
 import { asyncHandler } from '../helpers/asyncHandler';
 import { endpointResponse } from '../helpers/endpointResponse';
 
-import { CreateCashRegisterType, UpdateCashRegisterType } from 'src/schemas/cashRegister.schema';
+import {
+  CreateCashRegisterType,
+  UpdateCashRegisterByIdType,
+  UpdateCashRegisterType,
+} from 'src/schemas/cashRegister.schema';
 
 const prisma = new PrismaClient();
 
@@ -26,7 +30,7 @@ export const getAll = asyncHandler(
             orderBy: [{ id: 'desc' }],
           }, */
         },
-        orderBy: [{ id: 'desc' }],
+        orderBy: [{ closingDate: 'asc' }],
       });
 
       endpointResponse({
@@ -72,25 +76,30 @@ export const getById = asyncHandler(
       });
 
       const cash =
-        cashRegister?.cashMovements.map((el) =>
-          el.paymentMethodDetails.filter((el) => el.paymentMethodId === 1).reduce((acc, el) => acc + el.amount, 0),
-        )[0] || 0;
+        cashRegister?.cashMovements
+          .map((movement) => movement.paymentMethodDetails.filter((el) => el.paymentMethodId === 1))
+          .flat()
+          .reduce((acc, el) => acc + el.amount, 0) || 0;
       const debit =
-        cashRegister?.cashMovements.map((el) =>
-          el.paymentMethodDetails.filter((el) => el.paymentMethodId === 2).reduce((acc, el) => acc + el.amount, 0),
-        )[0] || 0;
+        cashRegister?.cashMovements
+          .map((movement) => movement.paymentMethodDetails.filter((el) => el.paymentMethodId === 2))
+          .flat()
+          .reduce((acc, el) => acc + el.amount, 0) || 0;
       const credit =
-        cashRegister?.cashMovements.map((el) =>
-          el.paymentMethodDetails.filter((el) => el.paymentMethodId === 3).reduce((acc, el) => acc + el.amount, 0),
-        )[0] || 0;
+        cashRegister?.cashMovements
+          .map((movement) => movement.paymentMethodDetails.filter((el) => el.paymentMethodId === 3))
+          .flat()
+          .reduce((acc, el) => acc + el.amount, 0) || 0;
       const transfer =
-        cashRegister?.cashMovements.map((el) =>
-          el.paymentMethodDetails.filter((el) => el.paymentMethodId === 4).reduce((acc, el) => acc + el.amount, 0),
-        )[0] || 0;
+        cashRegister?.cashMovements
+          .map((movement) => movement.paymentMethodDetails.filter((el) => el.paymentMethodId === 4))
+          .flat()
+          .reduce((acc, el) => acc + el.amount, 0) || 0;
       const mercadoPago =
-        cashRegister?.cashMovements.map((el) =>
-          el.paymentMethodDetails.filter((el) => el.paymentMethodId === 5).reduce((acc, el) => acc + el.amount, 0),
-        )[0] || 0;
+        cashRegister?.cashMovements
+          .map((movement) => movement.paymentMethodDetails.filter((el) => el.paymentMethodId === 5))
+          .flat()
+          .reduce((acc, el) => acc + el.amount, 0) || 0;
 
       endpointResponse({
         res,
@@ -252,7 +261,173 @@ export const close = asyncHandler(
       });
     } catch (error) {
       if (error instanceof Error) {
-        const httpError = createHttpError(500, `[Purchases - CREATE]: ${error.message}`);
+        const httpError = createHttpError(500, `[CASHREGISTERS - CLOSE]: ${error.message}`);
+        next(httpError);
+      }
+    }
+  },
+);
+
+export const closeById = asyncHandler(
+  async (req: Request<{ id?: number }, unknown, UpdateCashRegisterByIdType>, res: Response, next: NextFunction) => {
+    try {
+      const { warehouseId, cart, warehouseDestinationId, closingDate } = req.body;
+      const { id: userId } = req.params;
+
+      // DISCHARGE
+      if (cart.length > 0) {
+        cart.sort((a, b) => a.productId - b.productId);
+        const cost = cart.reduce((acc, item) => acc + Number(item.quantity) * Number(item.cost), 0);
+        const { id } = await prisma.discharges.create({ data: { warehouseId, userId: Number(userId), cost } });
+        await prisma.movements.create({ data: { amount: cost, type: 'OUT', userId: Number(userId) } });
+        const productsIds = cart.map((item) => item.productId).sort();
+        const cartWithWarehouseId = cart
+          .map((item) => ({
+            dischargeId: id,
+            cost: item.cost,
+            reasonId: item.reasonId,
+            productId: item.productId,
+            quantity: item.quantity,
+            info: item.info,
+          }))
+          .sort((a, b) => a.productId - b.productId);
+        await prisma.dischargeDetails.createMany({ data: cartWithWarehouseId });
+        const stocks = await prisma.stocks.findMany({
+          where: { productId: { in: productsIds }, warehouseId: warehouseId },
+          orderBy: [{ id: 'asc' }],
+        });
+
+        const newStock = stocks.map((item, idx) => {
+          return {
+            id: item.id,
+            productId: item.productId,
+            warehouseId: warehouseId,
+            stock: item.stock - cart[idx].quantity,
+            prevstock: item.stock,
+            prevdate: item.createdAt,
+          };
+        });
+
+        await Promise.all(
+          newStock.map(
+            async (el) =>
+              await prisma.stocks.update({
+                where: { id: el.id },
+                data: { ...el },
+              }),
+          ),
+        );
+      }
+
+      // TRANSFER
+      const tranferStocks = await prisma.stocks.findMany({ where: { warehouseId, stock: { gt: 0 } } });
+      const cart2 = tranferStocks.map((el) => ({ productId: el.productId, quantity: el.stock }));
+
+      const transfer = await prisma.transfer.create({
+        data: { warehouseOriginId: warehouseId, warehouseDestinationId, userId: Number(userId) },
+      });
+      const cartWithTransferId = cart2.map((el) => ({ ...el, transferId: transfer.id }));
+      await prisma.transferDetails.createMany({ data: cartWithTransferId });
+
+      const productsIds2 = cart2.map((item) => item.productId);
+      const stocksOrigin = await prisma.stocks.findMany({
+        where: { productId: { in: productsIds2 }, warehouseId: warehouseId },
+        orderBy: [{ createdAt: 'asc' }],
+      });
+
+      const uniqueStocksOrigin = stocksOrigin.reduce((acc: any[], current) => {
+        const existingStock = acc.find((stock) => stock.productId === current.productId);
+
+        if (!existingStock) {
+          acc.push(current);
+        }
+
+        return acc;
+      }, []);
+
+      uniqueStocksOrigin.sort((a, b) => a.productId - b.productId);
+      cart2.sort((a, b) => a.productId - b.productId);
+      const newStockOrigin = uniqueStocksOrigin.map((item, idx) => {
+        return {
+          id: item.id,
+          productId: item.productId,
+          warehouseId,
+          stock: item.stock - cart2[idx].quantity,
+          prevstock: item.stock,
+          prevdate: item.createdAt,
+        };
+      });
+
+      await Promise.all(
+        newStockOrigin.map(
+          async (el) =>
+            await prisma.stocks.update({
+              where: { id: el.id },
+              data: { ...el },
+            }),
+        ),
+      );
+
+      const stocksDestination = await prisma.stocks.findMany({
+        where: { productId: { in: productsIds2 }, warehouseId: warehouseDestinationId },
+        orderBy: [{ createdAt: 'asc' }],
+      });
+
+      const uniqueStocksDestination = stocksDestination.reduce((acc: any[], current) => {
+        const existingStock = acc.find((stock) => stock.productId === current.productId);
+
+        if (!existingStock) {
+          acc.push(current);
+        }
+
+        return acc;
+      }, []);
+
+      uniqueStocksDestination.sort((a, b) => a.productId - b.productId);
+
+      const newStockDestination = uniqueStocksDestination.map((item, idx) => {
+        return {
+          id: item.id,
+          productId: item.productId,
+          warehouseId: warehouseDestinationId,
+          stock: item.stock + cart2[idx].quantity,
+          prevstock: item.stock,
+          prevdate: item.createdAt,
+        };
+      });
+
+      await Promise.all(
+        newStockDestination.map(
+          async (el) =>
+            await prisma.stocks.update({
+              where: { id: el.id },
+              data: { ...el },
+            }),
+        ),
+      );
+
+      // CLOSE CASH REGISTER
+      const actualCashRegister = await prisma.cashRegisters.findFirst({
+        where: { userId: Number(userId) },
+        orderBy: [{ id: 'desc' }],
+      });
+      const cashRegister = await prisma.cashRegisters.update({
+        where: { id: Number(actualCashRegister?.id) },
+        data: { closingDate },
+      });
+
+      endpointResponse({
+        res,
+        code: 200,
+        status: true,
+        message: 'Caja cerrada',
+        body: {
+          cashRegister,
+        },
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        const httpError = createHttpError(500, `[CASHREGISTERS - CLOSE]: ${error.message}`);
         next(httpError);
       }
     }
