@@ -9,7 +9,7 @@ export const products = [
     name: 'Tomate Redondo',
     barcode: '0123456789012',
     status: StatusType.ENABLED,
-    allownegativestock: StatusType.DISABLED,
+    allownegativestock: StatusType.ENABLED,
     categoryId: 3,
     unitId: 2,
     description: '',
