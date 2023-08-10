@@ -12,7 +12,13 @@ const prisma = new PrismaClient();
 export const getAll = asyncHandler(
   async (_req: Request<unknown, unknown, unknown>, res: Response, next: NextFunction) => {
     try {
+      // Only warehouses (not drivers)
+      const warehouses = await prisma.warehouses.findMany({ where: { driver: 0 }, select: { id: true } });
+      const ids = warehouses.map((el) => el.id);
       const stocks = await prisma.stocks.findMany({
+        where: {
+          warehouseId: { in: ids },
+        },
         include: {
           products: {
             include: {
