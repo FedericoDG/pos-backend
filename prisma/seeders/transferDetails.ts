@@ -24,4 +24,18 @@ export const transferDetails = [
     createdAt: now.plus({ minutes: 3 }).toString(),
     updatedAt: now.plus({ minutes: 3 }).toString(),
   },
+  {
+    transferId: 2,
+    productId: 1,
+    quantity: 10,
+    createdAt: now.plus({ minutes: 4 }).toString(),
+    updatedAt: now.plus({ minutes: 4 }).toString(),
+  },
+  {
+    transferId: 2,
+    productId: 2,
+    quantity: 12,
+    createdAt: now.plus({ minutes: 5 }).toString(),
+    updatedAt: now.plus({ minutes: 5 }).toString(),
+  },
 ];

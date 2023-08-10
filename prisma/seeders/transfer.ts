@@ -10,4 +10,11 @@ export const transfer = [
     createdAt: now.plus({ minutes: 1 }).toString(),
     updatedAt: now.plus({ minutes: 1 }).toString(),
   },
+  {
+    warehouseOriginId: 1,
+    warehouseDestinationId: 3,
+    userId: 1,
+    createdAt: now.plus({ minutes: 2 }).toString(),
+    updatedAt: now.plus({ minutes: 2 }).toString(),
+  },
 ];
