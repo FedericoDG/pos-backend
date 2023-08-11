@@ -79,8 +79,9 @@ export const create = asyncHandler(
     try {
       const { warehouseId, clientId, discount, recharge, cart, payments, info } = req.body;
       const { id: userId } = req.user;
+      console.log(userId);
 
-      const cashRegister = await prisma.cashRegisters.findFirst({ orderBy: [{ id: 'desc' }] });
+      const cashRegister = await prisma.cashRegisters.findFirst({ where: { userId }, orderBy: [{ id: 'desc' }] });
 
       const productsIds = cart.map((item) => item.productId);
       const subtotal = cart.reduce((acc, item) => acc + item.quantity * item.price, 0);
