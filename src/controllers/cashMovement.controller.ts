@@ -111,12 +111,30 @@ export const create = asyncHandler(
       // Create Cash Movement Details
       const cashMovementId = cashMovement.id;
 
-      const cartWithcashMovementId = cart.map((item) => ({ ...item, cashMovementId }));
+      const cartWithcashMovementId = cart.map((item) => ({
+        productId: item.productId,
+        price: item.price,
+        quantity: item.quantity,
+        cashMovementId,
+      }));
 
       await prisma.cashMovementsDetails.createMany({ data: cartWithcashMovementId });
 
       // Create Payments Details
-      const mappedPayments = payments.map((item) => ({ ...item, cashMovementId }));
+      const reducedPayments = payments.reduce((accumulator, payment) => {
+        const paymentMethodId = payment.paymentMethodId;
+        if (!accumulator[paymentMethodId]) {
+          accumulator[paymentMethodId] = {
+            amount: 0,
+            paymentMethodId: paymentMethodId,
+          };
+        }
+        accumulator[paymentMethodId].amount += payment.amount;
+        return accumulator;
+      }, {});
+
+      const reducedPaymentsArray: Array<{ amount: number; paymentMethodId: number }> = Object.values(reducedPayments);
+      const mappedPayments = reducedPaymentsArray.map((item) => ({ ...item, cashMovementId }));
 
       await prisma.paymentMethodDetails.createMany({ data: mappedPayments });
 
@@ -172,6 +190,43 @@ export const create = asyncHandler(
     } catch (error) {
       if (error instanceof Error) {
         const httpError = createHttpError(500, `[Cash Registers - CREATE]: ${error.message}`);
+        next(httpError);
+      }
+    }
+  },
+);
+
+export const checkCart = asyncHandler(
+  async (req: Request<unknown, unknown, any>, res: Response, next: NextFunction) => {
+    try {
+      const { cart, warehouseId } = req.body;
+      const filteredCart = cart.filter((el) => !el.allow);
+      filteredCart.sort((a, b) => a.productId - b.productId);
+
+      const ids = filteredCart.map((el) => el.productId);
+      const stocks = await prisma.stocks.findMany({
+        where: { warehouseId, productId: { in: ids } },
+        select: { productId: true, stock: true },
+      });
+
+      const error: number[] = [];
+
+      for (let index = 0; index < filteredCart.length; index++) {
+        if (filteredCart[index].quantity > stocks[index].stock) error.push(filteredCart[index].productId);
+      }
+
+      endpointResponse({
+        res,
+        code: 200,
+        status: true,
+        message: 'Caja creada',
+        body: {
+          error,
+        },
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        const httpError = createHttpError(500, `[Cash Registers - CHECK CART]: ${error.message}`);
         next(httpError);
       }
     }

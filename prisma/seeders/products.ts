@@ -83,7 +83,7 @@ export const products = [
     status: StatusType.ENABLED,
     allownegativestock: StatusType.DISABLED,
     categoryId: 1,
-    unitId: 2,
+    unitId: 1,
     description: '',
     createdAt: now.plus({ minutes: 7 }).toString(),
     updatedAt: now.plus({ minutes: 7 }).toString(),
