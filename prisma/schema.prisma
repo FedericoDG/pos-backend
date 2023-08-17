@@ -28,25 +28,43 @@ datasource db {
 }
 
 model Users {
-  id            Int             @id @default(autoincrement())
-  name          String
-  lastname      String
-  email         String          @unique
-  password      String
-  roleId        Int             @default(4)
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @default(now()) @updatedAt
+  id              Int              @id @default(autoincrement())
+  name            String
+  lastname        String
+  email           String           @unique
+  password        String
+  roleId          Int              @default(4)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @default(now()) @updatedAt
   // Relations
-  role          Roles           @relation(fields: [roleId], references: [id])
-  purchases     Purchases[]
-  movements     Movements[]
-  discharges    Discharges[]
-  transfer      Transfer[]
-  cashRegisters CashRegisters[]
-  cashMovements CashMovements[]
-  warehouses    Warehouses[]
+  role            Roles            @relation(fields: [roleId], references: [id])
+  purchases       Purchases[]
+  movements       Movements[]
+  discharges      Discharges[]
+  transfer        Transfer[]
+  cashRegisters   CashRegisters[]
+  cashMovements   CashMovements[]
+  warehouses      Warehouses[]
+  userPreferences UserPreferences?
 
   @@map(name: "users")
+}
+
+model UserPreferences {
+  id          Int        @id @default(autoincrement())
+  userId      Int        @unique
+  warehouseId Int        @default(1)
+  priceListId Int        @default(1)
+  clientId    Int        @default(1)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @default(now()) @updatedAt
+  //Relations
+  user        Users      @relation(fields: [userId], references: [id])
+  warehouse   Warehouses @relation(fields: [warehouseId], references: [id])
+  pricelist   Pricelists @relation(fields: [priceListId], references: [id])
+  client      Clients    @relation(fields: [clientId], references: [id])
+
+  @@map(name: "user-preferences")
 }
 
 model Roles {
@@ -115,22 +133,23 @@ model Units {
 }
 
 model Warehouses {
-  id            Int             @id @default(autoincrement())
-  code          String          @unique
-  driver        Int             @default(0)
-  userId        Int             @default(1)
-  description   String?
-  address       String?
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @default(now()) @updatedAt
+  id              Int               @id @default(autoincrement())
+  code            String            @unique
+  driver          Int               @default(0)
+  userId          Int               @default(1)
+  description     String?
+  address         String?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @default(now()) @updatedAt
   // Relations
-  stocks        Stocks[]
-  discharges    Discharges[]
-  purchases     Purchases[]
-  transferO     Transfer[]      @relation(name: "WarehouseOrigin")
-  transferD     Transfer[]      @relation(name: "WarehouseDestination")
-  cashMovements CashMovements[]
-  user          Users           @relation(fields: [userId], references: [id])
+  stocks          Stocks[]
+  discharges      Discharges[]
+  purchases       Purchases[]
+  transferO       Transfer[]        @relation(name: "WarehouseOrigin")
+  transferD       Transfer[]        @relation(name: "WarehouseDestination")
+  user            Users             @relation(fields: [userId], references: [id])
+  cashMovements   CashMovements[]
+  userPreferences UserPreferences[]
 
   @@map(name: "warehouses")
 }
@@ -152,13 +171,14 @@ model Stocks {
 }
 
 model Pricelists {
-  id          Int      @id @default(autoincrement())
-  code        String   @unique
-  description String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @default(now()) @updatedAt
+  id              Int               @id @default(autoincrement())
+  code            String            @unique
+  description     String?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @default(now()) @updatedAt
   // Relations
-  prices      Prices[]
+  prices          Prices[]
+  userPreferences UserPreferences[]
 
   @@map(name: "price_lists")
 }
@@ -208,22 +228,23 @@ model Suppliers {
 
 // TODO: Modificar una vez desarrollada la funcionalidad de "venta"
 model Clients {
-  id            Int             @id @default(autoincrement())
-  name          String
-  lastname      String
-  document      String          @unique
-  email         String          @unique
-  password      String
-  phone         String?
-  mobile        String?
-  address       String?
-  info          String?
-  roleId        Int             @default(5)
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @default(now()) @updatedAt
+  id              Int               @id @default(autoincrement())
+  name            String
+  lastname        String
+  document        String            @unique
+  email           String            @unique
+  password        String
+  phone           String?
+  mobile          String?
+  address         String?
+  info            String?
+  roleId          Int               @default(5)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @default(now()) @updatedAt
   // Relations
-  role          Roles           @relation(fields: [roleId], references: [id])
-  cashMovements CashMovements[]
+  role            Roles             @relation(fields: [roleId], references: [id])
+  cashMovements   CashMovements[]
+  userPreferences UserPreferences[]
 
   @@map(name: "clients")
 }

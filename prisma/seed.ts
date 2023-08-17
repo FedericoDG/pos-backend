@@ -1,5 +1,4 @@
 import { PrismaClient } from '@prisma/client';
-import { paymentMethods } from './seeders/paymentMethods';
 import {
   cashMovementDetails,
   cashMovements,
@@ -11,6 +10,7 @@ import {
   discharges,
   movements,
   paymentMethodDetails,
+  paymentMethods,
   pricelists,
   prices,
   products,
@@ -24,6 +24,7 @@ import {
   transferDetails,
   units,
   users,
+  userPreferences,
   warehouses,
 } from './seeders';
 
@@ -79,6 +80,8 @@ async function main() {
   await prisma.cashMovementsDetails.createMany({ data: cashMovementDetails });
 
   await prisma.paymentMethodDetails.createMany({ data: paymentMethodDetails });
+
+  await prisma.userPreferences.createMany({ data: userPreferences });
 }
 
 main()

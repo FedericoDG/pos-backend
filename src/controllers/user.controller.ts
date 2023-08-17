@@ -7,6 +7,7 @@ import { bcHash } from '../helpers/bcrypt';
 import { endpointResponse } from '../helpers/endpointResponse';
 
 import { CreateUserType, UpdateUserType, ResetPasswordUserType } from '../schemas/user.schema';
+import { userPreferences } from '../../prisma/seeders/userPreferences';
 
 const prisma = new PrismaClient();
 
@@ -14,7 +15,16 @@ export const getAll = asyncHandler(
   async (_req: Request<unknown, unknown, unknown>, res: Response, next: NextFunction) => {
     try {
       const users = await prisma.users.findMany({
-        select: { id: true, name: true, lastname: true, email: true, role: true, createdAt: true, updatedAt: true },
+        select: {
+          id: true,
+          name: true,
+          lastname: true,
+          email: true,
+          role: true,
+          userPreferences: true,
+          createdAt: true,
+          updatedAt: true,
+        },
       });
 
       endpointResponse({
@@ -41,7 +51,16 @@ export const getById = asyncHandler(
       const { id } = req.params;
       const user = await prisma.users.findFirst({
         where: { id: Number(id) },
-        select: { id: true, name: true, lastname: true, email: true, role: true, createdAt: true, updatedAt: true },
+        select: {
+          id: true,
+          name: true,
+          lastname: true,
+          email: true,
+          role: true,
+          userPreferences: true,
+          createdAt: true,
+          updatedAt: true,
+        },
       });
 
       endpointResponse({
@@ -81,6 +100,8 @@ export const create = asyncHandler(
         data,
       });
 
+      await prisma.userPreferences.create({ data: { userId: user.id } });
+
       endpointResponse({
         res,
         code: 200,
@@ -103,10 +124,10 @@ export const update = asyncHandler(
   async (req: Request<{ id?: number }, unknown, UpdateUserType>, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
-      const { password, roleId, ...rest } = req.body;
+      const { password, roleId, preferences, ...rest } = req.body;
       delete rest.email;
 
-      const data: UpdateUserType = {
+      const data: Omit<UpdateUserType, 'preferences'> = {
         ...rest,
       };
 
@@ -122,6 +143,11 @@ export const update = asyncHandler(
       const user = await prisma.users.update({
         where: { id: Number(id) },
         data,
+      });
+
+      await prisma.userPreferences.update({
+        where: { userId: Number(id) },
+        data: { ...preferences },
       });
 
       endpointResponse({

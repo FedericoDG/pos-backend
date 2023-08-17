@@ -16,6 +16,7 @@ export const userExist = async (req: Request, res: Response, next: NextFunction)
       where: { email },
       include: {
         role: true,
+        userPreferences: true,
       },
     });
 

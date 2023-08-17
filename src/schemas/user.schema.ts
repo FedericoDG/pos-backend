@@ -14,6 +14,11 @@ export const updateUserSchema = z.object({
   email: z.string().email().optional(),
   password: z.string().min(6).optional(),
   roleId: z.coerce.number().min(1).max(4).optional(),
+  preferences: z.object({
+    warehouseId: z.coerce.number().min(1),
+    priceListId: z.coerce.number().min(1),
+    clientId: z.coerce.number().min(1),
+  }),
 });
 
 export const resetPasswordUserSchema = z.object({

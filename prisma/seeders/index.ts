@@ -22,5 +22,6 @@ export * from './suppliers';
 export * from './transfer';
 export * from './transferDetails';
 export * from './units';
+export * from './userPreferences';
 export * from './users';
 export * from './warehouses';
