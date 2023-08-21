@@ -1,4 +1,4 @@
-import { Categories, Pricelists, Prices, Products, Stocks, Units, Warehouses } from '@prisma/client';
+import { Categories, IvaConditions, Pricelists, Prices, Products, Stocks, Units, Warehouses } from '@prisma/client';
 
 type ProductExtended = Products & Categories & Units;
 
@@ -12,6 +12,7 @@ type PriceListExtended =
         products: Products & {
           unit: Units;
           category: Categories;
+          ivaCondition: IvaConditions;
         };
       })[];
     })
@@ -39,6 +40,12 @@ export const getList = (pricelist: PriceListExtended, stocks: StockExtended, pro
           id: price.products.unit.id,
           code: price.products.unit.code,
           name: price.products.unit.name,
+        },
+        ivaCondition: {
+          id: price.products.ivaCondition.id,
+          code: price.products.ivaCondition.code,
+          tax: price.products.ivaCondition.tax,
+          description: price.products.ivaCondition.description,
         },
       };
     }

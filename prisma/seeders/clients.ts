@@ -6,6 +6,7 @@ export const clients = [
   {
     name: 'Consumidor',
     lastname: 'Final',
+    identificationId: 36,
     document: '00000000',
     email: 'consumidorfinal@gmail.com',
     password: '$2a$10$ZM6gFPu6tMAU4wr79TFDn.2IZbon0i/iGeNygxtGxdnVqEz1jkr4q',
@@ -19,6 +20,7 @@ export const clients = [
   {
     name: 'Juan Carlos',
     lastname: 'Pérez',
+    identificationId: 35,
     document: '10239367',
     email: 'juancarlosperez@gmail.com',
     password: '$2a$10$ZM6gFPu6tMAU4wr79TFDn.2IZbon0i/iGeNygxtGxdnVqEz1jkr4q',

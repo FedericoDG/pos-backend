@@ -20,6 +20,9 @@ import cost from './cost.route';
 import cashRegister from './cashRegister.route';
 import cashMovement from './cashMovement.route';
 import paymentMethods from './paymentMethod.route';
+import ivaConditions from './ivaCondition.route';
+import identifications from './identification.route';
+import invoceTypes from './invoceType.route';
 
 const router = Router();
 
@@ -43,5 +46,8 @@ router.use('/costs', cost);
 router.use('/cashregisters', cashRegister);
 router.use('/cashmovements', cashMovement);
 router.use('/paymentmethods', paymentMethods);
+router.use('/ivaconditions', ivaConditions);
+router.use('/identifications', identifications);
+router.use('/invocetypes', invoceTypes);
 
 export default router;

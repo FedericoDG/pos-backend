@@ -8,6 +8,9 @@ import {
   costs,
   dischargeDetails,
   discharges,
+  invoceTypes,
+  identifications,
+  ivaConditions,
   movements,
   paymentMethodDetails,
   paymentMethods,
@@ -23,8 +26,8 @@ import {
   transfer,
   transferDetails,
   units,
-  users,
   userPreferences,
+  users,
   warehouses,
 } from './seeders';
 
@@ -39,6 +42,8 @@ async function main() {
 
   await prisma.units.createMany({ data: units });
 
+  await prisma.ivaConditions.createMany({ data: ivaConditions });
+
   await prisma.products.createMany({ data: products });
 
   await prisma.warehouses.createMany({ data: warehouses });
@@ -46,6 +51,8 @@ async function main() {
   await prisma.stocks.createMany({ data: stocks });
 
   await prisma.suppliers.createMany({ data: suppliers });
+
+  await prisma.identifications.createMany({ data: identifications });
 
   await prisma.clients.createMany({ data: clients });
 
@@ -82,6 +89,8 @@ async function main() {
   await prisma.paymentMethodDetails.createMany({ data: paymentMethodDetails });
 
   await prisma.userPreferences.createMany({ data: userPreferences });
+
+  await prisma.invoceTypes.createMany({ data: invoceTypes });
 }
 
 main()

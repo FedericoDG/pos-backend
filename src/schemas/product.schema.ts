@@ -11,19 +11,21 @@ export const createProductSchema = z.object({
   allownegativestock: z.enum(StatusType).optional(),
   categoryId: z.number().nonnegative(),
   unitId: z.number().nonnegative(),
+  ivaConditionId: z.number().nonnegative(),
   alertlowstock: z.enum(StatusType).optional(),
   lowstock: z.number().nonnegative(),
 });
 
 export const updateProductSchema = z.object({
   code: z.string().nonempty(),
-  barcode: z.string().nonempty(),
+  barcode: z.string().optional(),
   name: z.string().nonempty().optional(),
   description: z.string().optional(),
   status: z.enum(StatusType).optional(),
   allownegativestock: z.enum(StatusType).optional(),
   categoryId: z.number().nonnegative().optional(),
   unitId: z.number().nonnegative().optional(),
+  ivaConditionId: z.number().nonnegative().optional(),
   alertlowstock: z.enum(StatusType).optional(),
   lowstock: z.number().nonnegative(),
 });

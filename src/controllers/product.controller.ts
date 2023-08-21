@@ -16,15 +16,16 @@ export const getAll = asyncHandler(
 
       if (nostock) {
         const products = await prisma.products.findMany({
+          include: {
+            unit: true,
+            category: true,
+            ivaCondition: true,
+          },
           orderBy: [
             {
               updatedAt: 'desc',
             },
           ],
-          include: {
-            unit: true,
-            category: true,
-          },
         });
         return endpointResponse({
           res,
@@ -36,6 +37,7 @@ export const getAll = asyncHandler(
           },
         });
       }
+
       const products = await prisma.products.findMany({
         orderBy: [
           {
@@ -45,12 +47,13 @@ export const getAll = asyncHandler(
         include: {
           unit: true,
           category: true,
+          ivaCondition: { select: { id: true, code: true, description: true, tax: true } },
           costs: { orderBy: [{ id: 'desc' }], take: 1 },
           stocks: { include: { warehouse: true }, orderBy: [{ id: 'desc' }] },
         },
       });
 
-      const productsWithTotalStock = products.map((product) => {
+      /*  const productsWithTotalStock = products.map((product) => {
         const totalStock = product.stocks.reduce((sum, stock) => {
           return sum + stock.stock;
         }, 0);
@@ -59,7 +62,7 @@ export const getAll = asyncHandler(
           ...product,
           totalStock,
         };
-      });
+      }); */
 
       const productsWithTotalStock2 = products.map((product) => {
         const warehouseStocks = product.stocks.reduce((acc, stock) => {
@@ -110,6 +113,7 @@ export const getById = asyncHandler(
         include: {
           unit: true,
           category: true,
+          ivaCondition: true,
           costs: { orderBy: [{ id: 'desc' }] },
           /*  costs: { orderBy: [{ id: 'desc' }], take: 1 }, */
           stocks: { include: { warehouse: true }, orderBy: [{ id: 'desc' }] },
@@ -244,6 +248,7 @@ export const update = asyncHandler(
         allownegativestock,
         categoryId,
         unitId,
+        ivaConditionId,
         alertlowstock,
         lowstock,
       } = req.body;
@@ -259,6 +264,7 @@ export const update = asyncHandler(
           allownegativestock,
           categoryId,
           unitId,
+          ivaConditionId,
           alertlowstock,
           lowstock,
         },
@@ -268,7 +274,7 @@ export const update = asyncHandler(
         res,
         code: 200,
         status: true,
-        message: 'Usuario actualizado',
+        message: 'Producto actualizado',
         body: {
           product,
         },

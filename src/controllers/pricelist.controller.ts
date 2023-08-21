@@ -77,7 +77,7 @@ export const getByIdAndWarehouseId = asyncHandler(
         where: { id: Number(id) },
         include: {
           prices: {
-            include: { products: { include: { unit: true, category: true } } },
+            include: { products: { include: { unit: true, category: true, ivaCondition: true } } },
             orderBy: [{ createdAt: 'desc' }],
           },
         },
@@ -131,7 +131,7 @@ export const getByIdWarehouseIdAndProductId = asyncHandler(
             where: {
               productId: Number(productId),
             },
-            include: { products: { include: { unit: true, category: true } } },
+            include: { products: { include: { unit: true, category: true, ivaCondition: true } } },
             orderBy: [{ createdAt: 'desc' }],
           },
         },
@@ -203,6 +203,7 @@ export const federico = asyncHandler(
                   status: true,
                   unit: { select: { code: true, name: true } },
                   category: { select: { name: true, description: true } },
+                  ivaCondition: true,
                   stocks: {
                     where: { warehouseId: { in: warehouses } },
                     select: { stock: true, warehouse: { select: { code: true, description: true } } },

@@ -52,10 +52,23 @@ CREATE TABLE `products` (
     `description` VARCHAR(191) NULL DEFAULT '',
     `categoryId` INTEGER NOT NULL,
     `unitId` INTEGER NOT NULL,
+    `ivaConditionId` INTEGER NOT NULL DEFAULT 6,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
     UNIQUE INDEX `products_code_key`(`code`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `iva_condition` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `code` VARCHAR(191) NOT NULL,
+    `tax` DOUBLE NOT NULL,
+    `description` VARCHAR(191) NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -166,6 +179,17 @@ CREATE TABLE `suppliers` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
+CREATE TABLE `identifications` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `code` VARCHAR(191) NOT NULL,
+    `description` VARCHAR(191) NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
 CREATE TABLE `clients` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(191) NOT NULL,
@@ -178,6 +202,7 @@ CREATE TABLE `clients` (
     `address` VARCHAR(191) NULL,
     `info` VARCHAR(191) NULL,
     `roleId` INTEGER NOT NULL DEFAULT 5,
+    `identificationId` INTEGER NOT NULL DEFAULT 36,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
@@ -356,6 +381,17 @@ CREATE TABLE `payment_method_details` (
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+-- CreateTable
+CREATE TABLE `invoces_types` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `code` VARCHAR(191) NOT NULL,
+    `description` VARCHAR(191) NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
 -- AddForeignKey
 ALTER TABLE `users` ADD CONSTRAINT `users_roleId_fkey` FOREIGN KEY (`roleId`) REFERENCES `roles`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
@@ -378,6 +414,9 @@ ALTER TABLE `products` ADD CONSTRAINT `products_categoryId_fkey` FOREIGN KEY (`c
 ALTER TABLE `products` ADD CONSTRAINT `products_unitId_fkey` FOREIGN KEY (`unitId`) REFERENCES `units`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE `products` ADD CONSTRAINT `products_ivaConditionId_fkey` FOREIGN KEY (`ivaConditionId`) REFERENCES `iva_condition`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE `warehouses` ADD CONSTRAINT `warehouses_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -397,6 +436,9 @@ ALTER TABLE `costs` ADD CONSTRAINT `costs_productId_fkey` FOREIGN KEY (`productI
 
 -- AddForeignKey
 ALTER TABLE `clients` ADD CONSTRAINT `clients_roleId_fkey` FOREIGN KEY (`roleId`) REFERENCES `roles`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `clients` ADD CONSTRAINT `clients_identificationId_fkey` FOREIGN KEY (`identificationId`) REFERENCES `identifications`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `purchases` ADD CONSTRAINT `purchases_supplierId_fkey` FOREIGN KEY (`supplierId`) REFERENCES `suppliers`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;

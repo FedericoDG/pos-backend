@@ -5,7 +5,7 @@ const now = DateTime.now();
 export const userPreferences = [
   {
     userId: 1,
-    warehouseId: 1,
+    warehouseId: 2,
     priceListId: 1,
     clientId: 1,
     createdAt: now.plus({ minutes: 1 }).toString(),

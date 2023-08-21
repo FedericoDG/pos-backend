@@ -14,6 +14,7 @@ export const getAll = asyncHandler(
   async (_req: Request<unknown, unknown, unknown>, res: Response, next: NextFunction) => {
     try {
       const clients = await prisma.clients.findMany({
+        include: { identification: true },
         orderBy: [
           {
             updatedAt: 'desc',
@@ -45,6 +46,7 @@ export const getById = asyncHandler(
       const { id } = req.params;
       const client = await prisma.clients.findFirst({
         where: { id: Number(id) },
+        include: { identification: true },
       });
 
       endpointResponse({
@@ -94,7 +96,7 @@ export const update = asyncHandler(
   async (req: Request<{ id?: number }, unknown, UpdateClientType>, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
-      const { name, lastname, phone, mobile, address, info /* password */ } = req.body;
+      const { name, lastname, phone, mobile, address, info, identificationId, document /* password */ } = req.body;
 
       const data: UpdateClientType = {
         name,
@@ -103,6 +105,8 @@ export const update = asyncHandler(
         mobile,
         address,
         info,
+        identificationId,
+        document,
       };
 
       /*  if (password) {

@@ -7,7 +7,6 @@ import { bcHash } from '../helpers/bcrypt';
 import { endpointResponse } from '../helpers/endpointResponse';
 
 import { CreateUserType, UpdateUserType, ResetPasswordUserType } from '../schemas/user.schema';
-import { userPreferences } from '../../prisma/seeders/userPreferences';
 
 const prisma = new PrismaClient();
 
@@ -87,20 +86,24 @@ export const create = asyncHandler(
       const { password, roleId, ...rest } = req.body;
       const hashedPassword = await bcHash(password);
 
-      const data: CreateUserType = {
-        ...rest,
-        password: hashedPassword,
-      };
-
-      if (roleId) {
-        data.roleId = Number(roleId);
-      }
-
       const user = await prisma.users.create({
-        data,
+        data: {
+          roleId: Number(roleId),
+          name: rest.name,
+          lastname: rest.lastname,
+          email: rest.email,
+          password: hashedPassword,
+        },
       });
 
-      await prisma.userPreferences.create({ data: { userId: user.id } });
+      await prisma.userPreferences.create({
+        data: {
+          clientId: rest.userPreferences.clientId,
+          priceListId: rest.userPreferences.priceListId,
+          warehouseId: rest.userPreferences.warehouseId,
+          userId: user.id,
+        },
+      });
 
       endpointResponse({
         res,
@@ -124,10 +127,10 @@ export const update = asyncHandler(
   async (req: Request<{ id?: number }, unknown, UpdateUserType>, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
-      const { password, roleId, preferences, ...rest } = req.body;
+      const { password, roleId, userPreferences, ...rest } = req.body;
       delete rest.email;
 
-      const data: Omit<UpdateUserType, 'preferences'> = {
+      const data: Omit<UpdateUserType, 'userPreferences'> = {
         ...rest,
       };
 
@@ -142,12 +145,16 @@ export const update = asyncHandler(
 
       const user = await prisma.users.update({
         where: { id: Number(id) },
-        data,
+        data: { name: rest.name, lastname: rest.lastname },
       });
 
       await prisma.userPreferences.update({
         where: { userId: Number(id) },
-        data: { ...preferences },
+        data: {
+          warehouseId: userPreferences.warehouseId,
+          priceListId: userPreferences.priceListId,
+          clientId: userPreferences.clientId,
+        },
       });
 
       endpointResponse({
