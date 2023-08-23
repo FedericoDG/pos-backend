@@ -333,11 +333,13 @@ CREATE TABLE `cash_movements` (
     `subtotal` DOUBLE NOT NULL,
     `discount` DOUBLE NOT NULL,
     `recharge` DOUBLE NOT NULL,
+    `otherTributes` DOUBLE NOT NULL,
     `total` DOUBLE NOT NULL,
     `cashRegisterId` INTEGER NOT NULL,
     `clientId` INTEGER NOT NULL,
     `warehouseId` INTEGER NOT NULL,
     `userId` INTEGER NOT NULL,
+    `invoceTypeId` INTEGER NOT NULL,
     `info` VARCHAR(191) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
@@ -351,6 +353,7 @@ CREATE TABLE `cash_movements_details` (
     `cashMovementId` INTEGER NOT NULL,
     `productId` INTEGER NOT NULL,
     `price` DOUBLE NOT NULL,
+    `tax` DOUBLE NOT NULL,
     `quantity` INTEGER NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
@@ -386,6 +389,30 @@ CREATE TABLE `invoces_types` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `code` VARCHAR(191) NOT NULL,
     `description` VARCHAR(191) NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `other_tributes` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `code` VARCHAR(191) NOT NULL,
+    `description` VARCHAR(191) NOT NULL,
+    `observation` VARCHAR(191) NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `other_tribute_details` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `cashMovementId` INTEGER NOT NULL,
+    `amount` DOUBLE NOT NULL,
+    `otherTributeId` INTEGER NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
@@ -504,6 +531,9 @@ ALTER TABLE `cash_movements` ADD CONSTRAINT `cash_movements_warehouseId_fkey` FO
 ALTER TABLE `cash_movements` ADD CONSTRAINT `cash_movements_clientId_fkey` FOREIGN KEY (`clientId`) REFERENCES `clients`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE `cash_movements` ADD CONSTRAINT `cash_movements_invoceTypeId_fkey` FOREIGN KEY (`invoceTypeId`) REFERENCES `invoces_types`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE `cash_movements_details` ADD CONSTRAINT `cash_movements_details_cashMovementId_fkey` FOREIGN KEY (`cashMovementId`) REFERENCES `cash_movements`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -514,3 +544,9 @@ ALTER TABLE `payment_method_details` ADD CONSTRAINT `payment_method_details_cash
 
 -- AddForeignKey
 ALTER TABLE `payment_method_details` ADD CONSTRAINT `payment_method_details_paymentMethodId_fkey` FOREIGN KEY (`paymentMethodId`) REFERENCES `payment_methods`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `other_tribute_details` ADD CONSTRAINT `other_tribute_details_cashMovementId_fkey` FOREIGN KEY (`cashMovementId`) REFERENCES `cash_movements`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `other_tribute_details` ADD CONSTRAINT `other_tribute_details_otherTributeId_fkey` FOREIGN KEY (`otherTributeId`) REFERENCES `other_tributes`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;

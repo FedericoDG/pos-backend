@@ -23,6 +23,7 @@ import paymentMethods from './paymentMethod.route';
 import ivaConditions from './ivaCondition.route';
 import identifications from './identification.route';
 import invoceTypes from './invoceType.route';
+import otherTributes from './otherTributes.route';
 
 const router = Router();
 
@@ -49,5 +50,6 @@ router.use('/paymentmethods', paymentMethods);
 router.use('/ivaconditions', ivaConditions);
 router.use('/identifications', identifications);
 router.use('/invocetypes', invoceTypes);
+router.use('/othertributes', otherTributes);
 
 export default router;

@@ -3,11 +3,19 @@ import { z } from 'zod';
 export const createCashMovementsSchema = z.object({
   clientId: z.number().nonnegative(),
   warehouseId: z.number().nonnegative(),
+  invoceTypeId: z.number().nonnegative(),
   cart: z.array(
     z.object({
       productId: z.number().nonnegative(),
       price: z.number().nonnegative(),
       quantity: z.number().nonnegative(),
+      tax: z.number().nonnegative(),
+    }),
+  ),
+  otherTributes: z.array(
+    z.object({
+      amount: z.number().nonnegative(),
+      otherTributeId: z.number().nonnegative(),
     }),
   ),
   payments: z.array(

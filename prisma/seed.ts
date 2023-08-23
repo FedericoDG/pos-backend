@@ -8,10 +8,11 @@ import {
   costs,
   dischargeDetails,
   discharges,
-  invoceTypes,
   identifications,
+  invoceTypes,
   ivaConditions,
   movements,
+  otherTributes,
   paymentMethodDetails,
   paymentMethods,
   pricelists,
@@ -80,6 +81,8 @@ async function main() {
 
   await prisma.paymentMethods.createMany({ data: paymentMethods });
 
+  await prisma.invoceTypes.createMany({ data: invoceTypes });
+
   await prisma.cashRegisters.createMany({ data: cashRegisters });
 
   await prisma.cashMovements.createMany({ data: cashMovements });
@@ -90,7 +93,7 @@ async function main() {
 
   await prisma.userPreferences.createMany({ data: userPreferences });
 
-  await prisma.invoceTypes.createMany({ data: invoceTypes });
+  await prisma.otherTributes.createMany({ data: otherTributes });
 }
 
 main()

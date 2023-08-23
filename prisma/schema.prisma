@@ -421,11 +421,13 @@ model CashMovements {
   subtotal       Float
   discount       Float
   recharge       Float
+  otherTributes  Float
   total          Float
   cashRegisterId Int
   clientId       Int
   warehouseId    Int
   userId         Int
+  invoceTypeId   Int
   info           String
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @default(now()) @updatedAt
@@ -434,9 +436,11 @@ model CashMovements {
   cashRegister   CashRegisters @relation(fields: [cashRegisterId], references: [id])
   warehouse      Warehouses    @relation(fields: [warehouseId], references: [id])
   client         Clients       @relation(fields: [clientId], references: [id])
+  invoceType     InvoceTypes   @relation(fields: [invoceTypeId], references: [id])
 
   cashMovementsDetails CashMovementsDetails[]
   paymentMethodDetails PaymentMethodDetails[]
+  otherTributesDetails OtherTributesDetails[]
 
   @@map(name: "cash_movements")
 }
@@ -446,6 +450,7 @@ model CashMovementsDetails {
   cashMovementId Int
   productId      Int
   price          Float
+  tax            Float
   quantity       Int
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @default(now()) @updatedAt
@@ -483,12 +488,40 @@ model PaymentMethodDetails {
 }
 
 model InvoceTypes {
-  id          Int      @id @default(autoincrement())
-  code        String
-  description String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @default(now()) @updatedAt
+  id            Int             @id @default(autoincrement())
+  code          String
+  description   String
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @default(now()) @updatedAt
   // Relations
+  cashMovements CashMovements[]
 
   @@map(name: "invoces_types")
+}
+
+model OtherTributes {
+  id                   Int                    @id @default(autoincrement())
+  code                 String
+  description          String
+  observation          String
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @default(now()) @updatedAt
+  // Relations
+  otherTributesDetails OtherTributesDetails[]
+
+  @@map(name: "other_tributes")
+}
+
+model OtherTributesDetails {
+  id             Int           @id @default(autoincrement())
+  cashMovementId Int
+  amount         Float
+  otherTributeId Int
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @default(now()) @updatedAt
+  // Relations
+  cashMovement   CashMovements @relation(fields: [cashMovementId], references: [id])
+  otherTribute   OtherTributes @relation(fields: [otherTributeId], references: [id])
+
+  @@map(name: "other_tribute_details")
 }

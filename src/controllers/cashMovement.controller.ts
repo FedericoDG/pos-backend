@@ -46,6 +46,7 @@ export const getById = asyncHandler(
           user: { include: { role: true } },
           warehouse: true,
           paymentMethodDetails: { include: { paymentMethod: true } },
+          otherTributesDetails: { include: { otherTribute: true } },
         },
         orderBy: [{ id: 'desc' }],
       });
@@ -77,14 +78,14 @@ export const getById = asyncHandler(
 export const create = asyncHandler(
   async (req: Request<unknown, unknown, CreateCashMovementsType>, res: Response, next: NextFunction) => {
     try {
-      const { warehouseId, clientId, discount, recharge, cart, payments, info } = req.body;
+      const { warehouseId, clientId, discount, recharge, cart, payments, info, invoceTypeId, otherTributes } = req.body;
       const { id: userId } = req.user;
-      console.log(userId);
 
       const cashRegister = await prisma.cashRegisters.findFirst({ where: { userId }, orderBy: [{ id: 'desc' }] });
 
       const productsIds = cart.map((item) => item.productId);
-      const subtotal = cart.reduce((acc, item) => acc + item.quantity * item.price, 0);
+      const subtotalOtherTributes = otherTributes.reduce((acc, item) => acc + item.amount, 0);
+      const subtotal = cart.reduce((acc, item) => acc + item.quantity * item.price * (1 + item.tax), 0);
       const cashRegisterId = cashRegister?.id || 1;
       const cashRegisterFinalBalance = cashRegister?.finalBalance || 0;
 
@@ -101,10 +102,12 @@ export const create = asyncHandler(
           subtotal: subtotal,
           recharge,
           discount,
+          otherTributes: subtotalOtherTributes,
           total: subtotal + recharge - discount,
           warehouseId,
           clientId,
           userId,
+          invoceTypeId,
           info,
         },
       });
@@ -116,6 +119,7 @@ export const create = asyncHandler(
         productId: item.productId,
         price: item.price,
         quantity: item.quantity,
+        tax: item.tax,
         cashMovementId,
       }));
 
@@ -138,6 +142,11 @@ export const create = asyncHandler(
       const mappedPayments = reducedPaymentsArray.map((item) => ({ ...item, cashMovementId }));
 
       await prisma.paymentMethodDetails.createMany({ data: mappedPayments });
+
+      // Create Other Tributes Details
+      const mappedOtherTributes = otherTributes.map((item) => ({ ...item, cashMovementId }));
+
+      await prisma.otherTributesDetails.createMany({ data: mappedOtherTributes });
 
       // Stock Origin
       const stocks = await prisma.stocks.findMany({
@@ -183,14 +192,14 @@ export const create = asyncHandler(
         res,
         code: 200,
         status: true,
-        message: 'Caja creada',
+        message: 'Movimiento creado',
         body: {
           cashMovement,
         },
       });
     } catch (error) {
       if (error instanceof Error) {
-        const httpError = createHttpError(500, `[Cash Registers - CREATE]: ${error.message}`);
+        const httpError = createHttpError(500, `[Cash Movements - CREATE]: ${error.message}`);
         next(httpError);
       }
     }

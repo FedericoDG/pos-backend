@@ -11,6 +11,7 @@ export * from './index';
 export * from './invoceTypes';
 export * from './ivaConditions';
 export * from './movements';
+export * from './otherTributes';
 export * from './paymentMethodDetails';
 export * from './paymentMethods';
 export * from './pricelist';
