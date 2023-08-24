@@ -64,8 +64,9 @@ export const getById = asyncHandler(
               client: true,
               warehouse: true,
               paymentMethodDetails: { include: { paymentMethod: true } },
+              otherTributesDetails: { include: { otherTribute: true } },
               cashMovementsDetails: {
-                include: { product: { include: { category: true, unit: true } } },
+                include: { product: { include: { category: true, unit: true, ivaCondition: true } } },
                 orderBy: [{ id: 'desc' }],
               },
             },
@@ -100,6 +101,9 @@ export const getById = asyncHandler(
           .map((movement) => movement.paymentMethodDetails.filter((el) => el.paymentMethodId === 5))
           .flat()
           .reduce((acc, el) => acc + el.amount, 0) || 0;
+      const discounts = cashRegister?.cashMovements.reduce((acc, el) => acc + el.discount, 0) || 0;
+      const recharges = cashRegister?.cashMovements.reduce((acc, el) => acc + el.recharge, 0) || 0;
+      const otherTributes = cashRegister?.cashMovements.reduce((acc, el) => acc + el.otherTributes, 0) || 0;
 
       endpointResponse({
         res,
@@ -107,7 +111,18 @@ export const getById = asyncHandler(
         status: true,
         message: 'Caja recuperada',
         body: {
-          cashRegister: { ...cashRegister, cash, debit, credit, transfer, mercadoPago },
+          cashRegister: {
+            ...cashRegister,
+            total: cash + debit + credit + transfer + mercadoPago + recharges + otherTributes - discounts,
+            cash,
+            debit,
+            credit,
+            transfer,
+            mercadoPago,
+            discounts,
+            recharges,
+            otherTributes,
+          },
         },
       });
     } catch (error) {

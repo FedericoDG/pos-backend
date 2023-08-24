@@ -63,4 +63,28 @@ export const costs = [
     createdAt: now.plus({ minutes: 10 }).toString(),
     updatedAt: now.plus({ minutes: 10 }).toString(),
   },
+  {
+    productId: 9,
+    price: 530.4,
+    createdAt: now.plus({ minutes: 10 }).toString(),
+    updatedAt: now.plus({ minutes: 10 }).toString(),
+  },
+  {
+    productId: 10,
+    price: 499.4,
+    createdAt: now.plus({ minutes: 10 }).toString(),
+    updatedAt: now.plus({ minutes: 10 }).toString(),
+  },
+  {
+    productId: 11,
+    price: 608.1,
+    createdAt: now.plus({ minutes: 10 }).toString(),
+    updatedAt: now.plus({ minutes: 10 }).toString(),
+  },
+  {
+    productId: 12,
+    price: 610.15,
+    createdAt: now.plus({ minutes: 10 }).toString(),
+    updatedAt: now.plus({ minutes: 10 }).toString(),
+  },
 ];

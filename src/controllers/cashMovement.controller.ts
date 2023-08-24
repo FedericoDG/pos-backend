@@ -92,7 +92,7 @@ export const create = asyncHandler(
       // Update Cash Register
       await prisma.cashRegisters.update({
         where: { id: cashRegisterId },
-        data: { finalBalance: cashRegisterFinalBalance + subtotal + recharge - discount },
+        data: { finalBalance: cashRegisterFinalBalance + subtotal + recharge + subtotalOtherTributes - discount },
       });
 
       // Create Cash Movement
@@ -103,7 +103,7 @@ export const create = asyncHandler(
           recharge,
           discount,
           otherTributes: subtotalOtherTributes,
-          total: subtotal + recharge - discount,
+          total: subtotal + recharge + subtotalOtherTributes - discount,
           warehouseId,
           clientId,
           userId,
