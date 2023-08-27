@@ -5,7 +5,7 @@ import createHttpError from 'http-errors';
 import { asyncHandler } from '../helpers/asyncHandler';
 import { endpointResponse } from '../helpers/endpointResponse';
 
-import { bcHash } from 'src/helpers/bcrypt';
+import { bcHash } from '../helpers/bcrypt';
 import { CreateWarehouseType, UpdateWarehouseType } from '../schemas/warehouse.schema';
 
 const prisma = new PrismaClient();
@@ -156,9 +156,6 @@ export const create = asyncHandler(
 
       let warehouse: Warehouses;
       if (data.driver === 1) {
-        console.log('CREAR CHOFER');
-        /*  */
-        console.log(data);
         const hashedPassword = await bcHash(data.password!);
 
         const user = await prisma.users.create({
@@ -175,7 +172,6 @@ export const create = asyncHandler(
           data: { code: data.code, description: data.description, userId: user.id, driver: 1 },
         });
       } else {
-        console.log('CREAR DEPÓSITO');
         warehouse = await prisma.warehouses.create({ data });
       }
 
@@ -217,7 +213,6 @@ export const update = asyncHandler(
 
       let warehouse: Warehouses;
       if (driver === 1) {
-        console.log('CHOFER');
         warehouse = await prisma.warehouses.update({
           where: { id: Number(id) },
           data: { description: rest.description },
@@ -232,7 +227,6 @@ export const update = asyncHandler(
           },
         });
       } else {
-        console.log('DEPÓSITO');
         warehouse = await prisma.warehouses.update({
           where: { id: Number(id) },
           data: { address: rest.address, description: rest.description },

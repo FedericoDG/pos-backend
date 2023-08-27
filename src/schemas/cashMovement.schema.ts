@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 export const createCashMovementsSchema = z.object({
+  iva: z.boolean(),
   clientId: z.number().nonnegative(),
   warehouseId: z.number().nonnegative(),
   invoceTypeId: z.number().nonnegative(),

@@ -19,18 +19,8 @@ export const getAll = asyncHandler(
       const cashRegisters = await prisma.cashRegisters.findMany({
         include: {
           user: { include: { role: true } },
-          /*   cashMovements: {
-            include: {
-              user: { include: { role: true } },
-              cashMovementsDetails: {
-                include: { product: { include: { category: true, unit: true } } },
-                orderBy: [{ id: 'desc' }],
-              },
-            },
-            orderBy: [{ id: 'desc' }],
-          }, */
         },
-        orderBy: [{ closingDate: 'asc' }],
+        orderBy: [{ openingDate: 'desc' }],
       });
 
       endpointResponse({
@@ -114,14 +104,15 @@ export const getById = asyncHandler(
           cashRegister: {
             ...cashRegister,
             total: cash + debit + credit + transfer + mercadoPago + recharges + otherTributes - discounts,
+            sales: cash + debit + credit + transfer + mercadoPago,
             cash,
             debit,
             credit,
             transfer,
             mercadoPago,
-            discounts,
             recharges,
             otherTributes,
+            discounts,
           },
         },
       });

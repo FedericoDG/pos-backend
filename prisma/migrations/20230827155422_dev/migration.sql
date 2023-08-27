@@ -335,6 +335,7 @@ CREATE TABLE `cash_movements` (
     `recharge` DOUBLE NOT NULL,
     `otherTributes` DOUBLE NOT NULL,
     `total` DOUBLE NOT NULL,
+    `iva` BOOLEAN NOT NULL,
     `cashRegisterId` INTEGER NOT NULL,
     `clientId` INTEGER NOT NULL,
     `warehouseId` INTEGER NOT NULL,

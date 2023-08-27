@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import createHttpError from 'http-errors';
-import { endpointResponse } from 'src/helpers/endpointResponse';
+import { endpointResponse } from '../helpers/endpointResponse';
 
 const prisma = new PrismaClient();
 

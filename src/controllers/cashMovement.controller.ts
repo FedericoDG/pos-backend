@@ -42,7 +42,7 @@ export const getById = asyncHandler(
       const cashMovement = await prisma.cashMovements.findFirst({
         where: { id: Number(id) },
         include: {
-          client: true,
+          client: { include: { identification: true } },
           user: { include: { role: true } },
           warehouse: true,
           paymentMethodDetails: { include: { paymentMethod: true } },
@@ -78,7 +78,8 @@ export const getById = asyncHandler(
 export const create = asyncHandler(
   async (req: Request<unknown, unknown, CreateCashMovementsType>, res: Response, next: NextFunction) => {
     try {
-      const { warehouseId, clientId, discount, recharge, cart, payments, info, invoceTypeId, otherTributes } = req.body;
+      const { warehouseId, clientId, discount, recharge, cart, payments, info, invoceTypeId, otherTributes, iva } =
+        req.body;
       const { id: userId } = req.user;
 
       const cashRegister = await prisma.cashRegisters.findFirst({ where: { userId }, orderBy: [{ id: 'desc' }] });
@@ -88,16 +89,18 @@ export const create = asyncHandler(
       const subtotal = cart.reduce((acc, item) => acc + item.quantity * item.price * (1 + item.tax), 0);
       const cashRegisterId = cashRegister?.id || 1;
       const cashRegisterFinalBalance = cashRegister?.finalBalance || 0;
+      const finalBalance = cashRegisterFinalBalance + subtotal + recharge + subtotalOtherTributes - discount;
 
       // Update Cash Register
       await prisma.cashRegisters.update({
         where: { id: cashRegisterId },
-        data: { finalBalance: cashRegisterFinalBalance + subtotal + recharge + subtotalOtherTributes - discount },
+        data: { finalBalance: finalBalance },
       });
 
       // Create Cash Movement
       const cashMovement = await prisma.cashMovements.create({
         data: {
+          iva,
           cashRegisterId,
           subtotal: subtotal,
           recharge,

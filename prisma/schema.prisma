@@ -423,6 +423,7 @@ model CashMovements {
   recharge       Float
   otherTributes  Float
   total          Float
+  iva            Boolean
   cashRegisterId Int
   clientId       Int
   warehouseId    Int

@@ -11,7 +11,7 @@ import { schemaValidator } from '../middlewares/schemaValidator.middleware';
 
 // Schema
 import { createCashMovementsSchema } from '../schemas/cashMovement.schema';
-import { userExistMidd } from 'src/middlewares/checkCart';
+import { userExistMidd } from '../middlewares/checkCart';
 
 // Routes
 purchase.get('/', [validToken, accessLevel('ADMIN')], getAll);

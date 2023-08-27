@@ -12,7 +12,7 @@ export const paymentMethodDetails = [
   },
   {
     cashMovementId: 1,
-    amount: 3450,
+    amount: 2800.25,
     paymentMethodId: 2,
     createdAt: now.plus({ minutes: 2 }).toString(),
     updatedAt: now.plus({ minutes: 2 }).toString(),
@@ -26,7 +26,7 @@ export const paymentMethodDetails = [
   },
   {
     cashMovementId: 2,
-    amount: 4450,
+    amount: 4770.25,
     paymentMethodId: 2,
     createdAt: now.plus({ minutes: 4 }).toString(),
     updatedAt: now.plus({ minutes: 4 }).toString(),
