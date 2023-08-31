@@ -22,8 +22,10 @@ import cashMovement from './cashMovement.route';
 import paymentMethods from './paymentMethod.route';
 import ivaConditions from './ivaCondition.route';
 import identifications from './identification.route';
+import ivaTypes from './ivaType.route';
 import invoceTypes from './invoceType.route';
 import otherTributes from './otherTributes.route';
+import settings from './settings.route';
 
 const router = Router();
 
@@ -49,7 +51,9 @@ router.use('/cashmovements', cashMovement);
 router.use('/paymentmethods', paymentMethods);
 router.use('/ivaconditions', ivaConditions);
 router.use('/identifications', identifications);
+router.use('/ivatypes', ivaTypes);
 router.use('/invocetypes', invoceTypes);
 router.use('/othertributes', otherTributes);
+router.use('/settings', settings);
 
 export default router;

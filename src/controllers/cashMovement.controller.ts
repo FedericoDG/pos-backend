@@ -83,6 +83,7 @@ export const create = asyncHandler(
       const { id: userId } = req.user;
 
       const cashRegister = await prisma.cashRegisters.findFirst({ where: { userId }, orderBy: [{ id: 'desc' }] });
+      const settings = await prisma.settings.findFirst({ select: { invoceNumber: true, posNumber: true } });
 
       const productsIds = cart.map((item) => item.productId);
       const subtotalOtherTributes = otherTributes.reduce((acc, item) => acc + item.amount, 0);
@@ -111,6 +112,8 @@ export const create = asyncHandler(
           clientId,
           userId,
           invoceTypeId,
+          posNumber: settings?.posNumber || 0,
+          invoceNumber: settings?.invoceNumber || 0,
           info,
         },
       });
@@ -190,6 +193,9 @@ export const create = asyncHandler(
             }),
         ),
       );
+
+      // UpdateInvoceNumber
+      await prisma.settings.update({ where: { id: 1 }, data: { invoceNumber: { increment: 1 } } });
 
       endpointResponse({
         res,

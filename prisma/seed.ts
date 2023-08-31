@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { settings } from './seeders/settings';
 import {
   cashMovementDetails,
   cashMovements,
@@ -11,6 +12,7 @@ import {
   identifications,
   invoceTypes,
   ivaConditions,
+  ivaType,
   movements,
   otherTributes,
   paymentMethodDetails,
@@ -35,6 +37,8 @@ import {
 const prisma = new PrismaClient();
 
 async function main() {
+  await prisma.settings.createMany({ data: settings });
+
   await prisma.roles.createMany({ data: roles });
 
   await prisma.users.createMany({ data: users });
@@ -44,6 +48,8 @@ async function main() {
   await prisma.units.createMany({ data: units });
 
   await prisma.ivaConditions.createMany({ data: ivaConditions });
+
+  await prisma.ivaType.createMany({ data: ivaType });
 
   await prisma.products.createMany({ data: products });
 

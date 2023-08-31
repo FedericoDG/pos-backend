@@ -9,7 +9,7 @@ export const invoceTypes = [
     createdAt: now.plus({ minutes: 1 }).toString(),
     updatedAt: now.plus({ minutes: 1 }).toString(),
   },
-  {
+  /* {
     code: '002',
     description: 'NOTAS DE DÉBITO A',
     createdAt: now.plus({ minutes: 2 }).toString(),
@@ -32,14 +32,14 @@ export const invoceTypes = [
     description: 'NOTAS DE VENTA AL CONTADO A',
     createdAt: now.plus({ minutes: 5 }).toString(),
     updatedAt: now.plus({ minutes: 5 }).toString(),
-  },
+  }, */
   {
     code: '006',
     description: 'FACTUTAS B',
     createdAt: now.plus({ minutes: 6 }).toString(),
     updatedAt: now.plus({ minutes: 6 }).toString(),
   },
-  {
+  /* {
     code: '007',
     description: 'NOTAS DE DÉBITO B',
     createdAt: now.plus({ minutes: 7 }).toString(),
@@ -290,13 +290,13 @@ export const invoceTypes = [
     description: 'RECIBO FACTURA A REGIMEN DE FACTURA DE CRÉDITO',
     createdAt: now.plus({ minutes: 48 }).toString(),
     updatedAt: now.plus({ minutes: 48 }).toString(),
-  },
+  },*/
   {
     code: '051',
     description: 'FACTURAS M',
     createdAt: now.plus({ minutes: 49 }).toString(),
     updatedAt: now.plus({ minutes: 49 }).toString(),
-  },
+  } /*
   {
     code: '052',
     description: 'NOTAS DE DÉBITO M',
@@ -578,7 +578,7 @@ export const invoceTypes = [
     description: 'REMITO ELECTRÓNICO CÁRNICO',
     createdAt: now.plus({ minutes: 96 }).toString(),
     updatedAt: now.plus({ minutes: 96 }).toString(),
-  },
+  }, */,
   {
     code: '555',
     description: 'COMPROBANTE X',

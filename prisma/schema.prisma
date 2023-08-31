@@ -27,6 +27,24 @@ datasource db {
   // directUrl = env("DIRECT_URL")
 }
 
+model Settings {
+  id           Int      @id @default(autoincrement())
+  name         String
+  address      String
+  cp           String
+  province     String
+  ivaCondition String
+  cuit         String
+  posNumber    Int
+  invoceName   String
+  invoceNumber Int
+  imageURL     String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now()) @updatedAt
+
+  @@map(name: "settings")
+}
+
 model Users {
   id              Int              @id @default(autoincrement())
   name            String
@@ -121,6 +139,18 @@ model IvaConditions {
   products    Products[]
 
   @@map(name: "iva_condition")
+}
+
+model IvaType {
+  id          Int       @id @default(autoincrement())
+  code        String
+  description String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @default(now()) @updatedAt
+  // Relations
+  clients     Clients[]
+
+  @@map(name: "iva_type")
 }
 
 model Categories {
@@ -253,7 +283,6 @@ model Identifications {
   @@map(name: "identifications")
 }
 
-// TODO: Modificar una vez desarrollada la funcionalidad de "venta"
 model Clients {
   id               Int               @id @default(autoincrement())
   name             String
@@ -267,11 +296,13 @@ model Clients {
   info             String?
   roleId           Int               @default(5)
   identificationId Int               @default(36)
+  ivaTypeId        Int               @default(5)
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @default(now()) @updatedAt
   // Relations
   role             Roles             @relation(fields: [roleId], references: [id])
   identification   Identifications   @relation(fields: [identificationId], references: [id])
+  ivaType          IvaType           @relation(fields: [ivaTypeId], references: [id])
   cashMovements    CashMovements[]
   userPreferences  UserPreferences[]
 
@@ -428,7 +459,9 @@ model CashMovements {
   clientId       Int
   warehouseId    Int
   userId         Int
+  posNumber      Int
   invoceTypeId   Int
+  invoceNumber   Int
   info           String
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @default(now()) @updatedAt

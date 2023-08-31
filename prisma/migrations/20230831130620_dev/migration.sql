@@ -1,4 +1,23 @@
 -- CreateTable
+CREATE TABLE `settings` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(191) NOT NULL,
+    `address` VARCHAR(191) NOT NULL,
+    `cp` VARCHAR(191) NOT NULL,
+    `province` VARCHAR(191) NOT NULL,
+    `ivaCondition` VARCHAR(191) NOT NULL,
+    `cuit` VARCHAR(191) NOT NULL,
+    `posNumber` INTEGER NOT NULL,
+    `invoceName` VARCHAR(191) NOT NULL,
+    `invoceNumber` INTEGER NOT NULL,
+    `imageURL` VARCHAR(191) NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
 CREATE TABLE `users` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(191) NOT NULL,
@@ -65,6 +84,17 @@ CREATE TABLE `iva_condition` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `code` VARCHAR(191) NOT NULL,
     `tax` DOUBLE NOT NULL,
+    `description` VARCHAR(191) NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `iva_type` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `code` VARCHAR(191) NOT NULL,
     `description` VARCHAR(191) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
@@ -203,6 +233,7 @@ CREATE TABLE `clients` (
     `info` VARCHAR(191) NULL,
     `roleId` INTEGER NOT NULL DEFAULT 5,
     `identificationId` INTEGER NOT NULL DEFAULT 36,
+    `ivaTypeId` INTEGER NOT NULL DEFAULT 5,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
@@ -340,7 +371,9 @@ CREATE TABLE `cash_movements` (
     `clientId` INTEGER NOT NULL,
     `warehouseId` INTEGER NOT NULL,
     `userId` INTEGER NOT NULL,
+    `posNumber` INTEGER NOT NULL,
     `invoceTypeId` INTEGER NOT NULL,
+    `invoceNumber` INTEGER NOT NULL,
     `info` VARCHAR(191) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
@@ -467,6 +500,9 @@ ALTER TABLE `clients` ADD CONSTRAINT `clients_roleId_fkey` FOREIGN KEY (`roleId`
 
 -- AddForeignKey
 ALTER TABLE `clients` ADD CONSTRAINT `clients_identificationId_fkey` FOREIGN KEY (`identificationId`) REFERENCES `identifications`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `clients` ADD CONSTRAINT `clients_ivaTypeId_fkey` FOREIGN KEY (`ivaTypeId`) REFERENCES `iva_type`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `purchases` ADD CONSTRAINT `purchases_supplierId_fkey` FOREIGN KEY (`supplierId`) REFERENCES `suppliers`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
