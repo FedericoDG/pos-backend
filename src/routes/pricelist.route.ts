@@ -7,6 +7,7 @@ import {
   create,
   federico,
   getAll,
+  getById,
   getByIdAndWarehouseId,
   getByIdWarehouseIdAndProductId,
   remove,
@@ -24,6 +25,7 @@ import { createPriceListSchema, updatePriceListSchema } from '../schemas/priceli
 // Routes
 priceList.get('/', [validToken, accessLevel('USER')], getAll);
 priceList.get('/report', [validToken, accessLevel('USER')], federico);
+priceList.get('/:id', [validToken, accessLevel('USER')], getById);
 priceList.get('/:id/:warehouseId', [validToken, accessLevel('USER')], getByIdAndWarehouseId);
 priceList.get('/:id/:warehouseId/:productId', [validToken, accessLevel('USER')], getByIdWarehouseIdAndProductId);
 priceList.post(

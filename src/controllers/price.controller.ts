@@ -5,7 +5,7 @@ import createHttpError from 'http-errors';
 import { asyncHandler } from '../helpers/asyncHandler';
 import { endpointResponse } from '../helpers/endpointResponse';
 
-import { CreatePriceType } from '../schemas/price.schema';
+import { CreatePriceManyPercentageType, CreatePriceType } from '../schemas/price.schema';
 
 const prisma = new PrismaClient();
 
@@ -23,6 +23,29 @@ export const create = asyncHandler(
         message: 'Precio creado',
         body: {
           price,
+        },
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        const httpError = createHttpError(500, `[Prices - CREATE]: ${error.message}`);
+        next(httpError);
+      }
+    }
+  },
+);
+
+export const createManyPercentage = asyncHandler(
+  async (req: Request<unknown, unknown, CreatePriceManyPercentageType>, res: Response, next: NextFunction) => {
+    try {
+      const prices = await prisma.prices.createMany({ data: req.body.cart });
+
+      endpointResponse({
+        res,
+        code: 200,
+        status: true,
+        message: 'Precios creados',
+        body: {
+          prices,
         },
       });
     } catch (error) {

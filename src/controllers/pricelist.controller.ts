@@ -68,6 +68,53 @@ export const getAll = asyncHandler(
   },
 );
 
+export const getById = asyncHandler(
+  async (req: Request<{ id?: number }, unknown, unknown>, res: Response, next: NextFunction) => {
+    try {
+      const { id } = req.params;
+
+      const pricelist = await prisma.pricelists.findFirst({
+        where: { id: Number(id) },
+        include: {
+          prices: {
+            include: { products: { include: { unit: true, category: true, ivaCondition: true } } },
+            orderBy: [{ createdAt: 'desc' }],
+          },
+        },
+      });
+
+      const uniquePrices = pricelist?.prices.reduce((accumulator: any, currentPrice: any) => {
+        // Verificar si el producto ya está en el acumulador
+        const existingProduct = accumulator.find((item) => item.products.id === currentPrice.products.id);
+
+        // Si no se encuentra el producto en el acumulador, agregarlo
+        if (!existingProduct) {
+          accumulator.push(currentPrice);
+        }
+
+        return accumulator;
+      }, []);
+
+      const prices = uniquePrices.map((el) => ({ ...el.products, price: el.price }));
+
+      endpointResponse({
+        res,
+        code: 200,
+        status: true,
+        message: 'Lista de precio recuperada',
+        body: {
+          products: prices,
+        },
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        const httpError = createHttpError(500, `[PriceLists - GET ONE]: ${error.message}`);
+        next(httpError);
+      }
+    }
+  },
+);
+
 export const getByIdAndWarehouseId = asyncHandler(
   async (req: Request<{ id?: number; warehouseId?: number }, unknown, unknown>, res: Response, next: NextFunction) => {
     try {
