@@ -156,7 +156,7 @@ export const getById = asyncHandler(
         });
 
         if (price.length > 0) {
-          const filteredPrice = price.filter((el) => el.price > 0);
+          const filteredPrice = price.filter((el) => el.price >= 0); // OJO
           if (filteredPrice.length > 0) {
             prices.push(price[0]);
             priceDetails.push(price.sort((a, b) => a.id - b.id));

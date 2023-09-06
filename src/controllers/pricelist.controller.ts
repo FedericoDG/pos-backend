@@ -211,7 +211,7 @@ export const getByIdWarehouseIdAndProductId = asyncHandler(
   },
 );
 
-export const federico = asyncHandler(
+export const report = asyncHandler(
   async (
     req: Request<unknown, unknown, unknown, { products?: any; pricelists?: any; warehouses?: any }>,
     res: Response,
