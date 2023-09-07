@@ -405,6 +405,12 @@ export const create = asyncHandler(
 
       const pricelist = await prisma.pricelists.create({ data });
 
+      const products = await prisma.products.findMany({ select: { id: true } });
+
+      const prices = products.map((product) => ({ productId: product.id, pricelistId: pricelist.id, price: 0 }));
+
+      await prisma.prices.createMany({ data: prices });
+
       endpointResponse({
         res,
         code: 200,
