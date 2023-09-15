@@ -22,7 +22,7 @@ export const clients = [
     name: 'Juan Carlos',
     lastname: 'Pérez',
     identificationId: 25,
-    document: '30281263679',
+    document: '30710395949',
     ivaTypeId: 1,
     email: 'juancarlosperez@gmail.com',
     password: '$2a$10$ZM6gFPu6tMAU4wr79TFDn.2IZbon0i/iGeNygxtGxdnVqEz1jkr4q',

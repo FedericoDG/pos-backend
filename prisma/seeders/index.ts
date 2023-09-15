@@ -1,3 +1,4 @@
+export * from './afip';
 export * from './cashMovementDetails';
 export * from './cashMovements';
 export * from './cashRegisters';

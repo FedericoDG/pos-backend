@@ -35,7 +35,6 @@ model Settings {
   province     String
   ivaCondition String
   cuit         String
-  posNumber    Int
   invoceName   String
   invoceNumber Int
   imageURL     String
@@ -43,6 +42,16 @@ model Settings {
   updatedAt    DateTime @default(now()) @updatedAt
 
   @@map(name: "settings")
+}
+
+model Afip {
+  id             Int      @id @default(autoincrement())
+  posNumber      Int
+  certExpiration DateTime
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @default(now()) @updatedAt
+
+  @@map(name: "afip")
 }
 
 model Users {
@@ -448,29 +457,35 @@ model CashRegisters {
 }
 
 model CashMovements {
-  id             Int           @id @default(autoincrement())
-  subtotal       Float
-  discount       Float
-  recharge       Float
-  otherTributes  Float
-  total          Float
-  iva            Boolean
-  cashRegisterId Int
-  clientId       Int
-  warehouseId    Int
-  userId         Int
-  posNumber      Int
-  invoceTypeId   Int
-  invoceNumber   Int
-  info           String
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @default(now()) @updatedAt
+  id               Int           @id @default(autoincrement())
+  subtotal         Float
+  discount         Float
+  recharge         Float
+  otherTributes    Float
+  total            Float
+  iva              Boolean
+  cashRegisterId   Int
+  clientId         Int
+  warehouseId      Int
+  userId           Int
+  posNumber        Int
+  invoceTypeId     Int
+  invoceNumber     Int
+  cbteTipo         Int?
+  invoceIdAfip     Int?
+  invoceNumberAfip Int?
+  cae              String?
+  vtoCae           DateTime?
+  impTotal         String?
+  info             String
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @default(now()) @updatedAt
   //Relations
-  user           Users         @relation(fields: [userId], references: [id])
-  cashRegister   CashRegisters @relation(fields: [cashRegisterId], references: [id])
-  warehouse      Warehouses    @relation(fields: [warehouseId], references: [id])
-  client         Clients       @relation(fields: [clientId], references: [id])
-  invoceType     InvoceTypes   @relation(fields: [invoceTypeId], references: [id])
+  user             Users         @relation(fields: [userId], references: [id])
+  cashRegister     CashRegisters @relation(fields: [cashRegisterId], references: [id])
+  warehouse        Warehouses    @relation(fields: [warehouseId], references: [id])
+  client           Clients       @relation(fields: [clientId], references: [id])
+  invoceType       InvoceTypes   @relation(fields: [invoceTypeId], references: [id])
 
   cashMovementsDetails CashMovementsDetails[]
   paymentMethodDetails PaymentMethodDetails[]

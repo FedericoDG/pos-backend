@@ -6,6 +6,7 @@ import { asyncHandler } from '../helpers/asyncHandler';
 import { endpointResponse } from '../helpers/endpointResponse';
 
 import { CreateCashMovementsType } from 'src/schemas/cashMovement.schema';
+import { createAfipInvoce } from 'src/helpers/createAfipInvoce';
 
 const prisma = new PrismaClient();
 
@@ -83,7 +84,8 @@ export const create = asyncHandler(
       const { id: userId } = req.user;
 
       const cashRegister = await prisma.cashRegisters.findFirst({ where: { userId }, orderBy: [{ id: 'desc' }] });
-      const settings = await prisma.settings.findFirst({ select: { invoceNumber: true, posNumber: true } });
+      const settings = await prisma.settings.findFirst({ select: { invoceNumber: true } });
+      const afip = await prisma.afip.findFirst({ select: { posNumber: true } });
 
       const productsIds = cart.map((item) => item.productId);
       const subtotalOtherTributes = otherTributes.reduce((acc, item) => acc + item.amount, 0);
@@ -99,7 +101,7 @@ export const create = asyncHandler(
       });
 
       // Create Cash Movement
-      const cashMovement = await prisma.cashMovements.create({
+      let cashMovement = await prisma.cashMovements.create({
         data: {
           iva,
           cashRegisterId,
@@ -111,8 +113,8 @@ export const create = asyncHandler(
           warehouseId,
           clientId,
           userId,
+          posNumber: afip?.posNumber || 1,
           invoceTypeId,
-          posNumber: settings?.posNumber || 0,
           invoceNumber: settings?.invoceNumber || 0,
           info,
         },
@@ -150,7 +152,11 @@ export const create = asyncHandler(
       await prisma.paymentMethodDetails.createMany({ data: mappedPayments });
 
       // Create Other Tributes Details
-      const mappedOtherTributes = otherTributes.map((item) => ({ ...item, cashMovementId }));
+      const mappedOtherTributes = otherTributes.map((item) => ({
+        amount: item.amount,
+        otherTributeId: item.otherTributeId,
+        cashMovementId,
+      }));
 
       await prisma.otherTributesDetails.createMany({ data: mappedOtherTributes });
 
@@ -197,6 +203,36 @@ export const create = asyncHandler(
       // UpdateInvoceNumber
       await prisma.settings.update({ where: { id: 1 }, data: { invoceNumber: { increment: 1 } } });
 
+      if (iva) {
+        console.log('CREAREMOS UNA FACTURA AFIP');
+        // Create AFIP Invoce
+        const { invoceIdAfip, invoceNumberAfip, cae, voucherInfo, vtoCae, cbteTipo, impTotal } = await createAfipInvoce(
+          req.body,
+        );
+
+        // Update Cash Movement
+        if (cae) {
+          cashMovement = await prisma.cashMovements.update({
+            where: { id: cashMovementId },
+            data: { invoceIdAfip, invoceNumberAfip, cae, vtoCae, cbteTipo, impTotal },
+          });
+        }
+
+        console.log({ voucherInfo });
+
+        return endpointResponse({
+          res,
+          code: 200,
+          status: true,
+          message: 'Movimiento creado',
+          body: {
+            cashMovement: {
+              ...cashMovement,
+              voucherInfo,
+            },
+          },
+        });
+      }
       endpointResponse({
         res,
         code: 200,
