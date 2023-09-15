@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { settings } from './seeders/settings';
 import {
+  afip,
   cashMovementDetails,
   cashMovements,
   cashRegisters,
@@ -38,6 +39,8 @@ const prisma = new PrismaClient();
 
 async function main() {
   await prisma.settings.createMany({ data: settings });
+
+  await prisma.afip.createMany({ data: afip });
 
   await prisma.roles.createMany({ data: roles });
 

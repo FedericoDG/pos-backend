@@ -7,10 +7,20 @@ CREATE TABLE `settings` (
     `province` VARCHAR(191) NOT NULL,
     `ivaCondition` VARCHAR(191) NOT NULL,
     `cuit` VARCHAR(191) NOT NULL,
-    `posNumber` INTEGER NOT NULL,
     `invoceName` VARCHAR(191) NOT NULL,
     `invoceNumber` INTEGER NOT NULL,
     `imageURL` VARCHAR(191) NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `afip` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `posNumber` INTEGER NOT NULL,
+    `certExpiration` DATETIME(3) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
@@ -374,6 +384,11 @@ CREATE TABLE `cash_movements` (
     `posNumber` INTEGER NOT NULL,
     `invoceTypeId` INTEGER NOT NULL,
     `invoceNumber` INTEGER NOT NULL,
+    `cbteTipo` INTEGER NULL,
+    `invoceIdAfip` INTEGER NULL,
+    `invoceNumberAfip` INTEGER NULL,
+    `cae` VARCHAR(191) NULL,
+    `vtoCae` DATETIME(3) NULL,
     `info` VARCHAR(191) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),

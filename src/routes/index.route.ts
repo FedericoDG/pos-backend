@@ -26,6 +26,7 @@ import ivaTypes from './ivaType.route';
 import invoceTypes from './invoceType.route';
 import otherTributes from './otherTributes.route';
 import settings from './settings.route';
+import afip from './afip.route';
 
 const router = Router();
 
@@ -55,5 +56,6 @@ router.use('/ivatypes', ivaTypes);
 router.use('/invocetypes', invoceTypes);
 router.use('/othertributes', otherTributes);
 router.use('/settings', settings);
+router.use('/afip', afip);
 
 export default router;

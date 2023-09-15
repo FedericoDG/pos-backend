@@ -66,13 +66,13 @@ export const otherTributes = [
     createdAt: now.plus({ minutes: 1 }).toString(),
     updatedAt: now.plus({ minutes: 1 }).toString(),
   },
-  {
+  /*   {
     code: '10',
     description: 'IMPUESTO INTERNO A NIVEL ITEM',
     observation: 'SÓLO CONTROLADORES FISCALES',
     createdAt: now.plus({ minutes: 1 }).toString(),
     updatedAt: now.plus({ minutes: 1 }).toString(),
-  },
+  }, */
   {
     code: '13',
     description: 'PERCEPCIÓN DE IVA A NO CATEGORIZADO',
@@ -80,7 +80,7 @@ export const otherTributes = [
     createdAt: now.plus({ minutes: 1 }).toString(),
     updatedAt: now.plus({ minutes: 1 }).toString(),
   },
-  {
+  /* {
     code: '14',
     description: 'RETENCIÓN IIGG - RG 830',
     observation: 'LIQUIDACIONES PECUARIAS',
@@ -121,7 +121,7 @@ export const otherTributes = [
     observation: 'LIQUIDACIONES PECUARIAS',
     createdAt: now.plus({ minutes: 1 }).toString(),
     updatedAt: now.plus({ minutes: 1 }).toString(),
-  },
+  }, */
   {
     code: '99',
     description: 'OTROS',

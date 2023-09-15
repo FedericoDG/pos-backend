@@ -5,7 +5,7 @@ const now = DateTime.now();
 export const invoceTypes = [
   {
     code: '001',
-    description: 'FACTURAS A',
+    description: 'FACTURA A',
     createdAt: now.plus({ minutes: 1 }).toString(),
     updatedAt: now.plus({ minutes: 1 }).toString(),
   },
@@ -35,7 +35,7 @@ export const invoceTypes = [
   }, */
   {
     code: '006',
-    description: 'FACTUTAS B',
+    description: 'FACTURA B',
     createdAt: now.plus({ minutes: 6 }).toString(),
     updatedAt: now.plus({ minutes: 6 }).toString(),
   },
@@ -293,7 +293,7 @@ export const invoceTypes = [
   },*/
   {
     code: '051',
-    description: 'FACTURAS M',
+    description: 'FACTURA M',
     createdAt: now.plus({ minutes: 49 }).toString(),
     updatedAt: now.plus({ minutes: 49 }).toString(),
   } /*

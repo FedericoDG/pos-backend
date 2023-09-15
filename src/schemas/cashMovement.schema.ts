@@ -15,8 +15,10 @@ export const createCashMovementsSchema = z.object({
   ),
   otherTributes: z.array(
     z.object({
+      id: z.number().nonnegative(),
       amount: z.number().nonnegative(),
       otherTributeId: z.number().nonnegative(),
+      description: z.string().optional(),
     }),
   ),
   payments: z.array(

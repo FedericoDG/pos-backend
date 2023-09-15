@@ -7,7 +7,6 @@ export const updateSettingsSchema = z.object({
   province: z.string().nonempty(),
   ivaCondition: z.string().nonempty(),
   cuit: z.string().nonempty(),
-  posNumber: z.number().nonnegative(),
   invoceName: z.string().nonempty(),
   invoceNumber: z.number().nonnegative(),
   imageURL: z.string(),
