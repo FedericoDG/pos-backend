@@ -28,7 +28,9 @@ export const createCashMovementsSchema = z.object({
     }),
   ),
   discount: z.number().nonnegative(),
+  discountPercent: z.number().nonnegative(),
   recharge: z.number().nonnegative(),
+  rechargePercent: z.number().nonnegative(),
   info: z.string(),
 });
 

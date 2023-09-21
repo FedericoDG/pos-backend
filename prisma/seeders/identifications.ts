@@ -215,7 +215,7 @@ export const identifications = [
   },
   {
     code: '99',
-    description: 'SIN IDENTIFICAR/VENTA GLOBAL DIARIA',
+    description: 'SIN IDENTIFICAR/VENTA DIARIA',
     createdAt: now.plus({ minutes: 36 }).toString(),
     updatedAt: now.plus({ minutes: 36 }).toString(),
   },

@@ -7,6 +7,63 @@ import { asyncHandler } from '../helpers/asyncHandler';
 import { endpointResponse } from '../helpers/endpointResponse';
 
 import { afipType } from '../schemas/afip.schema';
+import { CreateCashMovementsType } from 'src/schemas/cashMovement.schema';
+
+type Iva = {
+  Id: number;
+  BaseImp: number;
+  Importe: number;
+};
+
+type Tribute = {
+  Id: number;
+  BaseImp: number;
+  Importe: number;
+  Alic?: number;
+  Desc?: string;
+};
+
+type Data = {
+  CantReg: number;
+  PtoVta: number | undefined;
+  CbteTipo: number;
+  Concepto: number;
+  DocTipo: number;
+  DocNro: number;
+  CbteDesde: number;
+  CbteHasta: number;
+  CbteFch: number;
+  FchServDesde: number | null;
+  FchServHasta: number | null;
+  FchVtoPago: number | null;
+  ImpTotal: number;
+  ImpTotConc: number;
+  ImpNeto: number;
+  ImpOpEx: number;
+  ImpIVA: number;
+  ImpTrib: number;
+  MonId: string;
+  MonCotiz: number;
+  Iva: Iva[];
+  Tributos?: Tribute[];
+};
+
+type CashMovementId = {
+  cashMovementId: number;
+};
+
+type CreateAfipInvoce = CreateCashMovementsType & CashMovementId;
+
+const calcId = (num: number): number => {
+  if (num === 0.105) return 4;
+  if (num === 0.21) return 5;
+  if (num === 0.27) return 6;
+  if (num === 0.05) return 8;
+  if (num === 0.025) return 9;
+  return 3;
+};
+
+const toTwoDigits = (num: number): number => Math.round(num * 100) / 100;
 
 const prisma = new PrismaClient();
 
@@ -54,9 +111,179 @@ export const settings = asyncHandler(
   },
 );
 
-export const update = asyncHandler(async (req: Request<unknown, unknown, afipType>, res: Response) => {
-  console.log(req.body);
+export const create = asyncHandler(
+  async (req: Request<unknown, unknown, CreateAfipInvoce>, res: Response, next: NextFunction) => {
+    try {
+      const { clientId, cart, invoceTypeId, otherTributes, cashMovementId } = req.body;
 
+      const afip = new Afip({
+        CUIT: process.env.CUIT,
+        cert: './cert.crt',
+        key: './key.key',
+      });
+      const afipSettings = await prisma.afip.findFirst();
+      const client = await prisma.clients.findFirst({ where: { id: clientId } });
+      const identification = await prisma.identifications.findFirst({ where: { id: client?.identificationId } });
+      const fecha = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
+
+      // TOTALS
+      const subtotal = cart.reduce((acc, item) => acc + item.quantity * item.price, 0);
+      const importeNeto = toTwoDigits(subtotal);
+
+      const otrosImpuestos = otherTributes.reduce((acc, item) => acc + item.amount, 0);
+
+      // IVA TYPES
+      const iva: Array<{ Id: number; BaseImp: number; Importe: number }> = [];
+
+      const fede = cart.reduce((acc, el) => {
+        acc[el.tax] ??= el.tax;
+        return acc;
+      }, {});
+
+      const porcentajes: Array<number> = Object.values(fede);
+
+      porcentajes.forEach((item) => {
+        const filteredCart = cart.filter((el) => el.tax === item);
+        const cartSubtotal = toTwoDigits(filteredCart.reduce((acc, item) => acc + item.quantity * item.price, 0));
+        const cartTotalIva = toTwoDigits(
+          filteredCart.reduce((acc, item) => acc + item.quantity * item.price * item.tax, 0),
+        );
+        const id = calcId(item);
+        const iva0 = {
+          Id: id,
+          BaseImp: toTwoDigits(cartSubtotal),
+          Importe: cartTotalIva,
+        };
+        iva.push(iva0);
+      });
+
+      const totalIva = toTwoDigits(iva.reduce((acc, item) => acc + item.Importe, 0));
+      const importeTotal = toTwoDigits(importeNeto + otrosImpuestos + totalIva);
+
+      const importe_exento_iva = 0;
+
+      // INVOCE TYPE
+      let invoceId: number;
+
+      if (invoceTypeId === 1) {
+        console.log('FACTURA A');
+        invoceId = 1;
+      } else if (invoceTypeId === 2) {
+        console.log('FACTURA B');
+        invoceId = 6;
+      } else {
+        console.log('FACTURA M');
+        invoceId = 51;
+      }
+
+      // GET LAST VOUCHER NUMBER
+      const lastVoucher = await afip.ElectronicBilling.getLastVoucher(afipSettings?.posNumber, invoceId);
+
+      const data: Data = {
+        CantReg: 1, // Cantidad de facturas a registrar
+        PtoVta: afipSettings?.posNumber,
+        CbteTipo: invoceId,
+        Concepto: 1,
+        DocTipo: parseInt(identification?.code || '80'),
+        DocNro: parseInt(client?.document || '000000000'),
+        CbteDesde: lastVoucher + 1,
+        CbteHasta: lastVoucher + 1,
+        CbteFch: parseInt(fecha.replace(/-/g, '')), //20230908
+        FchServDesde: null,
+        FchServHasta: null,
+        FchVtoPago: null,
+        ImpTotal: importeTotal,
+        ImpTotConc: 0, // Importe neto no gravado
+        ImpNeto: importeNeto,
+        ImpOpEx: importe_exento_iva,
+        ImpIVA: totalIva,
+        ImpTrib: otrosImpuestos, //Importe total de tributos
+        MonId: 'PES',
+        MonCotiz: 1,
+        Iva: iva,
+      };
+
+      // TRIBUTES
+      if (otherTributes.length > 0) {
+        const tributes = otherTributes.map((item) => ({
+          Id: item.id,
+          BaseImp: importeTotal,
+          //Alic: 10,
+          Importe: item.amount,
+          Desc: item.description,
+        }));
+
+        data.ImpTrib = otrosImpuestos;
+        data.Tributos = tributes;
+      }
+
+      // CREATE AFIP INVOCE
+      const response = await afip.ElectronicBilling.createVoucher(data);
+
+      const voucherInfo = await afip.ElectronicBilling.getVoucherInfo(
+        lastVoucher + 1,
+        afipSettings?.posNumber,
+        invoceId,
+      );
+
+      const date = afip.ElectronicBilling.formatDate(voucherInfo.FchVto);
+
+      // Update Cash Movement
+
+      const cashMovement = await prisma.cashMovements.update({
+        where: { id: cashMovementId },
+        data: {
+          invoceIdAfip: invoceId,
+          invoceNumberAfip: lastVoucher + 1,
+          cae: response.CAE,
+          vtoCae: new Date(date),
+          cbteTipo: voucherInfo.CbteTipo,
+          impTotal: voucherInfo.ImpTotal,
+        },
+      });
+
+      endpointResponse({
+        res,
+        code: 200,
+        status: true,
+        message: 'AFIP',
+        body: {
+          cashMovement,
+        },
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        let errorCode = 99999;
+        let message = error.message;
+
+        if (error.message.substring(1, 6) === '10013') {
+          errorCode = 10013;
+          message = 'Para hacer un Comprobante "A" el cliente debe tener un CUIT asociado';
+        }
+        if (error.message.substring(1, 6) === '10056') {
+          errorCode = 10013;
+          message = 'El campo "importe total" soporta 13 números para la parte entera y 2 para los decimales.';
+        }
+
+        endpointResponse({
+          res,
+          code: 400,
+          status: false,
+          message: 'AFIP',
+          body: {
+            code: errorCode,
+            message,
+          },
+        });
+
+        const httpError = createHttpError(500, `[AFIP - CREATE]: ${error.message}`);
+        next(httpError);
+      }
+    }
+  },
+);
+
+export const update = asyncHandler(async (_req: Request<unknown, unknown, afipType>, res: Response) => {
   endpointResponse({
     res,
     code: 200,

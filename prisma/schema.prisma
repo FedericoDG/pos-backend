@@ -459,9 +459,11 @@ model CashRegisters {
 model CashMovements {
   id               Int           @id @default(autoincrement())
   subtotal         Float
-  discount         Float
-  recharge         Float
-  otherTributes    Float
+  discount         Float         @default(0)
+  discountPercent  Float         @default(0)
+  recharge         Float         @default(0)
+  rechargePercent  Float         @default(0)
+  otherTributes    Float         @default(0)
   total            Float
   iva              Boolean
   cashRegisterId   Int

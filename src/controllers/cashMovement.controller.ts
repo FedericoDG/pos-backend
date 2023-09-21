@@ -6,7 +6,6 @@ import { asyncHandler } from '../helpers/asyncHandler';
 import { endpointResponse } from '../helpers/endpointResponse';
 
 import { CreateCashMovementsType } from 'src/schemas/cashMovement.schema';
-import { createAfipInvoce } from 'src/helpers/createAfipInvoce';
 
 const prisma = new PrismaClient();
 
@@ -79,8 +78,20 @@ export const getById = asyncHandler(
 export const create = asyncHandler(
   async (req: Request<unknown, unknown, CreateCashMovementsType>, res: Response, next: NextFunction) => {
     try {
-      const { warehouseId, clientId, discount, recharge, cart, payments, info, invoceTypeId, otherTributes, iva } =
-        req.body;
+      const {
+        warehouseId,
+        clientId,
+        discount,
+        discountPercent,
+        recharge,
+        rechargePercent,
+        cart,
+        payments,
+        info,
+        invoceTypeId,
+        otherTributes,
+        iva,
+      } = req.body;
       const { id: userId } = req.user;
 
       const cashRegister = await prisma.cashRegisters.findFirst({ where: { userId }, orderBy: [{ id: 'desc' }] });
@@ -92,7 +103,7 @@ export const create = asyncHandler(
       const subtotal = cart.reduce((acc, item) => acc + item.quantity * item.price * (1 + item.tax), 0);
       const cashRegisterId = cashRegister?.id || 1;
       const cashRegisterFinalBalance = cashRegister?.finalBalance || 0;
-      const finalBalance = cashRegisterFinalBalance + subtotal + recharge + subtotalOtherTributes - discount;
+      const finalBalance = cashRegisterFinalBalance + subtotal + subtotalOtherTributes;
 
       // Update Cash Register
       await prisma.cashRegisters.update({
@@ -101,15 +112,17 @@ export const create = asyncHandler(
       });
 
       // Create Cash Movement
-      let cashMovement = await prisma.cashMovements.create({
+      const cashMovement = await prisma.cashMovements.create({
         data: {
           iva,
           cashRegisterId,
           subtotal: subtotal,
-          recharge,
           discount,
+          discountPercent,
+          recharge,
+          rechargePercent,
           otherTributes: subtotalOtherTributes,
-          total: subtotal + recharge + subtotalOtherTributes - discount,
+          total: subtotal + subtotalOtherTributes,
           warehouseId,
           clientId,
           userId,
@@ -203,12 +216,11 @@ export const create = asyncHandler(
       // UpdateInvoceNumber
       await prisma.settings.update({ where: { id: 1 }, data: { invoceNumber: { increment: 1 } } });
 
-      if (iva) {
+      /* if (iva) {
         console.log('CREAREMOS UNA FACTURA AFIP');
         // Create AFIP Invoce
-        const { invoceIdAfip, invoceNumberAfip, cae, voucherInfo, vtoCae, cbteTipo, impTotal } = await createAfipInvoce(
-          req.body,
-        );
+        const { invoceIdAfip, invoceNumberAfip, cae, voucherInfo, vtoCae, cbteTipo, impTotal, error } =
+          await createAfipInvoce(req.body);
 
         // Update Cash Movement
         if (cae) {
@@ -229,10 +241,11 @@ export const create = asyncHandler(
             cashMovement: {
               ...cashMovement,
               voucherInfo,
+              error,
             },
           },
         });
-      }
+      } */
       endpointResponse({
         res,
         code: 200,

@@ -207,6 +207,7 @@ export const createAfipInvoce = async (props: CreateCashMovementsType) => {
       vtoCae: new Date(date),
       impTotal: voucherInfo.ImpTotal,
       voucherInfo,
+      error: null,
     };
   } catch (error) {
     console.log(error);
@@ -218,6 +219,7 @@ export const createAfipInvoce = async (props: CreateCashMovementsType) => {
       vtoCae: null,
       impTotal: null,
       voucherInfo: null,
+      error,
     };
   }
 };
