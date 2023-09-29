@@ -585,4 +585,22 @@ export const invoceTypes = [
     createdAt: now.plus({ minutes: 97 }).toString(),
     updatedAt: now.plus({ minutes: 97 }).toString(),
   },
+  {
+    code: '003',
+    description: 'NOTAS DE CRÉDITO A',
+    createdAt: now.plus({ minutes: 98 }).toString(),
+    updatedAt: now.plus({ minutes: 98 }).toString(),
+  },
+  {
+    code: '008',
+    description: 'NOTAS DE CRÉDITO B',
+    createdAt: now.plus({ minutes: 99 }).toString(),
+    updatedAt: now.plus({ minutes: 99 }).toString(),
+  },
+  {
+    code: '053',
+    description: 'NOTAS DE CRÉDITO M',
+    createdAt: now.plus({ minutes: 100 }).toString(),
+    updatedAt: now.plus({ minutes: 100 }).toString(),
+  },
 ];

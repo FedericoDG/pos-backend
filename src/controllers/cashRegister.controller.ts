@@ -66,34 +66,51 @@ export const getById = asyncHandler(
         orderBy: [{ id: 'desc' }],
       });
 
+      const incomes = cashRegister?.cashMovements.filter(
+        (el) => el.invoceTypeId === 1 || el.invoceTypeId === 2 || el.invoceTypeId === 3 || el.invoceTypeId === 4,
+      );
+
+      const outcomes = cashRegister?.cashMovements.filter(
+        (el) => el.invoceTypeId === 5 || el.invoceTypeId === 6 || el.invoceTypeId === 7,
+      );
+
+      console.log({ outcomes });
+
       const cash =
-        cashRegister?.cashMovements
-          .map((movement) => movement.paymentMethodDetails.filter((el) => el.paymentMethodId === 1))
+        incomes
+          ?.map((movement) => movement.paymentMethodDetails.filter((el) => el.paymentMethodId === 1))
           .flat()
           .reduce((acc, el) => acc + el.amount, 0) || 0;
       const debit =
-        cashRegister?.cashMovements
-          .map((movement) => movement.paymentMethodDetails.filter((el) => el.paymentMethodId === 2))
+        incomes
+          ?.map((movement) => movement.paymentMethodDetails.filter((el) => el.paymentMethodId === 2))
           .flat()
           .reduce((acc, el) => acc + el.amount, 0) || 0;
       const credit =
-        cashRegister?.cashMovements
-          .map((movement) => movement.paymentMethodDetails.filter((el) => el.paymentMethodId === 3))
+        incomes
+          ?.map((movement) => movement.paymentMethodDetails.filter((el) => el.paymentMethodId === 3))
           .flat()
           .reduce((acc, el) => acc + el.amount, 0) || 0;
       const transfer =
-        cashRegister?.cashMovements
-          .map((movement) => movement.paymentMethodDetails.filter((el) => el.paymentMethodId === 4))
+        incomes
+          ?.map((movement) => movement.paymentMethodDetails.filter((el) => el.paymentMethodId === 4))
           .flat()
           .reduce((acc, el) => acc + el.amount, 0) || 0;
       const mercadoPago =
-        cashRegister?.cashMovements
-          .map((movement) => movement.paymentMethodDetails.filter((el) => el.paymentMethodId === 5))
+        incomes
+          ?.map((movement) => movement.paymentMethodDetails.filter((el) => el.paymentMethodId === 5))
           .flat()
           .reduce((acc, el) => acc + el.amount, 0) || 0;
-      const discounts = cashRegister?.cashMovements.reduce((acc, el) => acc + el.discount, 0) || 0;
-      const recharges = cashRegister?.cashMovements.reduce((acc, el) => acc + el.recharge, 0) || 0;
-      const otherTributes = cashRegister?.cashMovements.reduce((acc, el) => acc + el.otherTributes, 0) || 0;
+      const discounts = incomes?.reduce((acc, el) => acc + el.discount, 0) || 0;
+      const recharges = incomes?.reduce((acc, el) => acc + el.recharge, 0) || 0;
+      const otherTributes = incomes?.reduce((acc, el) => acc + el.otherTributes, 0) || 0;
+      const creditNotes =
+        outcomes
+          ?.map((movement) => movement.paymentMethodDetails)
+          .flat()
+          .reduce((acc, el) => acc + el.amount, 0) || 0;
+
+      console.log({ creditNotes });
 
       endpointResponse({
         res,
@@ -103,9 +120,10 @@ export const getById = asyncHandler(
         body: {
           cashRegister: {
             ...cashRegister,
-            total: cash + debit + credit + transfer + mercadoPago + recharges + otherTributes - discounts,
+            total: cash + debit + credit + transfer + mercadoPago + recharges + otherTributes - discounts - creditNotes,
             sales: cash + debit + credit + transfer + mercadoPago,
-            cash,
+            creditNotes,
+            cash: cash - creditNotes,
             debit,
             credit,
             transfer,

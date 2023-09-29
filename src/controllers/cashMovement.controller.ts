@@ -213,8 +213,11 @@ export const create = asyncHandler(
         ),
       );
 
-      // UpdateInvoceNumber
+      // Update Invoce Number
       await prisma.settings.update({ where: { id: 1 }, data: { invoceNumber: { increment: 1 } } });
+
+      // Create Movement
+      // await prisma.movements.create({ data: { type: 'IN', amount: subtotal + subtotalOtherTributes, userId } });
 
       /* if (iva) {
         console.log('CREAREMOS UNA FACTURA AFIP');
