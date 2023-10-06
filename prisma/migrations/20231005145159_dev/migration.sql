@@ -10,6 +10,7 @@ CREATE TABLE `settings` (
     `invoceName` VARCHAR(191) NOT NULL,
     `invoceNumber` INTEGER NOT NULL,
     `imageURL` VARCHAR(191) NOT NULL,
+    `maxPerInvoice` INTEGER NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
@@ -233,7 +234,6 @@ CREATE TABLE `identifications` (
 CREATE TABLE `clients` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(191) NOT NULL,
-    `lastname` VARCHAR(191) NOT NULL,
     `document` VARCHAR(191) NOT NULL,
     `email` VARCHAR(191) NOT NULL,
     `password` VARCHAR(191) NOT NULL,
@@ -372,9 +372,11 @@ CREATE TABLE `cash_registers` (
 CREATE TABLE `cash_movements` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `subtotal` DOUBLE NOT NULL,
-    `discount` DOUBLE NOT NULL,
-    `recharge` DOUBLE NOT NULL,
-    `otherTributes` DOUBLE NOT NULL,
+    `discount` DOUBLE NOT NULL DEFAULT 0,
+    `discountPercent` DOUBLE NOT NULL DEFAULT 0,
+    `recharge` DOUBLE NOT NULL DEFAULT 0,
+    `rechargePercent` DOUBLE NOT NULL DEFAULT 0,
+    `otherTributes` DOUBLE NOT NULL DEFAULT 0,
     `total` DOUBLE NOT NULL,
     `iva` BOOLEAN NOT NULL,
     `cashRegisterId` INTEGER NOT NULL,
@@ -389,6 +391,7 @@ CREATE TABLE `cash_movements` (
     `invoceNumberAfip` INTEGER NULL,
     `cae` VARCHAR(191) NULL,
     `vtoCae` DATETIME(3) NULL,
+    `impTotal` VARCHAR(191) NULL,
     `info` VARCHAR(191) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),

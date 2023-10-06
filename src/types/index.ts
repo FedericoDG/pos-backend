@@ -9,7 +9,7 @@ export interface Role {
 export interface User {
   id: number;
   name: string;
-  lastname: string;
+  lastname?: string;
   email: string;
   password?: string;
   roleId: number;
@@ -19,7 +19,6 @@ export interface User {
 export interface Client {
   id: number;
   name: string;
-  lastname: string;
   phone?: string;
   mobile?: string;
   address?: string;

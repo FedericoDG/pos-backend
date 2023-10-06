@@ -96,11 +96,10 @@ export const update = asyncHandler(
   async (req: Request<{ id?: number }, unknown, UpdateClientType>, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
-      const { name, lastname, phone, mobile, address, info, identificationId, document, ivaTypeId } = req.body;
+      const { name, phone, mobile, address, info, identificationId, document, ivaTypeId } = req.body;
 
       const data: UpdateClientType = {
         name,
-        lastname,
         phone,
         mobile,
         address,

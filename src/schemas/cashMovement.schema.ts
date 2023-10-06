@@ -32,6 +32,7 @@ export const createCashMovementsSchema = z.object({
   recharge: z.number().nonnegative(),
   rechargePercent: z.number().nonnegative(),
   info: z.string(),
+  creditNote: z.number().nonnegative().optional(),
 });
 
 export type CreateCashMovementsType = z.infer<typeof createCashMovementsSchema>;

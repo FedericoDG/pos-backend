@@ -2,7 +2,6 @@ import { z } from 'zod';
 
 export const createClientSchema = z.object({
   name: z.string().nonempty(),
-  lastname: z.string().nonempty(),
   identificationId: z.coerce.number().min(1),
   document: z.string().nonempty(),
   ivaTypeId: z.coerce.number().min(1),
@@ -16,7 +15,6 @@ export const createClientSchema = z.object({
 
 export const updateClientSchema = z.object({
   name: z.string().optional(),
-  lastname: z.string().optional(),
   identificationId: z.coerce.number().min(1),
   document: z.string().nonempty(),
   ivaTypeId: z.coerce.number().min(1),

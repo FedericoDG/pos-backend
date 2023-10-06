@@ -91,6 +91,7 @@ export const create = asyncHandler(
         invoceTypeId,
         otherTributes,
         iva,
+        creditNote,
       } = req.body;
       const { id: userId } = req.user;
 
@@ -111,27 +112,27 @@ export const create = asyncHandler(
         data: { finalBalance: finalBalance },
       });
 
+      const data: any = {
+        iva,
+        cashRegisterId,
+        subtotal: subtotal,
+        discount,
+        discountPercent,
+        recharge,
+        rechargePercent,
+        otherTributes: subtotalOtherTributes,
+        total: subtotal + subtotalOtherTributes,
+        warehouseId,
+        clientId,
+        userId,
+        posNumber: afip?.posNumber || 1,
+        invoceTypeId,
+        invoceNumber: settings?.invoceNumber || 0,
+        info,
+      };
+
       // Create Cash Movement
-      const cashMovement = await prisma.cashMovements.create({
-        data: {
-          iva,
-          cashRegisterId,
-          subtotal: subtotal,
-          discount,
-          discountPercent,
-          recharge,
-          rechargePercent,
-          otherTributes: subtotalOtherTributes,
-          total: subtotal + subtotalOtherTributes,
-          warehouseId,
-          clientId,
-          userId,
-          posNumber: afip?.posNumber || 1,
-          invoceTypeId,
-          invoceNumber: settings?.invoceNumber || 0,
-          info,
-        },
-      });
+      const cashMovement = await prisma.cashMovements.create({ data });
 
       // Create Cash Movement Details
       const cashMovementId = cashMovement.id;

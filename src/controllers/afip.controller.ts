@@ -54,14 +54,6 @@ type CashMovementId = {
 };
 type CreateAfipInvoce = CreateCashMovementsType & CashMovementId;
 
-type CartItem = {
-  cashMovementId: number;
-  productId: number;
-  price: number;
-  quantity: number;
-  tax: number;
-};
-
 interface CreateAfipCreditNote extends CreateAfipInvoce {
   invoceTypeId: number;
   invoceNumber: number;
@@ -242,7 +234,6 @@ export const create = asyncHandler(
       const date = afip.ElectronicBilling.formatDate(voucherInfo.FchVto);
 
       // Update Cash Movement
-
       const cashMovement = await prisma.cashMovements.update({
         where: { id: cashMovementId },
         data: {
@@ -299,7 +290,7 @@ export const create = asyncHandler(
 export const creditNote = asyncHandler(
   async (req: Request<unknown, unknown, CreateAfipCreditNote>, res: Response, next: NextFunction) => {
     try {
-      const { clientId, warehouseId, invoceTypeId, invoceNumber, cart, payments } = req.body;
+      const { clientId, warehouseId, invoceTypeId, invoceNumber, cart, payments, cashMovementId: cashMId } = req.body;
 
       const afip = new Afip({
         CUIT: process.env.CUIT,
@@ -474,6 +465,9 @@ export const creditNote = asyncHandler(
 
       // Create Cash Movement Details
       const cashMovementId = cashMovement.id;
+
+      // Udate Original CashMovemnet
+      await prisma.cashMovements.update({ where: { id: cashMId }, data: { creditNote: cashMovementId } });
 
       const cartWithcashMovementId = cart.map((item) => ({
         productId: item.productId,

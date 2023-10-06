@@ -4,8 +4,7 @@ const now = DateTime.now();
 
 export const clients = [
   {
-    name: 'Consumidor',
-    lastname: 'Final',
+    name: 'Consumidor Final',
     identificationId: 36,
     document: '00000000',
     ivaTypeId: 5,
@@ -19,8 +18,7 @@ export const clients = [
     updatedAt: now.plus({ minutes: 1 }).toString(),
   },
   {
-    name: 'Juan Carlos',
-    lastname: 'Pérez',
+    name: 'Juan Carlos Perez',
     identificationId: 25,
     document: '30710395949',
     ivaTypeId: 1,

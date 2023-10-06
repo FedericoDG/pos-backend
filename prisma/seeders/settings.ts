@@ -4,7 +4,7 @@ const now = DateTime.now();
 
 export const settings = [
   {
-    name: 'Delivery Hero Stores SA',
+    name: 'Delivery Hero Stores S.A.',
     address: 'Av. Brasil, 123',
     cp: '5000',
     province: 'Córdoba',
@@ -13,6 +13,7 @@ export const settings = [
     invoceName: 'Presupuesto',
     invoceNumber: 3,
     imageURL: 'https://live.pystatic.com/webassets/pwa/icons/icon-384x384.png',
+    maxPerInvoice: 92720,
     createdAt: now.plus({ minutes: 1 }).toString(),
     updatedAt: now.plus({ minutes: 1 }).toString(),
   },
