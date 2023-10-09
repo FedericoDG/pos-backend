@@ -1,5 +1,8 @@
 import { z } from 'zod';
 
-export const afipSchema = z.object({});
+export const afipEditSttingsSchema = z.object({
+  posNumber: z.number().nonnegative(),
+  maxPerInvoice: z.number().nonnegative(),
+});
 
-export type afipType = z.infer<typeof afipSchema>;
+export type afipEditSttingsType = z.infer<typeof afipEditSttingsSchema>;

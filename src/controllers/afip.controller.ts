@@ -6,9 +6,8 @@ import Afip from '@afipsdk/afip.js';
 import { asyncHandler } from '../helpers/asyncHandler';
 import { endpointResponse } from '../helpers/endpointResponse';
 
-import { afipType } from '../schemas/afip.schema';
+import { afipEditSttingsType } from '../schemas/afip.schema';
 import { CreateCashMovementsType } from 'src/schemas/cashMovement.schema';
-import warehouse from '../routes/warehouse.route';
 
 type Iva = {
   Id: number;
@@ -110,6 +109,33 @@ export const settings = asyncHandler(
       });
       if (error instanceof Error) {
         const httpError = createHttpError(500, `[AFIP - GET ONE]: ${error.message}`);
+        next(httpError);
+      }
+    }
+  },
+);
+
+export const editSettings = asyncHandler(
+  async (req: Request<unknown, unknown, afipEditSttingsType>, res: Response, next: NextFunction) => {
+    try {
+      const data = req.body;
+
+      const settings = await prisma.afip.update({ where: { id: 1 }, data });
+
+      endpointResponse({
+        res,
+        code: 200,
+        status: true,
+        message: 'Parámetros de AFIP actualizados',
+        body: {
+          afip: {
+            ...settings,
+          },
+        },
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        const httpError = createHttpError(500, `[AFIP - UPDATE]: ${error.message}`);
         next(httpError);
       }
     }

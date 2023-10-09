@@ -28,19 +28,18 @@ datasource db {
 }
 
 model Settings {
-  id            Int      @id @default(autoincrement())
-  name          String
-  address       String
-  cp            String
-  province      String
-  ivaCondition  String
-  cuit          String
-  invoceName    String
-  invoceNumber  Int
-  imageURL      String
-  maxPerInvoice Int
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @default(now()) @updatedAt
+  id           Int      @id @default(autoincrement())
+  name         String
+  address      String
+  cp           String
+  province     String
+  ivaCondition String
+  cuit         String
+  invoceName   String
+  invoceNumber Int
+  imageURL     String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now()) @updatedAt
 
   @@map(name: "settings")
 }
@@ -48,6 +47,7 @@ model Settings {
 model Afip {
   id             Int      @id @default(autoincrement())
   posNumber      Int
+  maxPerInvoice  Int
   certExpiration DateTime
   createdAt      DateTime @default(now())
   updatedAt      DateTime @default(now()) @updatedAt
