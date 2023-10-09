@@ -9,7 +9,7 @@ import {
   CreateCashRegisterType,
   UpdateCashRegisterByIdType,
   UpdateCashRegisterType,
-} from 'src/schemas/cashRegister.schema';
+} from '../schemas/cashRegister.schema';
 
 const prisma = new PrismaClient();
 

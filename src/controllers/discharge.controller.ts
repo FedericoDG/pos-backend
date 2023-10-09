@@ -5,7 +5,7 @@ import createHttpError from 'http-errors';
 import { asyncHandler } from '../helpers/asyncHandler';
 import { endpointResponse } from '../helpers/endpointResponse';
 
-import { CreateDischargeType } from 'src/schemas/discharge.schema';
+import { CreateDischargeType } from '../schemas/discharge.schema';
 
 const prisma = new PrismaClient();
 

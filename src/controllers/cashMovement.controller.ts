@@ -5,7 +5,7 @@ import createHttpError from 'http-errors';
 import { asyncHandler } from '../helpers/asyncHandler';
 import { endpointResponse } from '../helpers/endpointResponse';
 
-import { CreateCashMovementsType } from 'src/schemas/cashMovement.schema';
+import { CreateCashMovementsType } from '../schemas/cashMovement.schema';
 
 const prisma = new PrismaClient();
 
@@ -91,7 +91,6 @@ export const create = asyncHandler(
         invoceTypeId,
         otherTributes,
         iva,
-        creditNote,
       } = req.body;
       const { id: userId } = req.user;
 

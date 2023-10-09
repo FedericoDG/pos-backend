@@ -7,7 +7,7 @@ import { create, creditNote, editSettings, settings } from '../controllers/afip.
 
 // Middlewares
 import { accessLevel, validToken } from '../middlewares/auth.middleware';
-import { schemaValidator } from 'src/middlewares/schemaValidator.middleware';
+import { schemaValidator } from '../middlewares/schemaValidator.middleware';
 
 // Schema
 import { afipEditSttingsSchema } from '../schemas/afip.schema';

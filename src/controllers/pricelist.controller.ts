@@ -5,7 +5,7 @@ import createHttpError from 'http-errors';
 import { asyncHandler } from '../helpers/asyncHandler';
 import { endpointResponse } from '../helpers/endpointResponse';
 
-import { CreatePriceListType, UpdatePriceListType } from 'src/schemas/pricelist.schema';
+import { CreatePriceListType, UpdatePriceListType } from '../schemas/pricelist.schema';
 import { getList } from '../helpers/getList';
 
 const prisma = new PrismaClient();

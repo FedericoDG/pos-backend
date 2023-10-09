@@ -7,7 +7,7 @@ import { asyncHandler } from '../helpers/asyncHandler';
 import { endpointResponse } from '../helpers/endpointResponse';
 
 import { afipEditSttingsType } from '../schemas/afip.schema';
-import { CreateCashMovementsType } from 'src/schemas/cashMovement.schema';
+import { CreateCashMovementsType } from '../schemas/cashMovement.schema';
 
 type Iva = {
   Id: number;

@@ -4,7 +4,7 @@ import createHttpError from 'http-errors';
 
 import { bcCompare } from '../helpers/bcrypt';
 
-import { Client } from 'src/types';
+import { Client } from '../types';
 
 const prisma = new PrismaClient();
 

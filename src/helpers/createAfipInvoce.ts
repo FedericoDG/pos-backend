@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { CreateCashMovementsType } from 'src/schemas/cashMovement.schema';
+import { CreateCashMovementsType } from '../schemas/cashMovement.schema';
 import Afip from '@afipsdk/afip.js';
 
 type Iva = {

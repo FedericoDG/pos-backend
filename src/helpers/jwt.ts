@@ -1,6 +1,6 @@
 import jsonWebToken from 'jsonwebtoken';
 
-import { User } from 'src/types';
+import { User } from '../types';
 
 export const jwtSign = (user: User) => jsonWebToken.sign(user, process.env.SECRET || '');
 

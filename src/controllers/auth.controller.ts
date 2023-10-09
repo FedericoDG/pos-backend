@@ -5,7 +5,7 @@ import { asyncHandler } from '../helpers/asyncHandler';
 import { endpointResponse } from '../helpers/endpointResponse';
 import { jwtSign } from '../helpers/jwt';
 
-import { LoginType } from 'src/schemas/auth.schema';
+import { LoginType } from '../schemas/auth.schema';
 
 export const login = asyncHandler(
   async (req: Request<unknown, unknown, LoginType>, res: Response, next: NextFunction) => {

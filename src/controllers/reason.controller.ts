@@ -5,7 +5,7 @@ import createHttpError from 'http-errors';
 import { asyncHandler } from '../helpers/asyncHandler';
 import { endpointResponse } from '../helpers/endpointResponse';
 
-import { CreateReasonType, UpdateReasonType } from 'src/schemas/reason.schema';
+import { CreateReasonType, UpdateReasonType } from '../schemas/reason.schema';
 
 const prisma = new PrismaClient();
 
