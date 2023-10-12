@@ -48,6 +48,7 @@ model Afip {
   id             Int      @id @default(autoincrement())
   posNumber      Int
   maxPerInvoice  Int
+  invoiceM       Int      @default(0)
   certExpiration DateTime
   createdAt      DateTime @default(now())
   updatedAt      DateTime @default(now()) @updatedAt

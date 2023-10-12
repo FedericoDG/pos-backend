@@ -80,6 +80,9 @@ export const settings = asyncHandler(
       const last_voucherA = await afip.ElectronicBilling.getLastVoucher(settings?.posNumber, 1);
       const last_voucherB = await afip.ElectronicBilling.getLastVoucher(settings?.posNumber, 6);
       const last_voucherM = await afip.ElectronicBilling.getLastVoucher(settings?.posNumber, 51);
+      const last_voucherNCA = await afip.ElectronicBilling.getLastVoucher(settings?.posNumber, 3);
+      const last_voucherNCB = await afip.ElectronicBilling.getLastVoucher(settings?.posNumber, 8);
+      const last_voucherNCM = await afip.ElectronicBilling.getLastVoucher(settings?.posNumber, 53);
 
       endpointResponse({
         res,
@@ -92,6 +95,9 @@ export const settings = asyncHandler(
             nextInvoceNumberA: last_voucherA + 1,
             nextInvoceNumberB: last_voucherB + 1,
             nextInvoceNumberM: last_voucherM + 1,
+            nextInvoceNumberNCA: last_voucherNCA + 1,
+            nextInvoceNumberNCB: last_voucherNCB + 1,
+            nextInvoceNumberNCM: last_voucherNCM + 1,
           },
         },
       });

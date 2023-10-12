@@ -13,7 +13,7 @@ import { schemaValidator } from '../middlewares/schemaValidator.middleware';
 import { afipEditSttingsSchema } from '../schemas/afip.schema';
 
 // Routes
-afip.get('/settings/', [validToken, accessLevel('SUPERADMIN')], settings);
+afip.get('/settings/', [validToken, accessLevel('DRIVER')], settings);
 afip.put('/settings/', [validToken, accessLevel('SUPERADMIN'), schemaValidator(afipEditSttingsSchema)], editSettings);
 afip.post('/', [validToken, accessLevel('SELLER')], create);
 afip.post('/nota-credito', [validToken, accessLevel('ADMIN')], creditNote);

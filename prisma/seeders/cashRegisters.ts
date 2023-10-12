@@ -6,7 +6,7 @@ export const cashRegisters = [
   {
     openingDate: now.plus({ minutes: 1 }).toString(),
     initialBalance: 2355,
-    finalBalance: 8800.25,
+    finalBalance: 9770.25,
     userId: 3,
     createdAt: now.plus({ minutes: 1 }).toString(),
     updatedAt: now.plus({ minutes: 1 }).toString(),

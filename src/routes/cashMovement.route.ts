@@ -15,7 +15,7 @@ import { userExistMidd } from '../middlewares/checkCart';
 
 // Routes
 purchase.get('/', [validToken, accessLevel('ADMIN')], getAll);
-purchase.get('/:id', [validToken, accessLevel('ADMIN')], getById);
+purchase.get('/:id', [validToken, accessLevel('DRIVER')], getById);
 purchase.post(
   '/',
   [validToken, accessLevel('DRIVER'), schemaValidator(createCashMovementsSchema), userExistMidd],
