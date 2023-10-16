@@ -4,31 +4,77 @@ import createHttpError from 'http-errors';
 
 import { asyncHandler } from '../helpers/asyncHandler';
 import { endpointResponse } from '../helpers/endpointResponse';
+import { getMovementsType } from 'src/schemas/movement.schema';
 
-import { CreateCashMovementsType } from '../schemas/cashMovement.schema';
+//import { CreateCashMovementsType } from '../schemas/cashMovement.schema';
 
 const prisma = new PrismaClient();
 
 export const getAll = asyncHandler(
-  async (_req: Request<unknown, unknown, unknown>, res: Response, next: NextFunction) => {
+  async (req: Request<unknown, unknown, getMovementsType>, res: Response, next: NextFunction) => {
     try {
-      const cashMovements = await prisma.cashMovements.findMany({
-        include: { client: true, user: { include: { role: true } }, warehouse: true, paymentMethodDetails: true },
+      const { userId, paymentMethodId, from, to } = req.body;
+      const parsedFrom = new Date(from.concat(' 00:00:00'));
+      const parsedTo = new Date(to.concat(' 23:59:59'));
+
+      const data: { userId?: number; paymentMethodId?: number } = {};
+
+      if (userId) {
+        data.userId = userId;
+      }
+
+      if (paymentMethodId) {
+        data.paymentMethodId = paymentMethodId;
+      }
+
+      const movements = await prisma.movements.findMany({
+        where: {
+          ...data,
+          createdAt: {
+            lte: parsedTo,
+            gte: parsedFrom,
+          },
+        },
+        include: { user: { include: { role: true } }, paymentMethod: true },
         orderBy: [{ id: 'desc' }],
       });
+
+      const incomes = movements.filter((el) => el.type === MovementType.IN);
+      const totalIncomes = incomes.reduce((acc, el) => acc + el.amount, 0) || 0;
+      const totalCash = incomes.filter((el) => el.paymentMethodId === 1).reduce((acc, el) => acc + el.amount, 0) || 0;
+      const totalDebit = incomes.filter((el) => el.paymentMethodId === 2).reduce((acc, el) => acc + el.amount, 0) || 0;
+      const totalCredit = incomes.filter((el) => el.paymentMethodId === 3).reduce((acc, el) => acc + el.amount, 0) || 0;
+      const totalTransfer =
+        incomes.filter((el) => el.paymentMethodId === 4).reduce((acc, el) => acc + el.amount, 0) || 0;
+      const totalMercadoPago =
+        incomes.filter((el) => el.paymentMethodId === 5).reduce((acc, el) => acc + el.amount, 0) || 0;
+
+      const outcomes = movements.filter((el) => el.type === MovementType.OUT);
+      const totalOutcomes = outcomes.reduce((acc, el) => acc + el.amount, 0) || 0;
 
       endpointResponse({
         res,
         code: 200,
         status: true,
-        message: 'Cajas recuperadas',
+        message: 'Movimientos recuperados',
         body: {
-          cashMovements,
+          movements,
+          incomes: {
+            totalIncomes,
+            totalCash,
+            totalDebit,
+            totalCredit,
+            totalTransfer,
+            totalMercadoPago,
+          },
+          outcomes: {
+            totalOutcomes,
+          },
         },
       });
     } catch (error) {
       if (error instanceof Error) {
-        const httpError = createHttpError(500, `[Cash Movements - GET ALL]: ${error.message}`);
+        const httpError = createHttpError(500, `[Movements - GET ALL]: ${error.message}`);
         next(httpError);
       }
     }
@@ -36,24 +82,37 @@ export const getAll = asyncHandler(
 );
 
 export const getById = asyncHandler(
-  async (req: Request<{ id?: number }, unknown, unknown>, res: Response, next: NextFunction) => {
+  async (req: Request<{ id?: number }, unknown, getMovementsType>, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
-      const cashMovement = await prisma.cashMovements.findFirst({
-        where: { id: Number(id) },
-        include: {
-          client: { include: { identification: true } },
-          user: { include: { role: true } },
-          warehouse: true,
-          paymentMethodDetails: { include: { paymentMethod: true } },
-          otherTributesDetails: { include: { otherTribute: true } },
-        },
-        orderBy: [{ id: 'desc' }],
-      });
+      const { userId, paymentMethodId, from, to } = req.body;
 
-      const cashMovementDetails = await prisma.cashMovementsDetails.findMany({
-        where: { cashMovementId: Number(id) },
-        include: { product: { include: { category: true, unit: true } } },
+      const parsedFrom = new Date(from.concat(' 00:00:00'));
+      const parsedTo = new Date(to.concat(' 23:59:59'));
+
+      const data: { userId?: number; paymentMethodId?: number } = {};
+
+      if (userId) {
+        data.userId = userId;
+      }
+
+      if (paymentMethodId) {
+        data.paymentMethodId = paymentMethodId;
+      }
+
+      const movement = await prisma.movements.findFirst({
+        where: {
+          ...data,
+          id: Number(id),
+          createdAt: {
+            lte: parsedTo,
+            gte: parsedFrom,
+          },
+        },
+        include: {
+          user: { include: { role: true } },
+          paymentMethod: true,
+        },
         orderBy: [{ id: 'desc' }],
       });
 
@@ -63,19 +122,19 @@ export const getById = asyncHandler(
         status: true,
         message: 'Movimiento recuperado',
         body: {
-          cashMovement: { ...cashMovement, cashMovementDetails },
+          movement,
         },
       });
     } catch (error) {
       if (error instanceof Error) {
-        const httpError = createHttpError(500, `[Cash Movement - GET ONE]: ${error.message}`);
+        const httpError = createHttpError(500, `[Movement - GET ONE]: ${error.message}`);
         next(httpError);
       }
     }
   },
 );
 
-export const create = asyncHandler(
+/* export const create = asyncHandler(
   async (req: Request<unknown, unknown, CreateCashMovementsType>, res: Response, next: NextFunction) => {
     try {
       const {
@@ -216,15 +275,9 @@ export const create = asyncHandler(
       // Update Invoce Number
       await prisma.settings.update({ where: { id: 1 }, data: { invoceNumber: { increment: 1 } } });
 
-      // Create Balance
-      const mappedMovements = reducedPaymentsArray.map((item) => ({
-        amount: item.amount,
-        type: MovementType.IN,
-        concept: 'Venta de productos',
-        paymentMethodId: item.paymentMethodId,
-        userId: req.user.id,
-      }));
-      await prisma.movements.createMany({ data: mappedMovements });
+      /// TODO
+      // Create Movement
+      // await prisma.movements.create({ data: { type: 'IN', amount: subtotal + subtotalOtherTributes, userId } });
 
       endpointResponse({
         res,
@@ -242,43 +295,6 @@ export const create = asyncHandler(
       }
     }
   },
-);
-
-export const checkCart = asyncHandler(
-  async (req: Request<unknown, unknown, any>, res: Response, next: NextFunction) => {
-    try {
-      const { cart, warehouseId } = req.body;
-      const filteredCart = cart.filter((el) => !el.allow);
-      filteredCart.sort((a, b) => a.productId - b.productId);
-
-      const ids = filteredCart.map((el) => el.productId);
-      const stocks = await prisma.stocks.findMany({
-        where: { warehouseId, productId: { in: ids } },
-        select: { productId: true, stock: true },
-      });
-
-      const error: number[] = [];
-
-      for (let index = 0; index < filteredCart.length; index++) {
-        if (filteredCart[index].quantity > stocks[index].stock) error.push(filteredCart[index].productId);
-      }
-
-      endpointResponse({
-        res,
-        code: 200,
-        status: true,
-        message: 'Caja creada',
-        body: {
-          error,
-        },
-      });
-    } catch (error) {
-      if (error instanceof Error) {
-        const httpError = createHttpError(500, `[Cash Registers - CHECK CART]: ${error.message}`);
-        next(httpError);
-      }
-    }
-  },
-);
+); */
 
 //TODO Undo Cash Movement

@@ -1,5 +1,5 @@
 import { NextFunction, Response, Request } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { MovementType, PrismaClient } from '@prisma/client';
 import createHttpError from 'http-errors';
 
 import { asyncHandler } from '../helpers/asyncHandler';
@@ -303,7 +303,15 @@ export const closeById = asyncHandler(
         cart.sort((a, b) => a.productId - b.productId);
         const cost = cart.reduce((acc, item) => acc + Number(item.quantity) * Number(item.cost), 0);
         const { id } = await prisma.discharges.create({ data: { warehouseId, userId: Number(userId), cost } });
-        await prisma.movements.create({ data: { amount: cost, type: 'OUT', userId: Number(userId) } });
+        await prisma.movements.create({
+          data: {
+            amount: cost,
+            type: MovementType.OUT,
+            concept: 'Baja/Pérdida de productos',
+            paymentMethodId: 1,
+            userId: Number(userId),
+          },
+        });
         const productsIds = cart.map((item) => item.productId).sort();
         const cartWithWarehouseId = cart
           .map((item) => ({

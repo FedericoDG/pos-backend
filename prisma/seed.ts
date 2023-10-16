@@ -78,6 +78,8 @@ async function main() {
 
   await prisma.costs.createMany({ data: costs });
 
+  await prisma.paymentMethods.createMany({ data: paymentMethods });
+
   await prisma.movements.createMany({ data: movements });
 
   await prisma.discharges.createMany({ data: discharges });
@@ -87,8 +89,6 @@ async function main() {
   await prisma.transfer.createMany({ data: transfer });
 
   await prisma.transferDetails.createMany({ data: transferDetails });
-
-  await prisma.paymentMethods.createMany({ data: paymentMethods });
 
   await prisma.invoceTypes.createMany({ data: invoceTypes });
 

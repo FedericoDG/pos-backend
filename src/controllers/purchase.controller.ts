@@ -1,5 +1,5 @@
 import { NextFunction, Response, Request } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { MovementType, PrismaClient } from '@prisma/client';
 import createHttpError from 'http-errors';
 
 import { asyncHandler } from '../helpers/asyncHandler';
@@ -108,8 +108,16 @@ export const create = asyncHandler(
       const cartWithPurchaseId = cart.map((el) => ({ ...el, purchaseId: purchase.id }));
       await prisma.purchaseDetails.createMany({ data: cartWithPurchaseId });
 
-      // Movement
-      await prisma.movements.create({ data: { amount: rest.total, type: 'OUT', userId } });
+      // Create Balance
+      await prisma.movements.create({
+        data: {
+          amount: rest.total,
+          type: MovementType.OUT,
+          concept: 'Compra de productos',
+          paymentMethodId: 1,
+          userId,
+        },
+      });
 
       // Update Costs
       const costs = cart.filter((el) => el.price !== 0).map((el) => ({ productId: el.productId, price: el.price }));

@@ -355,14 +355,17 @@ model PurchaseDetails {
 }
 
 model Movements {
-  id        Int          @id @default(autoincrement())
-  amount    Float
-  type      MovementType
-  userId    Int
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @default(now()) @updatedAt
+  id              Int            @id @default(autoincrement())
+  amount          Float
+  concept         String
+  type            MovementType
+  userId          Int
+  paymentMethodId Int
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @default(now()) @updatedAt
   // Relations
-  user      Users        @relation(fields: [userId], references: [id])
+  user            Users          @relation(fields: [userId], references: [id])
+  paymentMethod   PaymentMethods @relation(fields: [paymentMethodId], references: [id])
 
   @@map(name: "movements")
 }
@@ -522,6 +525,7 @@ model PaymentMethods {
   updatedAt            DateTime               @default(now()) @updatedAt
   // Relations
   paymentMethodDetails PaymentMethodDetails[]
+  movements            Movements[]
 
   @@map(name: "payment_methods")
 }

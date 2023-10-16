@@ -1,5 +1,5 @@
 import { NextFunction, Response, Request } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { MovementType, PrismaClient } from '@prisma/client';
 import createHttpError from 'http-errors';
 
 import { asyncHandler } from '../helpers/asyncHandler';
@@ -105,8 +105,16 @@ export const create = asyncHandler(
 
       const { id } = await prisma.discharges.create({ data: { warehouseId, userId, cost } });
 
-      // Balance
-      await prisma.movements.create({ data: { amount: cost, type: 'OUT', userId } });
+      // Create Balance
+      await prisma.movements.create({
+        data: {
+          amount: cost,
+          type: MovementType.OUT,
+          concept: 'Baja/Pérdida de productos',
+          paymentMethodId: 1,
+          userId,
+        },
+      });
 
       // Discharge Details
       const productsIds = cart.map((item) => item.productId).sort();

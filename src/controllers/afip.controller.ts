@@ -1,5 +1,5 @@
 import { NextFunction, Response, Request } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { MovementType, PrismaClient } from '@prisma/client';
 import createHttpError from 'http-errors';
 import Afip from '@afipsdk/afip.js';
 
@@ -529,8 +529,16 @@ export const creditNote = asyncHandler(
 
       await prisma.paymentMethodDetails.createMany({ data: mappedPayments });
 
-      // Create Movement
-      // await prisma.movements.create({ data: { type: 'OUT', amount: importeTotal, userId: req.user.id } });
+      // Create Balance
+      const mappedMovements = reducedPaymentsArray.map((item) => ({
+        amount: item.amount,
+        type: MovementType.OUT,
+        concept: 'Nota de Crédito',
+        paymentMethodId: 1,
+        userId: req.user.id,
+      }));
+
+      await prisma.movements.createMany({ data: mappedMovements });
 
       //Update Warehouse
       const productIds = cart.map((item) => item.productId);
