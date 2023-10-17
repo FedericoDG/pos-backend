@@ -1,12 +1,10 @@
 import { NextFunction, Response, Request } from 'express';
-import { MovementType, PrismaClient } from '@prisma/client';
+import { MovementType, PrismaClient, Users } from '@prisma/client';
 import createHttpError from 'http-errors';
 
 import { asyncHandler } from '../helpers/asyncHandler';
 import { endpointResponse } from '../helpers/endpointResponse';
 import { getMovementsType } from 'src/schemas/movement.schema';
-
-//import { CreateCashMovementsType } from '../schemas/cashMovement.schema';
 
 const prisma = new PrismaClient();
 
@@ -23,16 +21,17 @@ export const getAll = asyncHandler(
       const parsedTo = new Date(to!.concat(' 23:59:59'));
 
       const data: Data = { userId: Number(userId), paymentMethodId: Number(paymentMethodId) };
+      let user: Users | null = null;
 
       if (userId === '0') {
         delete data.userId;
+      } else {
+        user = await prisma.users.findFirst({ where: { id: Number(userId) } });
       }
 
       if (paymentMethodId === '0') {
         delete data.paymentMethodId;
       }
-
-      console.log(data);
 
       const movements = await prisma.movements.findMany({
         where: {
@@ -65,7 +64,8 @@ export const getAll = asyncHandler(
         status: true,
         message: 'Movimientos recuperados',
         body: {
-          movements,
+          from: parsedFrom,
+          to: parsedTo,
           incomes: {
             totalIncomes,
             totalCash,
@@ -77,6 +77,8 @@ export const getAll = asyncHandler(
           outcomes: {
             totalOutcomes,
           },
+          user,
+          movements,
         },
       });
     } catch (error) {
