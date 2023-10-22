@@ -5,7 +5,7 @@ const now = DateTime.now();
 
 export const movements = [
   {
-    amount: 9770.25,
+    amount: 6000,
     type: MovementType.IN,
     concept: 'Venta de productos',
     userId: 3,
@@ -14,11 +14,29 @@ export const movements = [
     updatedAt: now.plus({ minutes: 1 }).toString(),
   },
   {
-    amount: 9770.25,
+    amount: 3770.25,
+    type: MovementType.IN,
+    concept: 'Venta de productos',
+    userId: 3,
+    paymentMethodId: 2,
+    createdAt: now.plus({ minutes: 1 }).toString(),
+    updatedAt: now.plus({ minutes: 1 }).toString(),
+  },
+  {
+    amount: 5000,
     type: MovementType.IN,
     concept: 'Venta de productos',
     userId: 4,
     paymentMethodId: 1,
+    createdAt: now.plus({ minutes: 1 }).toString(),
+    updatedAt: now.plus({ minutes: 1 }).toString(),
+  },
+  {
+    amount: 4770.25,
+    type: MovementType.IN,
+    concept: 'Venta de productos',
+    userId: 4,
+    paymentMethodId: 2,
     createdAt: now.plus({ minutes: 1 }).toString(),
     updatedAt: now.plus({ minutes: 1 }).toString(),
   },
