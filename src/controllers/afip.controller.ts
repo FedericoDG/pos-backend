@@ -536,6 +536,7 @@ export const creditNote = asyncHandler(
         concept: 'Nota de Crédito',
         paymentMethodId: 1,
         userId: req.user.id,
+        clientId,
       }));
 
       await prisma.movements.createMany({ data: mappedMovements });

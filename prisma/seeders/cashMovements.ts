@@ -8,7 +8,7 @@ export const cashMovements = [
     subtotal: 9770.25,
     total: 9770.25,
     warehouseId: 1,
-    clientId: 2,
+    clientId: 1,
     userId: 3,
     invoceTypeId: 4,
     posNumber: 1,
