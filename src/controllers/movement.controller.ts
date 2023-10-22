@@ -10,11 +10,12 @@ const prisma = new PrismaClient();
 
 interface Data {
   userId?: number;
+  clientId?: number;
   paymentMethodId?: number;
 }
 
-type Client = Clients & { total: number };
 type User = Users & { total: number };
+type Client = Clients & { total: number };
 
 export const getAll = asyncHandler(
   async (req: Request<unknown, unknown, unknown, getMovementsType>, res: Response, next: NextFunction) => {
@@ -25,15 +26,23 @@ export const getAll = asyncHandler(
 
       const data: Data = {
         userId: Number(userId),
+        clientId: Number(clientId),
         paymentMethodId: Number(paymentMethodId),
       };
 
       let user: Users | null = null;
+      let client: Clients | null = null;
 
       if (userId === '0') {
         delete data.userId;
       } else {
         user = await prisma.users.findFirst({ where: { id: Number(userId) } });
+      }
+
+      if (clientId === '0') {
+        delete data.clientId;
+      } else {
+        client = await prisma.clients.findFirst({ where: { id: Number(clientId) } });
       }
 
       if (paymentMethodId === '0') {
@@ -55,7 +64,7 @@ export const getAll = asyncHandler(
 
       const paymentMethodDetails = await prisma.paymentMethodDetails.findMany({
         where: {
-          id: { in: ids },
+          cashMovementId: { in: ids },
         },
         orderBy: [{ createdAt: 'desc' }],
       });
@@ -71,7 +80,21 @@ export const getAll = asyncHandler(
         console.log('NO HAY FILTRO DE USUARIO');
       }
 
-      let clients = mappedCashMovements.reduce((acc: Client[], curr) => {
+      if (clientId !== '0') {
+        mappedCashMovements = mappedCashMovements.filter((el) => el.clientId === Number(clientId));
+      } else {
+        console.log('NO HAY FILTRO DE CLIENTE');
+      }
+
+      if (paymentMethodId !== '0') {
+        mappedCashMovements = mappedCashMovements.filter(
+          (el) => el.paymentMethodDetails.paymentMethodId === Number(paymentMethodId),
+        );
+      } else {
+        console.log('NO HAY FILTRO DE FORMA DE PAGO');
+      }
+
+      const clients = mappedCashMovements.reduce((acc: Client[], curr) => {
         const exist = acc.find((el) => el.id === curr.client.id);
 
         if (exist) {
@@ -81,18 +104,25 @@ export const getAll = asyncHandler(
             exist.total += curr.total;
           }
         } else {
-          acc.push({
-            ...curr.client,
-            total: curr.total,
-          });
+          if (curr.invoceTypeId === 5 || curr.invoceTypeId === 6 || curr.invoceTypeId === 7) {
+            acc.push({
+              ...curr.client,
+              total: curr.total * -1,
+            });
+          } else {
+            acc.push({
+              ...curr.client,
+              total: curr.total,
+            });
+          }
         }
 
         return acc;
       }, []);
 
-      if (clientId !== '0') {
+      /* if (clientId !== '0') {
         clients = clients.filter((el) => el.id === Number(clientId));
-      }
+      } */
 
       const users = mappedCashMovements.reduce((acc: User[], curr) => {
         const exist = acc.find((el) => el.id === curr.user.id);
@@ -104,10 +134,17 @@ export const getAll = asyncHandler(
             exist.total += curr.total;
           }
         } else {
-          acc.push({
-            ...curr.user,
-            total: curr.total,
-          });
+          if (curr.invoceTypeId === 5 || curr.invoceTypeId === 6 || curr.invoceTypeId === 7) {
+            acc.push({
+              ...curr.user,
+              total: curr.total * -1,
+            });
+          } else {
+            acc.push({
+              ...curr.user,
+              total: curr.total,
+            });
+          }
         }
         return acc;
       }, []);
@@ -144,6 +181,8 @@ export const getAll = asyncHandler(
       const invoiceNCMCount = invoiceNCM.length;
       const invoiceNCMTotal = invoiceNCM.reduce((acc, el) => acc + el.total, 0) || 0;
 
+      console.log({ data });
+
       let movements = await prisma.movements.findMany({
         where: {
           ...data,
@@ -152,7 +191,7 @@ export const getAll = asyncHandler(
             lte: parsedTo,
           },
         },
-        include: { user: { include: { role: true } }, paymentMethod: true },
+        include: { user: { include: { role: true } }, client: true, paymentMethod: true },
         orderBy: [{ id: 'desc' }],
       });
 
@@ -161,6 +200,9 @@ export const getAll = asyncHandler(
       } else {
         console.log('NO HAY FILTRO DE METODO DE PAGO');
       }
+
+      const outcomes = movements.filter((el) => el.type === MovementType.OUT);
+      const totalOutcomes = outcomes.reduce((acc, el) => acc + el.amount, 0) || 0;
 
       const incomes = movements.filter((el) => el.type === MovementType.IN);
       const totalIncomes = incomes.reduce((acc, el) => acc + el.amount, 0) || 0;
@@ -172,15 +214,13 @@ export const getAll = asyncHandler(
       const totalMercadoPago =
         incomes.filter((el) => el.paymentMethodId === 5).reduce((acc, el) => acc + el.amount, 0) || 0;
 
-      const outcomes = movements.filter((el) => el.type === MovementType.OUT);
-      const totalOutcomes = outcomes.reduce((acc, el) => acc + el.amount, 0) || 0;
-
       endpointResponse({
         res,
         code: 200,
         status: true,
         message: 'Movimientos recuperados',
         body: {
+          mappedCashMovements,
           from: parsedFrom,
           to: parsedTo,
           incomes: {
@@ -225,6 +265,7 @@ export const getAll = asyncHandler(
           clients,
           users,
           user,
+          client,
         },
       });
     } catch (error) {

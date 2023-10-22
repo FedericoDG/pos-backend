@@ -315,6 +315,7 @@ model Clients {
   ivaType          IvaType           @relation(fields: [ivaTypeId], references: [id])
   cashMovements    CashMovements[]
   userPreferences  UserPreferences[]
+  Movements        Movements[]
 
   @@map(name: "clients")
 }
@@ -360,11 +361,13 @@ model Movements {
   concept         String
   type            MovementType
   userId          Int
+  clientId        Int?
   paymentMethodId Int
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @default(now()) @updatedAt
   // Relations
   user            Users          @relation(fields: [userId], references: [id])
+  client          Clients?       @relation(fields: [clientId], references: [id])
   paymentMethod   PaymentMethods @relation(fields: [paymentMethodId], references: [id])
 
   @@map(name: "movements")

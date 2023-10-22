@@ -223,6 +223,7 @@ export const create = asyncHandler(
         concept: 'Venta de productos',
         paymentMethodId: item.paymentMethodId,
         userId: req.user.id,
+        clientId,
       }));
       await prisma.movements.createMany({ data: mappedMovements });
 
