@@ -1,5 +1,5 @@
 import { NextFunction, Response, Request } from 'express';
-import { Clients, MovementType, PrismaClient, Users } from '@prisma/client';
+import { CashMovements, Clients, Identifications, MovementType, PrismaClient, Roles, Users } from '@prisma/client';
 import createHttpError from 'http-errors';
 
 import { asyncHandler } from '../helpers/asyncHandler';
@@ -49,7 +49,7 @@ export const getAll = asyncHandler(
         delete data.paymentMethodId;
       }
 
-      const cashMovements = await prisma.cashMovements.findMany({
+      let mappedCashMovements = await prisma.cashMovements.findMany({
         where: {
           createdAt: {
             gte: parsedFrom,
@@ -59,20 +59,6 @@ export const getAll = asyncHandler(
         include: { user: { include: { role: true } }, client: { include: { identification: true } } },
         orderBy: [{ createdAt: 'desc' }],
       });
-
-      const ids = cashMovements.map((el) => el.id);
-
-      const paymentMethodDetails = await prisma.paymentMethodDetails.findMany({
-        where: {
-          cashMovementId: { in: ids },
-        },
-        orderBy: [{ createdAt: 'desc' }],
-      });
-
-      let mappedCashMovements = cashMovements.map((el, id) => ({
-        ...el,
-        paymentMethodDetails: paymentMethodDetails[id],
-      }));
 
       if (userId !== '0') {
         mappedCashMovements = mappedCashMovements.filter((el) => el.userId === Number(userId));
@@ -86,13 +72,13 @@ export const getAll = asyncHandler(
         console.log('NO HAY FILTRO DE CLIENTE');
       }
 
-      if (paymentMethodId !== '0') {
+      /* if (paymentMethodId !== '0') {
         mappedCashMovements = mappedCashMovements.filter(
           (el) => el.paymentMethodDetails.paymentMethodId === Number(paymentMethodId),
         );
       } else {
         console.log('NO HAY FILTRO DE FORMA DE PAGO');
-      }
+      } */
 
       const clients = mappedCashMovements.reduce((acc: Client[], curr) => {
         const exist = acc.find((el) => el.id === curr.client.id);
@@ -191,7 +177,7 @@ export const getAll = asyncHandler(
             lte: parsedTo,
           },
         },
-        include: { user: { include: { role: true } }, client: true, paymentMethod: true },
+        include: { user: { include: { role: true } }, client: true, paymentMethod: true, cashMovement: true },
         orderBy: [{ id: 'desc' }],
       });
 
@@ -201,18 +187,23 @@ export const getAll = asyncHandler(
         console.log('NO HAY FILTRO DE METODO DE PAGO');
       }
 
-      const outcomes = movements.filter((el) => el.type === MovementType.OUT);
-      const totalOutcomes = outcomes.reduce((acc, el) => acc + el.amount, 0) || 0;
+      const outcomes = movements.filter((el) => el.type === MovementType.OUT && el.concept !== 'N. de Crédito');
+      const purchases = outcomes.filter((el) => el.concept === 'Compra').reduce((acc, el) => acc + el.amount, 0) || 0;
+      const destroys =
+        outcomes.filter((el) => el.concept === 'Baja/Pérdida').reduce((acc, el) => acc + el.amount, 0) || 0;
+      const totalOutcomes = purchases + destroys;
 
       const incomes = movements.filter((el) => el.type === MovementType.IN);
-      const totalIncomes = incomes.reduce((acc, el) => acc + el.amount, 0) || 0;
-      const totalCash = incomes.filter((el) => el.paymentMethodId === 1).reduce((acc, el) => acc + el.amount, 0) || 0;
+      const totalCash =
+        incomes.filter((el) => el.paymentMethodId === 1).reduce((acc, el) => acc + el.amount, 0) -
+          (invoiceNCATotal + invoiceNCBTotal - invoiceNCMTotal) || 0;
       const totalDebit = incomes.filter((el) => el.paymentMethodId === 2).reduce((acc, el) => acc + el.amount, 0) || 0;
       const totalCredit = incomes.filter((el) => el.paymentMethodId === 3).reduce((acc, el) => acc + el.amount, 0) || 0;
       const totalTransfer =
         incomes.filter((el) => el.paymentMethodId === 4).reduce((acc, el) => acc + el.amount, 0) || 0;
       const totalMercadoPago =
         incomes.filter((el) => el.paymentMethodId === 5).reduce((acc, el) => acc + el.amount, 0) || 0;
+      const totalIncomes = totalCash + totalDebit + totalCredit + totalTransfer + totalMercadoPago;
 
       endpointResponse({
         res,
@@ -220,7 +211,6 @@ export const getAll = asyncHandler(
         status: true,
         message: 'Movimientos recuperados',
         body: {
-          mappedCashMovements,
           from: parsedFrom,
           to: parsedTo,
           incomes: {
@@ -232,6 +222,8 @@ export const getAll = asyncHandler(
             totalMercadoPago,
           },
           outcomes: {
+            purchases,
+            destroys,
             totalOutcomes,
           },
           discounts,
@@ -241,7 +233,7 @@ export const getAll = asyncHandler(
             invoiceAFIPCount:
               invoiceACount + invoiceBCount + invoiceMCount + invoiceNCACount + invoiceNCBCount + invoiceNCMCount,
             invoiceAFIPTotal:
-              invoiceATotal + invoiceBTotal + invoiceMTotal - invoiceNCATotal - invoiceNCBTotal - invoiceNCMTotal,
+              invoiceATotal + invoiceBTotal + invoiceMTotal - (invoiceNCATotal - invoiceNCBTotal - invoiceNCMTotal),
             //
             invoiceAFIPNCCount: invoiceNCACount + invoiceNCBCount + invoiceNCMCount,
             invoiceAFIPNCTotal: invoiceNCATotal + invoiceNCBTotal + invoiceNCMTotal,

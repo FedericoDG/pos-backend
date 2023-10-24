@@ -94,6 +94,9 @@ export const create = asyncHandler(
       } = req.body;
       const { id: userId } = req.user;
 
+      console.log('*** ES POR ACA ***');
+      console.log(req.body);
+
       const cashRegister = await prisma.cashRegisters.findFirst({ where: { userId }, orderBy: [{ id: 'desc' }] });
       const settings = await prisma.settings.findFirst({ select: { invoceNumber: true } });
       const afip = await prisma.afip.findFirst({ select: { posNumber: true } });
@@ -220,12 +223,23 @@ export const create = asyncHandler(
       const mappedMovements = reducedPaymentsArray.map((item) => ({
         amount: item.amount,
         type: MovementType.IN,
-        concept: 'Venta de productos',
+        concept: 'Venta',
         paymentMethodId: item.paymentMethodId,
         userId: req.user.id,
         clientId,
+        cashMovementId,
       }));
-      await prisma.movements.createMany({ data: mappedMovements });
+
+      // wait prisma.movements.createMany({ data: mappedMovements });
+      const ids: number[] = [];
+
+      await Promise.all(
+        mappedMovements.map(async (data) => {
+          const fede = await prisma.movements.create({ data });
+          console.log(fede);
+          ids.push(fede.id);
+        }),
+      );
 
       endpointResponse({
         res,
@@ -234,6 +248,7 @@ export const create = asyncHandler(
         message: 'Movimiento creado',
         body: {
           cashMovement,
+          ids,
         },
       });
     } catch (error) {

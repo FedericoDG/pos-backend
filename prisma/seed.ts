@@ -80,8 +80,6 @@ async function main() {
 
   await prisma.paymentMethods.createMany({ data: paymentMethods });
 
-  await prisma.movements.createMany({ data: movements });
-
   await prisma.discharges.createMany({ data: discharges });
 
   await prisma.dischargeDetails.createMany({ data: dischargeDetails });
@@ -95,6 +93,8 @@ async function main() {
   await prisma.cashRegisters.createMany({ data: cashRegisters });
 
   await prisma.cashMovements.createMany({ data: cashMovements });
+
+  await prisma.movements.createMany({ data: movements });
 
   await prisma.cashMovementsDetails.createMany({ data: cashMovementDetails });
 
