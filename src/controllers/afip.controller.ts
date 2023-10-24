@@ -51,7 +51,12 @@ type Data = {
 type CashMovementId = {
   cashMovementId: number;
 };
-type CreateAfipInvoce = CreateCashMovementsType & CashMovementId;
+
+type MovementIds = {
+  movementIds: number[];
+};
+
+type CreateAfipInvoce = CreateCashMovementsType & CashMovementId & MovementIds;
 
 interface CreateAfipCreditNote extends CreateAfipInvoce {
   invoceTypeId: number;
@@ -151,7 +156,7 @@ export const editSettings = asyncHandler(
 export const create = asyncHandler(
   async (req: Request<unknown, unknown, CreateAfipInvoce>, res: Response, next: NextFunction) => {
     try {
-      const { clientId, cart, invoceTypeId, otherTributes, cashMovementId } = req.body;
+      const { clientId, cart, invoceTypeId, otherTributes, cashMovementId, movementIds } = req.body;
 
       const afip = new Afip({
         CUIT: process.env.CUIT,
@@ -277,6 +282,9 @@ export const create = asyncHandler(
           impTotal: voucherInfo.ImpTotal,
         },
       });
+
+      // UPDATE MOVEMENT
+      console.log({ movementIds });
 
       endpointResponse({
         res,
@@ -533,10 +541,11 @@ export const creditNote = asyncHandler(
       const mappedMovements = reducedPaymentsArray.map((item) => ({
         amount: item.amount,
         type: MovementType.OUT,
-        concept: 'Nota de Crédito',
+        concept: 'N. de Crédito',
         paymentMethodId: 1,
         userId: req.user.id,
         clientId,
+        cashMovementId,
       }));
 
       await prisma.movements.createMany({ data: mappedMovements });

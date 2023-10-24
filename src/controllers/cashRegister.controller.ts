@@ -307,7 +307,7 @@ export const closeById = asyncHandler(
           data: {
             amount: cost,
             type: MovementType.OUT,
-            concept: 'Baja/Pérdida de productos',
+            concept: 'Baja/Pérdida',
             paymentMethodId: 1,
             userId: Number(userId),
           },

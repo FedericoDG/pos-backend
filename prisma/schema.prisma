@@ -362,13 +362,15 @@ model Movements {
   type            MovementType
   userId          Int
   clientId        Int?
+  cashMovementId  Int?
   paymentMethodId Int
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @default(now()) @updatedAt
   // Relations
   user            Users          @relation(fields: [userId], references: [id])
-  client          Clients?       @relation(fields: [clientId], references: [id])
   paymentMethod   PaymentMethods @relation(fields: [paymentMethodId], references: [id])
+  client          Clients?       @relation(fields: [clientId], references: [id])
+  cashMovement    CashMovements? @relation(fields: [cashMovementId], references: [id])
 
   @@map(name: "movements")
 }
@@ -500,6 +502,7 @@ model CashMovements {
   cashMovementsDetails CashMovementsDetails[]
   paymentMethodDetails PaymentMethodDetails[]
   otherTributesDetails OtherTributesDetails[]
+  movements            Movements[]
 
   @@map(name: "cash_movements")
 }

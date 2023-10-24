@@ -113,7 +113,7 @@ export const create = asyncHandler(
         data: {
           amount: rest.total,
           type: MovementType.OUT,
-          concept: 'Compra de productos',
+          concept: 'Compra',
           paymentMethodId: 1,
           userId,
         },
