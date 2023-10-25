@@ -21,8 +21,8 @@ export const movements = [
     clientId: 1,
     paymentMethodId: 1,
     cashMovementId: 1,
-    createdAt: now.plus({ minutes: 2 }).toString(),
-    updatedAt: now.plus({ minutes: 2 }).toString(),
+    createdAt: now.plus({ day: -1 }).toString(),
+    updatedAt: now.plus({ day: -1 }).toString(),
   },
   {
     amount: 3770.25,
@@ -32,8 +32,8 @@ export const movements = [
     clientId: 1,
     paymentMethodId: 2,
     cashMovementId: 1,
-    createdAt: now.plus({ minutes: 3 }).toString(),
-    updatedAt: now.plus({ minutes: 3 }).toString(),
+    createdAt: now.plus({ day: -1 }).toString(),
+    updatedAt: now.plus({ day: -1 }).toString(),
   },
   {
     amount: 5000,

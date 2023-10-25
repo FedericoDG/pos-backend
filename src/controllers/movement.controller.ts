@@ -1,5 +1,5 @@
 import { NextFunction, Response, Request } from 'express';
-import { CashMovements, Clients, Identifications, MovementType, PrismaClient, Roles, Users } from '@prisma/client';
+import { Clients, MovementType, PrismaClient, Users } from '@prisma/client';
 import createHttpError from 'http-errors';
 
 import { asyncHandler } from '../helpers/asyncHandler';
@@ -20,14 +20,20 @@ type Client = Clients & { total: number };
 export const getAll = asyncHandler(
   async (req: Request<unknown, unknown, unknown, getMovementsType>, res: Response, next: NextFunction) => {
     try {
-      const { userId, clientId, paymentMethodId, from, to } = req.query;
+      const { userId, clientId, paymentMethodId, invoices, from, to } = req.query;
+      const invoicesIds: number[] = JSON.parse(invoices!);
+
+      if (invoicesIds.includes(1)) invoicesIds.push(5);
+      if (invoicesIds.includes(2)) invoicesIds.push(6);
+      if (invoicesIds.includes(3)) invoicesIds.push(7);
+
       const parsedFrom = new Date(from!.concat(' 00:00:00'));
       const parsedTo = new Date(to!.concat(' 23:59:59'));
 
       const data: Data = {
         userId: Number(userId),
         clientId: Number(clientId),
-        paymentMethodId: Number(paymentMethodId),
+        //paymentMethodId: Number(paymentMethodId),
       };
 
       let user: Users | null = null;
@@ -51,6 +57,7 @@ export const getAll = asyncHandler(
 
       let mappedCashMovements = await prisma.cashMovements.findMany({
         where: {
+          invoceTypeId: { in: invoicesIds },
           createdAt: {
             gte: parsedFrom,
             lte: parsedTo,
@@ -62,23 +69,11 @@ export const getAll = asyncHandler(
 
       if (userId !== '0') {
         mappedCashMovements = mappedCashMovements.filter((el) => el.userId === Number(userId));
-      } else {
-        console.log('NO HAY FILTRO DE USUARIO');
       }
 
       if (clientId !== '0') {
         mappedCashMovements = mappedCashMovements.filter((el) => el.clientId === Number(clientId));
-      } else {
-        console.log('NO HAY FILTRO DE CLIENTE');
       }
-
-      /* if (paymentMethodId !== '0') {
-        mappedCashMovements = mappedCashMovements.filter(
-          (el) => el.paymentMethodDetails.paymentMethodId === Number(paymentMethodId),
-        );
-      } else {
-        console.log('NO HAY FILTRO DE FORMA DE PAGO');
-      } */
 
       const clients = mappedCashMovements.reduce((acc: Client[], curr) => {
         const exist = acc.find((el) => el.id === curr.client.id);
@@ -105,10 +100,6 @@ export const getAll = asyncHandler(
 
         return acc;
       }, []);
-
-      /* if (clientId !== '0') {
-        clients = clients.filter((el) => el.id === Number(clientId));
-      } */
 
       const users = mappedCashMovements.reduce((acc: User[], curr) => {
         const exist = acc.find((el) => el.id === curr.user.id);
@@ -167,11 +158,10 @@ export const getAll = asyncHandler(
       const invoiceNCMCount = invoiceNCM.length;
       const invoiceNCMTotal = invoiceNCM.reduce((acc, el) => acc + el.total, 0) || 0;
 
-      console.log({ data });
-
       let movements = await prisma.movements.findMany({
         where: {
           ...data,
+          OR: [{ concept: 'Venta' }, { concept: 'N. de Crédito' }],
           createdAt: {
             gte: parsedFrom,
             lte: parsedTo,
@@ -181,11 +171,45 @@ export const getAll = asyncHandler(
         orderBy: [{ id: 'desc' }],
       });
 
-      if (paymentMethodId !== '0') {
-        movements = movements.filter((el) => el.paymentMethodId === Number(paymentMethodId));
-      } else {
-        console.log('NO HAY FILTRO DE METODO DE PAGO');
-      }
+      movements = movements.filter((el) => invoicesIds?.includes(el.cashMovement!.invoceTypeId));
+
+      const groupedMovements = movements.reduce((result: any, movement: any) => {
+        // Buscar si ya existe un grupo con el mismo cashMovement.id
+        const existingGroup = result.find((group) => group.cashMovement.id === movement.cashMovement.id);
+
+        if (existingGroup) {
+          // Si el grupo ya existe, agregamos el movimiento al grupo y sumamos el monto
+          existingGroup.amount += movement.amount;
+          existingGroup.details.push({
+            id: movement.paymentMethod.id,
+            code: movement.paymentMethod.code,
+            amount: movement.amount,
+            concept: movement.concept,
+            type: movement.type,
+            createdAt: movement.createdAt,
+          });
+        } else {
+          // Si el grupo no existe, creamos uno nuevo
+          result.push({
+            id: movement.cashMovement.id,
+            amount: movement.amount,
+            concept: movement.concept,
+            type: movement.type,
+            createdAt: movement.createdAt,
+            cashMovement: movement.cashMovement,
+            user: movement.user,
+            details: [
+              {
+                id: movement.paymentMethod.id,
+                code: movement.paymentMethod.code,
+                amount: movement.amount,
+              },
+            ],
+          });
+        }
+
+        return result;
+      }, []);
 
       const outcomes = movements.filter((el) => el.type === MovementType.OUT && el.concept !== 'N. de Crédito');
       const purchases = outcomes.filter((el) => el.concept === 'Compra').reduce((acc, el) => acc + el.amount, 0) || 0;
@@ -211,6 +235,7 @@ export const getAll = asyncHandler(
         status: true,
         message: 'Movimientos recuperados',
         body: {
+          movements: groupedMovements,
           from: parsedFrom,
           to: parsedTo,
           incomes: {
@@ -233,7 +258,7 @@ export const getAll = asyncHandler(
             invoiceAFIPCount:
               invoiceACount + invoiceBCount + invoiceMCount + invoiceNCACount + invoiceNCBCount + invoiceNCMCount,
             invoiceAFIPTotal:
-              invoiceATotal + invoiceBTotal + invoiceMTotal - (invoiceNCATotal - invoiceNCBTotal - invoiceNCMTotal),
+              invoiceATotal + invoiceBTotal + invoiceMTotal - (invoiceNCATotal + invoiceNCBTotal + invoiceNCMTotal),
             //
             invoiceAFIPNCCount: invoiceNCACount + invoiceNCBCount + invoiceNCMCount,
             invoiceAFIPNCTotal: invoiceNCATotal + invoiceNCBTotal + invoiceNCMTotal,
@@ -253,7 +278,6 @@ export const getAll = asyncHandler(
             invoiceNCMCount,
             invoiceNCMTotal,
           },
-          movements,
           clients,
           users,
           user,

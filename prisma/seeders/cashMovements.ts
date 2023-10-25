@@ -15,8 +15,8 @@ export const cashMovements = [
     invoceNumber: 1,
     iva: false,
     info: '',
-    createdAt: now.plus({ minutes: 1 }).toString(),
-    updatedAt: now.plus({ minutes: 1 }).toString(),
+    createdAt: now.plus({ day: -1 }).toString(),
+    updatedAt: now.plus({ day: -1 }).toString(),
   },
   {
     cashRegisterId: 2,
