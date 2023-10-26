@@ -174,11 +174,9 @@ export const getAll = asyncHandler(
       movements = movements.filter((el) => invoicesIds?.includes(el.cashMovement!.invoceTypeId));
 
       const groupedMovements = movements.reduce((result: any, movement: any) => {
-        // Buscar si ya existe un grupo con el mismo cashMovement.id
         const existingGroup = result.find((group) => group.cashMovement.id === movement.cashMovement.id);
 
         if (existingGroup) {
-          // Si el grupo ya existe, agregamos el movimiento al grupo y sumamos el monto
           existingGroup.amount += movement.amount;
           existingGroup.details.push({
             id: movement.paymentMethod.id,
@@ -189,7 +187,6 @@ export const getAll = asyncHandler(
             createdAt: movement.createdAt,
           });
         } else {
-          // Si el grupo no existe, creamos uno nuevo
           result.push({
             id: movement.cashMovement.id,
             amount: movement.amount,
