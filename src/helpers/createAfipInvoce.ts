@@ -176,8 +176,6 @@ export const createAfipInvoce = async (props: CreateCashMovementsType) => {
     Iva: iva,
   };
 
-  console.log(data);
-
   // TRIBUTES
   if (otherTributes.length > 0) {
     const tributes = otherTributes.map((item) => ({
@@ -223,5 +221,3 @@ export const createAfipInvoce = async (props: CreateCashMovementsType) => {
     };
   }
 };
-
-// 2534,25

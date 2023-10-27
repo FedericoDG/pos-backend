@@ -74,8 +74,6 @@ export const getById = asyncHandler(
         (el) => el.invoceTypeId === 5 || el.invoceTypeId === 6 || el.invoceTypeId === 7,
       );
 
-      console.log({ outcomes });
-
       const cash =
         incomes
           ?.map((movement) => movement.paymentMethodDetails.filter((el) => el.paymentMethodId === 1))
@@ -109,8 +107,6 @@ export const getById = asyncHandler(
           ?.map((movement) => movement.paymentMethodDetails)
           .flat()
           .reduce((acc, el) => acc + el.amount, 0) || 0;
-
-      console.log({ creditNotes });
 
       endpointResponse({
         res,

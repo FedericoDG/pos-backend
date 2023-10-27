@@ -3,7 +3,7 @@ import { Router } from 'express';
 const purchase = Router();
 
 // Controller
-import { checkCart, create, getAll, getById } from '../controllers/cashMovement.controller';
+import { checkCart, create, createCreditNote, getAll, getById } from '../controllers/cashMovement.controller';
 
 // Middlewares
 import { accessLevel, validToken } from '../middlewares/auth.middleware';
@@ -21,6 +21,7 @@ purchase.post(
   [validToken, accessLevel('DRIVER'), schemaValidator(createCashMovementsSchema), userExistMidd],
   create,
 );
+purchase.post('/nota-credito', [validToken, accessLevel('ADMIN'), userExistMidd], createCreditNote);
 purchase.post('/check-cart', [validToken, accessLevel('DRIVER')], checkCart);
 
 export default purchase;

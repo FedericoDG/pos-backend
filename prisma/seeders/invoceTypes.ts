@@ -603,4 +603,10 @@ export const invoceTypes = [
     createdAt: now.plus({ minutes: 100 }).toString(),
     updatedAt: now.plus({ minutes: 100 }).toString(),
   },
+  {
+    code: '666',
+    description: 'NOTAS DE CRÉDITO X',
+    createdAt: now.plus({ minutes: 101 }).toString(),
+    updatedAt: now.plus({ minutes: 101 }).toString(),
+  },
 ];

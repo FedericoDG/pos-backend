@@ -283,9 +283,6 @@ export const create = asyncHandler(
         },
       });
 
-      // UPDATE MOVEMENT
-      console.log({ movementIds });
-
       endpointResponse({
         res,
         code: 200,
@@ -560,8 +557,6 @@ export const creditNote = asyncHandler(
       const updatedStock = stock.map((item, idx) => ({ id: item.id, stock: item.stock + sortedCart[idx].quantity }));
 
       await Promise.all(updatedStock.map((el) => prisma.stocks.update({ where: { id: el.id }, data: { ...el } })));
-
-      console.log(voucherInfo);
 
       endpointResponse({
         res,

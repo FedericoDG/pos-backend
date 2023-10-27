@@ -26,6 +26,7 @@ export const getAll = asyncHandler(
       if (invoicesIds.includes(1)) invoicesIds.push(5);
       if (invoicesIds.includes(2)) invoicesIds.push(6);
       if (invoicesIds.includes(3)) invoicesIds.push(7);
+      if (invoicesIds.includes(4)) invoicesIds.push(8);
 
       const parsedFrom = new Date(from!.concat(' 00:00:00'));
       const parsedTo = new Date(to!.concat(' 23:59:59'));
@@ -75,17 +76,19 @@ export const getAll = asyncHandler(
         mappedCashMovements = mappedCashMovements.filter((el) => el.clientId === Number(clientId));
       }
 
+      const creditNotesIds = [5, 6, 7, 8];
+
       const clients = mappedCashMovements.reduce((acc: Client[], curr) => {
         const exist = acc.find((el) => el.id === curr.client.id);
 
         if (exist) {
-          if (curr.invoceTypeId === 5 || curr.invoceTypeId === 6 || curr.invoceTypeId === 7) {
+          if (creditNotesIds.includes(curr.invoceTypeId)) {
             exist.total -= curr.total;
           } else {
             exist.total += curr.total;
           }
         } else {
-          if (curr.invoceTypeId === 5 || curr.invoceTypeId === 6 || curr.invoceTypeId === 7) {
+          if (creditNotesIds.includes(curr.invoceTypeId)) {
             acc.push({
               ...curr.client,
               total: curr.total * -1,
@@ -105,13 +108,13 @@ export const getAll = asyncHandler(
         const exist = acc.find((el) => el.id === curr.user.id);
 
         if (exist) {
-          if (curr.invoceTypeId === 5 || curr.invoceTypeId === 6 || curr.invoceTypeId === 7) {
+          if (creditNotesIds.includes(curr.invoceTypeId)) {
             exist.total -= curr.total;
           } else {
             exist.total += curr.total;
           }
         } else {
-          if (curr.invoceTypeId === 5 || curr.invoceTypeId === 6 || curr.invoceTypeId === 7) {
+          if (creditNotesIds.includes(curr.invoceTypeId)) {
             acc.push({
               ...curr.user,
               total: curr.total * -1,
@@ -158,6 +161,10 @@ export const getAll = asyncHandler(
       const invoiceNCMCount = invoiceNCM.length;
       const invoiceNCMTotal = invoiceNCM.reduce((acc, el) => acc + el.total, 0) || 0;
 
+      const invoiceNCX = mappedCashMovements.filter((el) => el.invoceTypeId === 8);
+      const invoiceNCXCount = invoiceNCX.length;
+      const invoiceNCXTotal = invoiceNCX.reduce((acc, el) => acc + el.total, 0) || 0;
+
       let movements = await prisma.movements.findMany({
         where: {
           ...data,
@@ -195,6 +202,7 @@ export const getAll = asyncHandler(
             createdAt: movement.createdAt,
             cashMovement: movement.cashMovement,
             user: movement.user,
+            client: movement.client,
             details: [
               {
                 id: movement.paymentMethod.id,
@@ -217,7 +225,7 @@ export const getAll = asyncHandler(
       const incomes = movements.filter((el) => el.type === MovementType.IN);
       const totalCash =
         incomes.filter((el) => el.paymentMethodId === 1).reduce((acc, el) => acc + el.amount, 0) -
-          (invoiceNCATotal + invoiceNCBTotal - invoiceNCMTotal) || 0;
+          (invoiceNCATotal + invoiceNCBTotal + invoiceNCMTotal + invoiceNCXTotal) || 0;
       const totalDebit = incomes.filter((el) => el.paymentMethodId === 2).reduce((acc, el) => acc + el.amount, 0) || 0;
       const totalCredit = incomes.filter((el) => el.paymentMethodId === 3).reduce((acc, el) => acc + el.amount, 0) || 0;
       const totalTransfer =
@@ -260,6 +268,8 @@ export const getAll = asyncHandler(
             invoiceAFIPNCCount: invoiceNCACount + invoiceNCBCount + invoiceNCMCount,
             invoiceAFIPNCTotal: invoiceNCATotal + invoiceNCBTotal + invoiceNCMTotal,
             //
+            invoiceNoAFIPCount: invoiceXCount + invoiceNCXCount,
+            invoiceNoAFIPTotal: invoiceXTotal - invoiceNCXTotal,
             invoiceACount,
             invoiceATotal,
             invoiceBCount,
@@ -274,6 +284,8 @@ export const getAll = asyncHandler(
             invoiceNCBTotal,
             invoiceNCMCount,
             invoiceNCMTotal,
+            invoiceNCXCount,
+            invoiceNCXTotal,
           },
           clients,
           users,
