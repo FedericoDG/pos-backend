@@ -71,7 +71,7 @@ export const getById = asyncHandler(
       );
 
       const outcomes = cashRegister?.cashMovements.filter(
-        (el) => el.invoceTypeId === 5 || el.invoceTypeId === 6 || el.invoceTypeId === 7,
+        (el) => el.invoceTypeId === 5 || el.invoceTypeId === 6 || el.invoceTypeId === 7 || el.invoceTypeId === 8,
       );
 
       const cash =
