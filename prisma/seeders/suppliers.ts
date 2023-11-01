@@ -11,8 +11,8 @@ export const suppliers = [
     mobile: '3516114150',
     address: '24 de Septiembre 358',
     info: '',
-    createdAt: now.plus({ minutes: 1 }).toString(),
-    updatedAt: now.plus({ minutes: 1 }).toString(),
+    createdAt: now.plus({ seconds: 1 }).toString(),
+    updatedAt: now.plus({ seconds: 1 }).toString(),
   },
   {
     cuit: '22222222222',
@@ -22,7 +22,7 @@ export const suppliers = [
     mobile: '',
     address: 'Viamonte 879',
     info: '',
-    createdAt: now.plus({ minutes: 2 }).toString(),
-    updatedAt: now.plus({ minutes: 2 }).toString(),
+    createdAt: now.plus({ seconds: 2 }).toString(),
+    updatedAt: now.plus({ seconds: 2 }).toString(),
   },
 ];

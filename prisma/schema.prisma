@@ -13,8 +13,10 @@ enum StatusType {
 }
 
 enum MovementType {
+  CREATION
   IN
   OUT
+  TRANSFER
 }
 
 generator client {
@@ -135,6 +137,7 @@ model Products {
   dischargeDetails     DischargeDetails[]
   transferDetails      TransferDetails[]
   cashMovementsDetails CashMovementsDetails[]
+  stocksDetails        StocksDetails[]
 
   @@map(name: "products")
 }
@@ -206,6 +209,7 @@ model Warehouses {
   user            Users             @relation(fields: [userId], references: [id])
   cashMovements   CashMovements[]
   userPreferences UserPreferences[]
+  stocksDetails   StocksDetails[]
 
   @@map(name: "warehouses")
 }
@@ -224,6 +228,22 @@ model Stocks {
   warehouse   Warehouses @relation(fields: [warehouseId], references: [id])
 
   @@map(name: "stock")
+}
+
+model StocksDetails {
+  id          Int        @id @default(autoincrement())
+  productId   Int
+  warehouseId Int
+  movementId  Int
+  stock       Float      @default(0)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @default(now()) @updatedAt
+  // Relations
+  movement    Movements  @relation(fields: [movementId], references: [id], onDelete: Cascade)
+  products    Products   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  warehouse   Warehouses @relation(fields: [warehouseId], references: [id])
+
+  @@map(name: "stock_details")
 }
 
 model Pricelists {
@@ -336,6 +356,7 @@ model Purchases {
   warehouse       Warehouses        @relation(fields: [warehouseId], references: [id])
   user            Users             @relation(fields: [userId], references: [id])
   purchaseDetails PurchaseDetails[]
+  Movements       Movements[]
 
   @@map(name: "purchases")
 }
@@ -356,21 +377,28 @@ model PurchaseDetails {
 }
 
 model Movements {
-  id              Int            @id @default(autoincrement())
+  id              Int             @id @default(autoincrement())
   amount          Float
   concept         String
   type            MovementType
   userId          Int
   clientId        Int?
+  purchaseId      Int?
   cashMovementId  Int?
+  dischargeId     Int?
+  transferId      Int?
   paymentMethodId Int
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @default(now()) @updatedAt
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @default(now()) @updatedAt
   // Relations
-  user            Users          @relation(fields: [userId], references: [id])
-  paymentMethod   PaymentMethods @relation(fields: [paymentMethodId], references: [id])
-  client          Clients?       @relation(fields: [clientId], references: [id])
-  cashMovement    CashMovements? @relation(fields: [cashMovementId], references: [id])
+  user            Users           @relation(fields: [userId], references: [id])
+  paymentMethod   PaymentMethods  @relation(fields: [paymentMethodId], references: [id])
+  client          Clients?        @relation(fields: [clientId], references: [id])
+  purchase        Purchases?      @relation(fields: [purchaseId], references: [id])
+  cashMovement    CashMovements?  @relation(fields: [cashMovementId], references: [id])
+  discharge       Discharges?     @relation(fields: [dischargeId], references: [id])
+  transfer        Transfer?       @relation(fields: [transferId], references: [id])
+  stocksDetails   StocksDetails[]
 
   @@map(name: "movements")
 }
@@ -386,6 +414,7 @@ model Discharges {
   warehouses       Warehouses         @relation(fields: [warehouseId], references: [id])
   user             Users              @relation(fields: [userId], references: [id])
   dischargeDetails DischargeDetails[]
+  Movements        Movements[]
 
   @@map(name: "discharges")
 }
@@ -431,6 +460,7 @@ model Transfer {
   warehouseDestination   Warehouses        @relation(fields: [warehouseDestinationId], references: [id], name: "WarehouseDestination")
   user                   Users             @relation(fields: [userId], references: [id])
   transferDetails        TransferDetails[]
+  Movements              Movements[]
 
   @@map(name: "transfer")
 }

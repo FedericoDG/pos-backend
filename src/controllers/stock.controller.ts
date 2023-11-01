@@ -192,6 +192,50 @@ export const getByWarehouseId = asyncHandler(
   },
 );
 
+export const getByWarehouseIdAndProductId = asyncHandler(
+  async (
+    req: Request<{ id?: number }, unknown, { from; to; productId: number }>,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    try {
+      const { id: warehouseId } = req.params;
+      const { from, to, productId } = req.body;
+
+      const parsedFrom = new Date(from!.concat(' 00:00:00'));
+      const parsedTo = new Date(to!.concat(' 23:59:59'));
+
+      const stock = await prisma.stocksDetails.findMany({
+        where: {
+          productId: Number(productId),
+          warehouseId: Number(warehouseId),
+          createdAt: {
+            gte: parsedFrom,
+            lte: parsedTo,
+          },
+        },
+        include: { movement: { include: { purchase: true, cashMovement: true, discharge: true, transfer: true } } },
+        orderBy: [{ id: 'desc' }],
+      });
+
+      endpointResponse({
+        res,
+        code: 200,
+        status: true,
+        message: 'Unidades recuperadas',
+        body: {
+          stock,
+        },
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        const httpError = createHttpError(500, `[Stocks - GET By WarehouseId and ProductId]: ${error.message}`);
+        next(httpError);
+      }
+    }
+  },
+);
+
 export const create = asyncHandler(
   async (req: Request<unknown, unknown, CreateUnitType>, res: Response, next: NextFunction) => {
     try {

@@ -217,25 +217,26 @@ export const create = asyncHandler(
       await prisma.settings.update({ where: { id: 1 }, data: { invoceNumber: { increment: 1 } } });
 
       // Create Balance
-      const mappedMovements = reducedPaymentsArray.map((item) => ({
-        amount: item.amount,
-        type: MovementType.IN,
-        concept: 'Venta',
-        paymentMethodId: item.paymentMethodId,
-        userId: req.user.id,
-        clientId,
-        cashMovementId,
+      const movement = await prisma.movements.create({
+        data: {
+          amount: subtotal + subtotalOtherTributes,
+          type: MovementType.IN,
+          concept: 'Venta',
+          userId,
+          paymentMethodId: 1,
+          cashMovementId,
+        },
+      });
+
+      // Stock Details
+      const stockDetails = newStock.map((item) => ({
+        productId: item.productId,
+        warehouseId: item.warehouseId,
+        stock: item.stock,
+        movementId: movement.id,
       }));
 
-      // wait prisma.movements.createMany({ data: mappedMovements });
-      const ids: number[] = [];
-
-      await Promise.all(
-        mappedMovements.map(async (data) => {
-          const movement = await prisma.movements.create({ data });
-          ids.push(movement.id);
-        }),
-      );
+      await prisma.stocksDetails.createMany({ data: stockDetails });
 
       endpointResponse({
         res,
@@ -244,7 +245,6 @@ export const create = asyncHandler(
         message: 'Movimiento creado',
         body: {
           cashMovement,
-          ids,
         },
       });
     } catch (error) {
@@ -276,9 +276,6 @@ export const createCreditNote = asyncHandler(
         data: { finalBalance: finalBalance },
       });
 
-      // Create Cash Movement
-      // INVOCE TYPE
-      //const invoceId = 555;
       const invId = 8;
 
       const afipSettings = await prisma.afip.findFirst();
@@ -352,17 +349,17 @@ export const createCreditNote = asyncHandler(
       await prisma.paymentMethodDetails.createMany({ data: mappedPayments });
 
       // Create Balance
-      const mappedMovements = reducedPaymentsArray.map((item) => ({
-        amount: item.amount,
-        type: MovementType.OUT,
-        concept: 'N. de Crédito',
-        paymentMethodId: 1,
-        userId: req.user.id,
-        clientId,
-        cashMovementId,
-      }));
-
-      await prisma.movements.createMany({ data: mappedMovements });
+      const movement = await prisma.movements.create({
+        data: {
+          amount: 0,
+          type: MovementType.OUT,
+          concept: 'N. de Crédito',
+          paymentMethodId: 1,
+          userId: req.user.id,
+          clientId,
+          cashMovementId,
+        },
+      });
 
       //Update Warehouse
       const productIds = cart.map((item) => item.productId);
@@ -374,6 +371,16 @@ export const createCreditNote = asyncHandler(
       const updatedStock = stock.map((item, idx) => ({ id: item.id, stock: item.stock + sortedCart[idx].quantity }));
 
       await Promise.all(updatedStock.map((el) => prisma.stocks.update({ where: { id: el.id }, data: { ...el } })));
+
+      // Stock Details
+      const stockDetails = updatedStock.map((item) => ({
+        productId: item.id,
+        warehouseId,
+        stock: item.stock,
+        movementId: movement.id,
+      }));
+
+      await prisma.stocksDetails.createMany({ data: stockDetails });
 
       endpointResponse({
         res,

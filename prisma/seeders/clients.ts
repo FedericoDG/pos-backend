@@ -14,8 +14,8 @@ export const clients = [
     mobile: '',
     address: '',
     info: '',
-    createdAt: now.plus({ minutes: 1 }).toString(),
-    updatedAt: now.plus({ minutes: 1 }).toString(),
+    createdAt: now.plus({ seconds: 1 }).toString(),
+    updatedAt: now.plus({ seconds: 1 }).toString(),
   },
   {
     name: 'Juan Carlos Perez',
@@ -28,7 +28,7 @@ export const clients = [
     mobile: '3517564940',
     address: '',
     info: '',
-    createdAt: now.plus({ minutes: 2 }).toString(),
-    updatedAt: now.plus({ minutes: 2 }).toString(),
+    createdAt: now.plus({ seconds: 2 }).toString(),
+    updatedAt: now.plus({ seconds: 2 }).toString(),
   },
 ];

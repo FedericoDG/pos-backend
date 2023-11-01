@@ -106,13 +106,14 @@ export const create = asyncHandler(
       const { id } = await prisma.discharges.create({ data: { warehouseId, userId, cost } });
 
       // Create Balance
-      await prisma.movements.create({
+      const movement = await prisma.movements.create({
         data: {
           amount: cost,
           type: MovementType.OUT,
           concept: 'Baja/Pérdida',
           paymentMethodId: 1,
           userId,
+          dischargeId: id,
         },
       });
 
@@ -158,6 +159,16 @@ export const create = asyncHandler(
             }),
         ),
       );
+
+      // Stock Details
+      const stockDetails = newStock.map((item) => ({
+        productId: item.productId,
+        warehouseId: item.warehouseId,
+        stock: item.stock,
+        movementId: movement.id,
+      }));
+
+      await prisma.stocksDetails.createMany({ data: stockDetails });
 
       endpointResponse({
         res,

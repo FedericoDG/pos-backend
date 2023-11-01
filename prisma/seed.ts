@@ -25,6 +25,7 @@ import {
   purchases,
   reasons,
   roles,
+  stockDetails,
   stocks,
   suppliers,
   transfer,
@@ -103,6 +104,8 @@ async function main() {
   await prisma.userPreferences.createMany({ data: userPreferences });
 
   await prisma.otherTributes.createMany({ data: otherTributes });
+
+  await prisma.stocksDetails.createMany({ data: stockDetails });
 }
 
 main()

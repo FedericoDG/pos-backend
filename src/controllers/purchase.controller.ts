@@ -109,13 +109,14 @@ export const create = asyncHandler(
       await prisma.purchaseDetails.createMany({ data: cartWithPurchaseId });
 
       // Create Balance
-      await prisma.movements.create({
+      const movement = await prisma.movements.create({
         data: {
           amount: rest.total,
           type: MovementType.OUT,
           concept: 'Compra',
           paymentMethodId: 1,
           userId,
+          purchaseId: purchase.id,
         },
       });
 
@@ -163,6 +164,16 @@ export const create = asyncHandler(
             }),
         ),
       );
+
+      // Stock Details
+      const stockDetails = newStock.map((item) => ({
+        productId: item.productId,
+        warehouseId: item.warehouseId,
+        stock: item.stock,
+        movementId: movement.id,
+      }));
+
+      await prisma.stocksDetails.createMany({ data: stockDetails });
 
       endpointResponse({
         res,
