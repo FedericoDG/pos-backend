@@ -6,6 +6,7 @@ import { asyncHandler } from '../helpers/asyncHandler';
 import { endpointResponse } from '../helpers/endpointResponse';
 
 import { CreateUnitType, UpdateUnitType } from '../schemas/unit.schema';
+import { DateTime } from 'luxon';
 
 const prisma = new PrismaClient();
 
@@ -218,12 +219,19 @@ export const getByWarehouseIdAndProductId = asyncHandler(
         orderBy: [{ id: 'desc' }],
       });
 
+      const desde = DateTime.fromJSDate(parsedFrom);
+      const hasta = DateTime.fromJSDate(parsedTo);
+
       endpointResponse({
         res,
         code: 200,
         status: true,
         message: 'Unidades recuperadas',
         body: {
+          from: parsedFrom,
+          desde,
+          to: parsedTo,
+          hasta,
           stock,
         },
       });

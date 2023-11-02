@@ -300,7 +300,7 @@ CREATE TABLE `movements` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `amount` DOUBLE NOT NULL,
     `concept` VARCHAR(191) NOT NULL,
-    `type` ENUM('CREATION', 'IN', 'OUT', 'TRANSFER') NOT NULL,
+    `type` ENUM('CREATION', 'IN', 'OUT', 'TRANSFER_IN', 'TRANSFER_OUT') NOT NULL,
     `userId` INTEGER NOT NULL,
     `clientId` INTEGER NULL,
     `purchaseId` INTEGER NULL,

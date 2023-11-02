@@ -112,8 +112,8 @@ export const create = asyncHandler(
       const movement = await prisma.movements.create({
         data: {
           amount: 0,
-          type: MovementType.TRANSFER,
-          concept: 'Transferencia',
+          type: MovementType.TRANSFER_OUT,
+          concept: 'Transferencia enviada',
           paymentMethodId: 1,
           userId,
           transferId: transfer.id,
@@ -210,12 +210,24 @@ export const create = asyncHandler(
         ),
       );
 
+      // Create Balance
+      const movement2 = await prisma.movements.create({
+        data: {
+          amount: 0,
+          type: MovementType.TRANSFER_IN,
+          concept: 'Transferencia recibida',
+          paymentMethodId: 1,
+          userId,
+          transferId: transfer.id,
+        },
+      });
+
       // Stock Details Destination
       const stockDetailsDestination = newStockDestination.map((item) => ({
         productId: item.productId,
         warehouseId: item.warehouseId,
         stock: item.stock,
-        movementId: movement.id,
+        movementId: movement2.id,
       }));
 
       await prisma.stocksDetails.createMany({ data: stockDetailsDestination });
