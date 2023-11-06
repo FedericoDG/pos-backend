@@ -21,9 +21,78 @@ export const getAll = asyncHandler(
         res,
         code: 200,
         status: true,
-        message: 'Cajas recuperadas',
+        message: 'Movimientos Recuperados',
         body: {
           cashMovements,
+        },
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        const httpError = createHttpError(500, `[Cash Movements - GET ALL]: ${error.message}`);
+        next(httpError);
+      }
+    }
+  },
+);
+
+export const getAllDetails = asyncHandler(
+  async (_req: Request<unknown, unknown, unknown>, res: Response, next: NextFunction) => {
+    try {
+      const creditNotesIds = [5, 6, 7, 8];
+
+      const cashMovementDetails = await prisma.cashMovementsDetails.findMany({
+        where: { cashMovement: { is: { iva: true } } },
+        include: { cashMovement: { include: { user: true, client: true, warehouse: true } } },
+        // include: { cashMovement: true },
+        orderBy: [{ id: 'desc' }],
+      });
+
+      //cashMovementDetails = cashMovementDetails?.filter((el) => el.cashMovement.iva);
+
+      const groupedCashMovementDetails = cashMovementDetails.reduce((acc, curr) => {
+        const key = `${curr.cashMovementId}_${curr.tax}`;
+
+        if (!acc[key]) {
+          if (creditNotesIds.includes(curr.cashMovement.invoceTypeId)) {
+            console.log('NC - iva: ', curr.tax);
+            acc[key] = {
+              cashMovementId: curr.cashMovementId,
+              createdAt: curr.createdAt,
+              isCreditNote: true,
+              totalTax: curr.quantity * curr.price * curr.tax * -1,
+              cashMovement: curr.cashMovement,
+            };
+          } else {
+            console.log('Factura - iva: ', curr.tax);
+            acc[key] = {
+              cashMovementId: curr.cashMovementId,
+              createdAt: curr.createdAt,
+              isCreditNote: false,
+              totalTax: curr.quantity * curr.price * curr.tax,
+              cashMovement: curr.cashMovement,
+            };
+          }
+        } else {
+          if (creditNotesIds.includes(curr.cashMovement.invoceTypeId)) {
+            acc[key].totalTax += curr.quantity * curr.price * curr.tax * -1;
+          } else {
+            acc[key].totalTax += curr.quantity * curr.price * curr.tax;
+          }
+        }
+
+        return acc;
+      }, {});
+
+      const result = Object.values(groupedCashMovementDetails);
+
+      endpointResponse({
+        res,
+        code: 200,
+        status: true,
+        message: 'Detalles Recuperados',
+        body: {
+          result,
+          cashMovementDetails,
         },
       });
     } catch (error) {

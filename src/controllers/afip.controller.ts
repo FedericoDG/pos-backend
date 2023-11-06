@@ -156,7 +156,7 @@ export const editSettings = asyncHandler(
 export const create = asyncHandler(
   async (req: Request<unknown, unknown, CreateAfipInvoce>, res: Response, next: NextFunction) => {
     try {
-      const { clientId, cart, invoceTypeId, otherTributes, cashMovementId, movementIds } = req.body;
+      const { clientId, cart, invoceTypeId, otherTributes, cashMovementId } = req.body;
 
       const afip = new Afip({
         CUIT: process.env.CUIT,

@@ -3,7 +3,14 @@ import { Router } from 'express';
 const purchase = Router();
 
 // Controller
-import { checkCart, create, createCreditNote, getAll, getById } from '../controllers/cashMovement.controller';
+import {
+  checkCart,
+  create,
+  createCreditNote,
+  getAll,
+  getAllDetails,
+  getById,
+} from '../controllers/cashMovement.controller';
 
 // Middlewares
 import { accessLevel, validToken } from '../middlewares/auth.middleware';
@@ -15,6 +22,7 @@ import { userExistMidd } from '../middlewares/checkCart';
 
 // Routes
 purchase.get('/', [validToken, accessLevel('ADMIN')], getAll);
+purchase.get('/details', [validToken, accessLevel('ADMIN')], getAllDetails);
 purchase.get('/:id', [validToken, accessLevel('DRIVER')], getById);
 purchase.post(
   '/',

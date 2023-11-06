@@ -10,6 +10,7 @@ export const updateSettingsSchema = z.object({
   invoceName: z.string().nonempty(),
   invoceNumber: z.number().nonnegative(),
   imageURL: z.string(),
+  showOtherTaxes: z.number().nonnegative(),
 });
 
 export type updateSettingsType = z.infer<typeof updateSettingsSchema>;
