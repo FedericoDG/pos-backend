@@ -40,50 +40,116 @@ export const getAllDetails = asyncHandler(
     try {
       const creditNotesIds = [5, 6, 7, 8];
 
-      const cashMovementDetails = await prisma.cashMovementsDetails.findMany({
-        where: { cashMovement: { is: { iva: true } } },
-        include: { cashMovement: { include: { user: true, client: true, warehouse: true } } },
-        // include: { cashMovement: true },
-        orderBy: [{ id: 'desc' }],
+      const cashMovements = await prisma.cashMovements.findMany({
+        where: { iva: true },
+        include: { cashMovementsDetails: true, client: true },
       });
+
+      const libroIva = cashMovements.map((el) => {
+        const reduced = el.cashMovementsDetails.reduce((acc: any, curr: any) => {
+          const key = curr.tax;
+
+          if (acc[key]) {
+            if (creditNotesIds.includes(el.invoceTypeId)) {
+              acc[key] += curr.tax * curr.price * curr.quantity;
+            } else {
+              acc[key] += curr.tax * curr.price * curr.quantity;
+            }
+          } else {
+            if (creditNotesIds.includes(el.invoceTypeId)) {
+              acc[key] = curr.tax * curr.price * curr.quantity;
+            } else {
+              acc[key] = curr.tax * curr.price * curr.quantity;
+            }
+          }
+          return acc;
+        }, {});
+
+        if (!reduced['0']) reduced['0'] = 0;
+        if (!reduced['0.025']) reduced['0.025'] = 0;
+        if (!reduced['0.05']) reduced['0.05'] = 0;
+        if (!reduced['0.105']) reduced['0.105'] = 0;
+        if (!reduced['0.21']) reduced['0.21'] = 0;
+        if (!reduced['0.27']) reduced['0.27'] = 0;
+
+        const iva =
+          reduced['0'] + reduced['0.025'] + reduced['0.05'] + reduced['0.105'] + reduced['0.21'] + reduced['0.27'];
+        const subTotal = el.total - iva;
+        const total = subTotal + iva;
+
+        const obj: any = {
+          id: el.id,
+          isCreditNote: false,
+          subTotal,
+          iva,
+          total,
+          invoceTypeId: el.invoceTypeId,
+          posNumber: el.posNumber,
+          invoceNumberAfip: el.invoceNumberAfip,
+          cae: el.cae,
+          vtoCae: el.vtoCae,
+          creditNote: el.creditNote,
+          cbteTipo: el.cbteTipo,
+          info: el.info,
+          ivaDetails: reduced,
+          createdAt: el.createdAt,
+          client: el.client,
+        };
+
+        if (creditNotesIds.includes(el.invoceTypeId)) {
+          obj.isCreditNote = true;
+          // obj.subTotal *= -1;
+          // obj.iva *= -1;
+          // obj.total *= -1;
+        }
+
+        return obj;
+      });
+
+      //const cashMovementDetails = await prisma.cashMovementsDetails.findMany({
+      //  where: { cashMovement: { is: { iva: true } } },
+      //  include: { cashMovement: { include: { user: true, client: true, warehouse: true } } },
+      //  orderBy: [{ id: 'desc' }],
+      //});
 
       //cashMovementDetails = cashMovementDetails?.filter((el) => el.cashMovement.iva);
 
-      const groupedCashMovementDetails = cashMovementDetails.reduce((acc, curr) => {
-        const key = `${curr.cashMovementId}_${curr.tax}`;
-
-        if (!acc[key]) {
-          if (creditNotesIds.includes(curr.cashMovement.invoceTypeId)) {
-            console.log('NC - iva: ', curr.tax);
-            acc[key] = {
-              cashMovementId: curr.cashMovementId,
-              createdAt: curr.createdAt,
-              isCreditNote: true,
-              totalTax: curr.quantity * curr.price * curr.tax * -1,
-              cashMovement: curr.cashMovement,
-            };
-          } else {
-            console.log('Factura - iva: ', curr.tax);
-            acc[key] = {
-              cashMovementId: curr.cashMovementId,
-              createdAt: curr.createdAt,
-              isCreditNote: false,
-              totalTax: curr.quantity * curr.price * curr.tax,
-              cashMovement: curr.cashMovement,
-            };
-          }
-        } else {
-          if (creditNotesIds.includes(curr.cashMovement.invoceTypeId)) {
-            acc[key].totalTax += curr.quantity * curr.price * curr.tax * -1;
-          } else {
-            acc[key].totalTax += curr.quantity * curr.price * curr.tax;
-          }
-        }
-
-        return acc;
-      }, {});
-
-      const result = Object.values(groupedCashMovementDetails);
+      // const groupedCashMovementDetails = cashMovementDetails.reduce((acc, curr) => {
+      //   const key = `${curr.cashMovementId}_${curr.tax}`;
+      //
+      //   if (!acc[key]) {
+      //     if (creditNotesIds.includes(curr.cashMovement.invoceTypeId)) {
+      //       console.log('NC - iva: ', curr.tax);
+      //       acc[key] = {
+      //         cashMovementId: curr.cashMovementId,
+      //         createdAt: curr.createdAt,
+      //         isCreditNote: true,
+      //         totalTax: curr.quantity * curr.price * curr.tax * -1,
+      //         cashMovement: curr.cashMovement,
+      //       };
+      //     } else {
+      //       console.log('Factura - iva: ', curr.tax);
+      //       acc[key] = {
+      //         cashMovementId: curr.cashMovementId,
+      //         createdAt: curr.createdAt,
+      //         isCreditNote: false,
+      //         totalTax: curr.quantity * curr.price * curr.tax,
+      //         cashMovement: curr.cashMovement,
+      //       };
+      //     }
+      //   } else {
+      //     if (creditNotesIds.includes(curr.cashMovement.invoceTypeId)) {
+      //       acc[key].totalTax += curr.quantity * curr.price * curr.tax * -1;
+      //     } else {
+      //       acc[key].totalTax += curr.quantity * curr.price * curr.tax;
+      //     }
+      //   }
+      //
+      //   return acc;
+      // }, {});
+      //
+      // const result = Object.values(groupedCashMovementDetails);
+      //
 
       endpointResponse({
         res,
@@ -91,8 +157,7 @@ export const getAllDetails = asyncHandler(
         status: true,
         message: 'Detalles Recuperados',
         body: {
-          result,
-          cashMovementDetails,
+          libroIva,
         },
       });
     } catch (error) {
