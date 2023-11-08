@@ -5,7 +5,7 @@ import createHttpError from 'http-errors';
 import { asyncHandler } from '../helpers/asyncHandler';
 import { endpointResponse } from '../helpers/endpointResponse';
 
-import { CreateCashMovementsType } from '../schemas/cashMovement.schema';
+import { CreateCashMovementsType, LibroIVAType } from '../schemas/cashMovement.schema';
 
 const prisma = new PrismaClient();
 
@@ -36,12 +36,23 @@ export const getAll = asyncHandler(
 );
 
 export const getAllDetails = asyncHandler(
-  async (_req: Request<unknown, unknown, unknown>, res: Response, next: NextFunction) => {
+  async (req: Request<unknown, unknown, unknown, LibroIVAType>, res: Response, next: NextFunction) => {
     try {
+      const { from, to } = req.query;
+
+      const parsedFrom = new Date(from!.concat(' 00:00:00'));
+      const parsedTo = new Date(to!.concat(' 23:59:59'));
+
       const creditNotesIds = [5, 6, 7, 8];
 
       const cashMovements = await prisma.cashMovements.findMany({
-        where: { iva: true },
+        where: {
+          iva: true,
+          createdAt: {
+            gte: parsedFrom,
+            lte: parsedTo,
+          },
+        },
         include: { cashMovementsDetails: true, client: true },
       });
 
@@ -155,14 +166,16 @@ export const getAllDetails = asyncHandler(
         res,
         code: 200,
         status: true,
-        message: 'Detalles Recuperados',
+        message: 'Libro IVA Recuperado',
         body: {
-          libroIva,
+          from: parsedFrom,
+          to: parsedTo,
+          movements: libroIva,
         },
       });
     } catch (error) {
       if (error instanceof Error) {
-        const httpError = createHttpError(500, `[Cash Movements - GET ALL]: ${error.message}`);
+        const httpError = createHttpError(500, `[Libro IVA - GET ALL]: ${error.message}`);
         next(httpError);
       }
     }

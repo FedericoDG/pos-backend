@@ -35,4 +35,10 @@ export const createCashMovementsSchema = z.object({
   creditNote: z.number().nonnegative().optional(),
 });
 
+export const getLibroIVA = z.object({
+  from: z.string().nonempty().optional(),
+  to: z.string().nonempty().optional(),
+});
+
 export type CreateCashMovementsType = z.infer<typeof createCashMovementsSchema>;
+export type LibroIVAType = z.infer<typeof getLibroIVA>;

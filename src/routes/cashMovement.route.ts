@@ -22,7 +22,7 @@ import { userExistMidd } from '../middlewares/checkCart';
 
 // Routes
 purchase.get('/', [validToken, accessLevel('ADMIN')], getAll);
-purchase.get('/details', [validToken, accessLevel('ADMIN')], getAllDetails);
+purchase.get('/iva', [validToken, accessLevel('ADMIN')], getAllDetails);
 purchase.get('/:id', [validToken, accessLevel('DRIVER')], getById);
 purchase.post(
   '/',
