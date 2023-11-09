@@ -3,7 +3,6 @@ import { PrismaClient } from '@prisma/client';
 import createHttpError from 'http-errors';
 
 import { asyncHandler } from '../helpers/asyncHandler';
-// import { bcHash } from '../helpers/bcrypt';
 import { endpointResponse } from '../helpers/endpointResponse';
 
 import { CreateClientType, UpdateClientType } from '../schemas/client.schema';

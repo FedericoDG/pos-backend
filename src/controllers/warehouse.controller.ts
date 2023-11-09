@@ -20,7 +20,7 @@ export const getAll = asyncHandler(
           include: { user: true },
           orderBy: [
             {
-              id: 'asc', // OJO
+              id: 'asc',
             },
           ],
         });

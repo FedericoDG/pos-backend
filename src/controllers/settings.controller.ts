@@ -38,8 +38,6 @@ export const update = asyncHandler(
     try {
       const { id } = req.params;
       const data = req.body;
-      console.log(data.showOtherTaxes);
-
       const settings = await prisma.settings.update({
         where: { id: Number(id) },
         data,

@@ -23,8 +23,6 @@ export const create = asyncHandler(
 
       if (oldPrice?.price !== data.price) {
         price = await prisma.prices.create({ data });
-      } else {
-        console.log('NO ES NECESARIO ACTUALIZAR EL PRECIO');
       }
 
       endpointResponse({

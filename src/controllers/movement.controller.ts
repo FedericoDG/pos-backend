@@ -178,8 +178,6 @@ export const getAll = asyncHandler(
         orderBy: [{ id: 'desc' }],
       });
 
-      console.log({ movements });
-
       movements = movements.filter((el) => invoicesIds?.includes(el.cashMovement!.invoceTypeId));
 
       const groupedMovements = movements.reduce((result: any, movement: any) => {

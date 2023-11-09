@@ -38,7 +38,12 @@ export const getAll = asyncHandler(
 export const getAllDetails = asyncHandler(
   async (req: Request<unknown, unknown, unknown, LibroIVAType>, res: Response, next: NextFunction) => {
     try {
-      const { from, to } = req.query;
+      const { from, to, invoices } = req.query;
+
+      const invoicesIds: number[] = JSON.parse(invoices!);
+      if (invoicesIds.includes(1)) invoicesIds.push(5);
+      if (invoicesIds.includes(2)) invoicesIds.push(6);
+      if (invoicesIds.includes(3)) invoicesIds.push(7);
 
       const parsedFrom = new Date(from!.concat(' 00:00:00'));
       const parsedTo = new Date(to!.concat(' 23:59:59'));
@@ -48,12 +53,14 @@ export const getAllDetails = asyncHandler(
       const cashMovements = await prisma.cashMovements.findMany({
         where: {
           iva: true,
+          invoceTypeId: { in: invoicesIds },
           createdAt: {
             gte: parsedFrom,
             lte: parsedTo,
           },
         },
         include: { cashMovementsDetails: true, client: true },
+        orderBy: [{ id: 'desc' }],
       });
 
       const libroIva = cashMovements.map((el) => {
@@ -109,58 +116,51 @@ export const getAllDetails = asyncHandler(
 
         if (creditNotesIds.includes(el.invoceTypeId)) {
           obj.isCreditNote = true;
-          // obj.subTotal *= -1;
-          // obj.iva *= -1;
-          // obj.total *= -1;
         }
 
         return obj;
       });
 
-      //const cashMovementDetails = await prisma.cashMovementsDetails.findMany({
-      //  where: { cashMovement: { is: { iva: true } } },
-      //  include: { cashMovement: { include: { user: true, client: true, warehouse: true } } },
-      //  orderBy: [{ id: 'desc' }],
-      //});
+      const totalSubTotal = libroIva.reduce((acc, curr) => {
+        if (curr.isCreditNote) {
+          return acc - curr.subTotal;
+        } else {
+          return acc + curr.subTotal;
+        }
+      }, 0);
 
-      //cashMovementDetails = cashMovementDetails?.filter((el) => el.cashMovement.iva);
+      const totalIva = libroIva.reduce((acc, curr) => {
+        if (curr.isCreditNote) {
+          return acc - curr.iva;
+        } else {
+          return acc + curr.iva;
+        }
+      }, 0);
 
-      // const groupedCashMovementDetails = cashMovementDetails.reduce((acc, curr) => {
-      //   const key = `${curr.cashMovementId}_${curr.tax}`;
-      //
-      //   if (!acc[key]) {
-      //     if (creditNotesIds.includes(curr.cashMovement.invoceTypeId)) {
-      //       console.log('NC - iva: ', curr.tax);
-      //       acc[key] = {
-      //         cashMovementId: curr.cashMovementId,
-      //         createdAt: curr.createdAt,
-      //         isCreditNote: true,
-      //         totalTax: curr.quantity * curr.price * curr.tax * -1,
-      //         cashMovement: curr.cashMovement,
-      //       };
-      //     } else {
-      //       console.log('Factura - iva: ', curr.tax);
-      //       acc[key] = {
-      //         cashMovementId: curr.cashMovementId,
-      //         createdAt: curr.createdAt,
-      //         isCreditNote: false,
-      //         totalTax: curr.quantity * curr.price * curr.tax,
-      //         cashMovement: curr.cashMovement,
-      //       };
-      //     }
-      //   } else {
-      //     if (creditNotesIds.includes(curr.cashMovement.invoceTypeId)) {
-      //       acc[key].totalTax += curr.quantity * curr.price * curr.tax * -1;
-      //     } else {
-      //       acc[key].totalTax += curr.quantity * curr.price * curr.tax;
-      //     }
-      //   }
-      //
-      //   return acc;
-      // }, {});
-      //
-      // const result = Object.values(groupedCashMovementDetails);
-      //
+      const totalTotal = libroIva.reduce((acc, curr) => {
+        if (curr.isCreditNote) {
+          return acc - curr.total;
+        } else {
+          return acc + curr.total;
+        }
+      }, 0);
+
+      const total0 = libroIva.filter((el) => el.ivaDetails['0']).reduce((acc, curr) => acc + curr.ivaDetails['0'], 0);
+      const total0025 = libroIva
+        .filter((el) => el.ivaDetails['0.025'])
+        .reduce((acc, curr) => acc + curr.ivaDetails['0.025'], 0);
+      const total005 = libroIva
+        .filter((el) => el.ivaDetails['0.05'])
+        .reduce((acc, curr) => acc + curr.ivaDetails['0.05'], 0);
+      const total0105 = libroIva
+        .filter((el) => el.ivaDetails['0.105'])
+        .reduce((acc, curr) => acc + curr.ivaDetails['0.105'], 0);
+      const total021 = libroIva
+        .filter((el) => el.ivaDetails['0.21'])
+        .reduce((acc, curr) => acc + curr.ivaDetails['0.21'], 0);
+      const total027 = libroIva
+        .filter((el) => el.ivaDetails['0.27'])
+        .reduce((acc, curr) => acc + curr.ivaDetails['0.27'], 0);
 
       endpointResponse({
         res,
@@ -170,6 +170,15 @@ export const getAllDetails = asyncHandler(
         body: {
           from: parsedFrom,
           to: parsedTo,
+          totalSubTotal,
+          totalIva,
+          totalTotal,
+          total0,
+          total0025,
+          total005,
+          total0105,
+          total021,
+          total027,
           movements: libroIva,
         },
       });
@@ -432,13 +441,13 @@ export const createCreditNote = asyncHandler(
         data: {
           iva: false,
           cashRegisterId: Number(cashRegister?.id),
-          subtotal: importeTotal, // OJO
+          subtotal: importeTotal,
           discount: 0,
           discountPercent: 0,
           recharge: 0,
           rechargePercent: 0,
           otherTributes: 0,
-          total: importeTotal + 0, // OJO
+          total: importeTotal + 0,
           warehouseId,
           clientId,
           userId: req.user.id,
@@ -456,7 +465,6 @@ export const createCreditNote = asyncHandler(
       });
 
       // UpdateInvoceNumber
-      // OJOACA
       await prisma.settings.update({ where: { id: 1 }, data: { invoceNumber: { increment: 1 } } });
 
       // Create Cash Movement Details

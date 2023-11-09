@@ -460,13 +460,13 @@ export const creditNote = asyncHandler(
         data: {
           iva: true,
           cashRegisterId: Number(cashRegister?.id),
-          subtotal: importeTotal, // OJO
+          subtotal: importeTotal,
           discount: 0,
           discountPercent: 0,
           recharge: 0,
           rechargePercent: 0,
           otherTributes: 0,
-          total: importeTotal + 0, // OJO
+          total: importeTotal + 0,
           warehouseId,
           clientId,
           userId: req.user.id,
