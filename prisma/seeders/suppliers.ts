@@ -6,6 +6,8 @@ export const suppliers = [
   {
     cuit: '11111111111',
     name: 'Proveedor Uno',
+    stateId: 1,
+    city: '',
     email: 'proveedoruno@gmail.com',
     phone: '3514258258',
     mobile: '3516114150',
@@ -17,6 +19,8 @@ export const suppliers = [
   {
     cuit: '22222222222',
     name: 'Proveedor Dos',
+    stateId: 1,
+    city: '',
     email: 'proveedordos@gmail.com',
     phone: '3514920499',
     mobile: '',

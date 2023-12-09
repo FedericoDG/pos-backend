@@ -20,6 +20,7 @@ export const getAll = asyncHandler(
             unit: true,
             category: true,
             ivaCondition: true,
+            costs: true,
           },
           orderBy: [
             {

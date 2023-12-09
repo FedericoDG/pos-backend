@@ -208,6 +208,7 @@ export const create = asyncHandler(
 export const update = asyncHandler(
   async (req: Request<{ id?: number }, unknown, UpdateWarehouseType>, res: Response, next: NextFunction) => {
     try {
+      console.log('ACA');
       const { id } = req.params;
       const { driver, ...rest } = req.body;
 

@@ -25,6 +25,7 @@ import {
   purchases,
   reasons,
   roles,
+  states,
   stockDetails,
   stocks,
   suppliers,
@@ -60,6 +61,8 @@ async function main() {
   await prisma.warehouses.createMany({ data: warehouses });
 
   await prisma.stocks.createMany({ data: stocks });
+
+  await prisma.states.createMany({ data: states });
 
   await prisma.suppliers.createMany({ data: suppliers });
 

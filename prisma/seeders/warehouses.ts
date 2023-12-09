@@ -21,6 +21,7 @@ export const warehouses = [
   },
   {
     code: 'chofer-1',
+    description: '',
     userId: 4,
     driver: 1,
     createdAt: now.plus({ seconds: 3 }).toString(),

@@ -11,10 +11,11 @@ import { schemaValidator } from '../middlewares/schemaValidator.middleware';
 
 // Schema
 import { createDischargeSchema } from '../schemas/discharge.schema';
+import { checkDischarge } from 'src/middlewares/checkDischarge';
 
 // Routes
 discharge.get('/', [validToken, accessLevel('ADMIN')], getAll);
 discharge.get('/:id', [validToken, accessLevel('ADMIN')], getById);
-discharge.post('/', [validToken, accessLevel('ADMIN'), schemaValidator(createDischargeSchema)], create);
+discharge.post('/', [validToken, accessLevel('ADMIN'), schemaValidator(createDischargeSchema), checkDischarge], create);
 
 export default discharge;

@@ -25,9 +25,10 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
-  // directUrl = env("DIRECT_URL")
+  provider          = "mysql"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_URL")
+  //url      = env("SHADOW_URL")
 }
 
 model Settings {
@@ -296,10 +297,13 @@ model Suppliers {
   mobile    String?
   address   String?
   info      String?
+  stateId   Int
+  city      String?
   createdAt DateTime    @default(now())
   updatedAt DateTime    @default(now()) @updatedAt
   //Relations
   purchase  Purchases[]
+  state     States      @relation(fields: [stateId], references: [id])
 
   @@map(name: "suppliers")
 }
@@ -322,7 +326,9 @@ model Clients {
   document         String            @unique
   email            String            @unique
   password         String
+  stateId          Int
   phone            String?
+  city             String?
   mobile           String?
   address          String?
   info             String?
@@ -333,11 +339,12 @@ model Clients {
   updatedAt        DateTime          @default(now()) @updatedAt
   // Relations
   role             Roles             @relation(fields: [roleId], references: [id])
+  state            States            @relation(fields: [stateId], references: [id])
   identification   Identifications   @relation(fields: [identificationId], references: [id])
   ivaType          IvaType           @relation(fields: [ivaTypeId], references: [id])
   cashMovements    CashMovements[]
   userPreferences  UserPreferences[]
-  Movements        Movements[]
+  movements        Movements[] // M
 
   @@map(name: "clients")
 }
@@ -358,7 +365,7 @@ model Purchases {
   warehouse       Warehouses        @relation(fields: [warehouseId], references: [id])
   user            Users             @relation(fields: [userId], references: [id])
   purchaseDetails PurchaseDetails[]
-  Movements       Movements[]
+  movements       Movements[] // M
 
   @@map(name: "purchases")
 }
@@ -416,7 +423,7 @@ model Discharges {
   warehouses       Warehouses         @relation(fields: [warehouseId], references: [id])
   user             Users              @relation(fields: [userId], references: [id])
   dischargeDetails DischargeDetails[]
-  Movements        Movements[]
+  movements        Movements[] // M
 
   @@map(name: "discharges")
 }
@@ -462,7 +469,7 @@ model Transfer {
   warehouseDestination   Warehouses        @relation(fields: [warehouseDestinationId], references: [id], name: "WarehouseDestination")
   user                   Users             @relation(fields: [userId], references: [id])
   transferDetails        TransferDetails[]
-  Movements              Movements[]
+  movements              Movements[] // M
 
   @@map(name: "transfer")
 }
@@ -619,4 +626,15 @@ model OtherTributesDetails {
   otherTribute   OtherTributes @relation(fields: [otherTributeId], references: [id])
 
   @@map(name: "other_tribute_details")
+}
+
+model States {
+  id        Int         @id @default(autoincrement())
+  name      String
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @default(now()) @updatedAt
+  clients   Clients[]
+  suppliers Suppliers[]
+
+  @@map(name: "states")
 }

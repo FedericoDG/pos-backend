@@ -24,6 +24,7 @@ export * from './purchases';
 export * from './reasons';
 export * from './roles';
 export * from './settings';
+export * from './states';
 export * from './stockDetails';
 export * from './stocks';
 export * from './suppliers';
