@@ -5,9 +5,9 @@ const now = DateTime.now();
 export const discharges = [
   {
     warehouseId: 1,
-    userId: 3,
-    cost: 4103.5,
-    createdAt: now.plus({ minutes: 1 }).toString(),
-    updatedAt: now.plus({ minutes: 1 }).toString(),
+    userId: 1,
+    cost: 1441.05,
+    createdAt: now.plus({ seconds: 1 }).toString(),
+    updatedAt: now.plus({ seconds: 1 }).toString(),
   },
 ];

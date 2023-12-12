@@ -93,11 +93,11 @@ export const update = asyncHandler(
   async (req: Request<{ id?: number }, unknown, UpdateSupplierType>, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
-      const { name, email, phone, mobile, address, info } = req.body;
+      const { name, email, phone, mobile, address, info, stateId, city } = req.body;
 
       const supplier = await prisma.suppliers.update({
         where: { id: Number(id) },
-        data: { name, email, phone, mobile, address, info },
+        data: { name, email, phone, mobile, address, info, stateId, city },
       });
 
       endpointResponse({

@@ -156,7 +156,7 @@ export const editSettings = asyncHandler(
 export const create = asyncHandler(
   async (req: Request<unknown, unknown, CreateAfipInvoce>, res: Response, next: NextFunction) => {
     try {
-      const { clientId, cart, invoceTypeId, otherTributes, cashMovementId, movementIds } = req.body;
+      const { clientId, cart, invoceTypeId, otherTributes, cashMovementId } = req.body;
 
       const afip = new Afip({
         CUIT: process.env.CUIT,
@@ -429,20 +429,6 @@ export const creditNote = asyncHandler(
         Iva: iva,
       };
 
-      // TRIBUTES
-      /* if (otherTributes.length > 0) {
-        const tributes = otherTributes.map((item) => ({
-          Id: item.id,
-          BaseImp: importeTotal,
-          //Alic: 10,
-          Importe: item.amount,
-          Desc: item.description,
-        }));
-
-        data.ImpTrib = otrosImpuestos;
-        data.Tributos = tributes;
-      } */
-
       // CREATE AFIP INVOCE
       const response = await afip.ElectronicBilling.createVoucher(data);
 
@@ -474,13 +460,13 @@ export const creditNote = asyncHandler(
         data: {
           iva: true,
           cashRegisterId: Number(cashRegister?.id),
-          subtotal: importeTotal, // OJO
+          subtotal: importeTotal,
           discount: 0,
           discountPercent: 0,
           recharge: 0,
           rechargePercent: 0,
           otherTributes: 0,
-          total: importeTotal + 0, // OJO
+          total: importeTotal + 0,
           warehouseId,
           clientId,
           userId: req.user.id,
@@ -534,19 +520,6 @@ export const creditNote = asyncHandler(
 
       await prisma.paymentMethodDetails.createMany({ data: mappedPayments });
 
-      // Create Balance
-      const mappedMovements = reducedPaymentsArray.map((item) => ({
-        amount: item.amount,
-        type: MovementType.OUT,
-        concept: 'N. de Crédito',
-        paymentMethodId: 1,
-        userId: req.user.id,
-        clientId,
-        cashMovementId,
-      }));
-
-      await prisma.movements.createMany({ data: mappedMovements });
-
       //Update Warehouse
       const productIds = cart.map((item) => item.productId);
       const sortedCart = [...cart].sort((a, b) => a.productId - b.productId);
@@ -555,8 +528,36 @@ export const creditNote = asyncHandler(
         orderBy: [{ id: 'asc' }],
       });
       const updatedStock = stock.map((item, idx) => ({ id: item.id, stock: item.stock + sortedCart[idx].quantity }));
+      const updatedStock2 = stock.map((item, idx) => ({
+        id: item.id,
+        productId: item.productId,
+        stock: item.stock + sortedCart[idx].quantity,
+      }));
 
       await Promise.all(updatedStock.map((el) => prisma.stocks.update({ where: { id: el.id }, data: { ...el } })));
+
+      // Create Balance
+      const movement = await prisma.movements.create({
+        data: {
+          amount: importeTotal,
+          type: MovementType.OUT,
+          concept: 'N. de Crédito',
+          paymentMethodId: 1,
+          userId: req.user.id,
+          clientId,
+          cashMovementId,
+        },
+      });
+
+      // Stock Details
+      const stockDetails = updatedStock2.map((item) => ({
+        productId: item.productId,
+        warehouseId,
+        stock: item.stock,
+        movementId: movement.id,
+      }));
+
+      await prisma.stocksDetails.createMany({ data: stockDetails });
 
       endpointResponse({
         res,

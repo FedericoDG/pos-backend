@@ -9,8 +9,8 @@ export const cashMovementDetails = [
     price: 640,
     quantity: 10,
     tax: 0,
-    createdAt: now.plus({ minutes: 1 }).toString(),
-    updatedAt: now.plus({ minutes: 1 }).toString(),
+    createdAt: now.plus({ seconds: 1 }).toString(),
+    updatedAt: now.plus({ seconds: 1 }).toString(),
   },
   {
     cashMovementId: 1,
@@ -18,8 +18,8 @@ export const cashMovementDetails = [
     price: 610,
     quantity: 5,
     tax: 0.105,
-    createdAt: now.plus({ minutes: 1 }).toString(),
-    updatedAt: now.plus({ minutes: 1 }).toString(),
+    createdAt: now.plus({ seconds: 1 }).toString(),
+    updatedAt: now.plus({ seconds: 1 }).toString(),
   },
   {
     cashMovementId: 2,
@@ -27,8 +27,8 @@ export const cashMovementDetails = [
     price: 640,
     quantity: 10,
     tax: 0,
-    createdAt: now.plus({ minutes: 1 }).toString(),
-    updatedAt: now.plus({ minutes: 1 }).toString(),
+    createdAt: now.plus({ seconds: 1 }).toString(),
+    updatedAt: now.plus({ seconds: 1 }).toString(),
   },
   {
     cashMovementId: 2,
@@ -36,7 +36,7 @@ export const cashMovementDetails = [
     price: 610,
     quantity: 5,
     tax: 0.105,
-    createdAt: now.plus({ minutes: 1 }).toString(),
-    updatedAt: now.plus({ minutes: 1 }).toString(),
+    createdAt: now.plus({ seconds: 1 }).toString(),
+    updatedAt: now.plus({ seconds: 1 }).toString(),
   },
 ];

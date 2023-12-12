@@ -142,7 +142,7 @@ export const getByIdAndWarehouseId = asyncHandler(
       const filteredList = {
         ...list,
         products: list.products?.filter((item: any) => item.price > 0),
-      }; /* OJO */
+      };
 
       endpointResponse({
         res,

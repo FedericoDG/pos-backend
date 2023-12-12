@@ -1,5 +1,5 @@
 import { NextFunction, Response, Request } from 'express';
-import { Prices, PrismaClient } from '@prisma/client';
+import { MovementType, Prices, PrismaClient } from '@prisma/client';
 import createHttpError from 'http-errors';
 
 import { asyncHandler } from '../helpers/asyncHandler';
@@ -20,6 +20,7 @@ export const getAll = asyncHandler(
             unit: true,
             category: true,
             ivaCondition: true,
+            costs: true,
           },
           orderBy: [
             {
@@ -156,7 +157,7 @@ export const getById = asyncHandler(
         });
 
         if (price.length > 0) {
-          const filteredPrice = price.filter((el) => el.price >= 0); // OJO
+          const filteredPrice = price.filter((el) => el.price >= 0);
           if (filteredPrice.length > 0) {
             prices.push(price[0]);
             priceDetails.push(price.sort((a, b) => a.id - b.id));
@@ -184,11 +185,11 @@ export const getById = asyncHandler(
   },
 );
 
-// TODO: Create costs
 export const create = asyncHandler(
   async (req: Request<unknown, unknown, CreateProductType>, res: Response, next: NextFunction) => {
     try {
       const data = req.body;
+      const { id: userId } = req.user;
 
       // Insert a product
       const product = await prisma.products.create({ data });
@@ -216,6 +217,21 @@ export const create = asyncHandler(
 
       // Create cost
       await prisma.costs.create({ data: { productId: id, price: 0 } });
+
+      // Create Balance
+      const movement = await prisma.movements.create({
+        data: {
+          amount: 0,
+          type: MovementType.CREATION,
+          concept: 'Creación',
+          paymentMethodId: 1,
+          userId,
+        },
+      });
+
+      // Stock Details
+      const stocksDetails = warehouseIds.map((whId) => ({ productId: id, warehouseId: whId, movementId: movement.id }));
+      await prisma.stocksDetails.createMany({ data: stocksDetails });
 
       endpointResponse({
         res,

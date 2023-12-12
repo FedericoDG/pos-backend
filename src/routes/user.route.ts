@@ -15,7 +15,7 @@ import { createUserSchema, updateUserSchema, resetPasswordUserSchema } from '../
 
 // Routes
 user.get('/', [validToken, accessLevel('ADMIN')], getAll);
-user.get('/:id', [validToken, accessLevel('ADMIN')], getById);
+user.get('/:id', [validToken, accessLevel('USER')], getById);
 user.post(
   '/',
   [

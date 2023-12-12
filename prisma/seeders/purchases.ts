@@ -10,8 +10,8 @@ export const purchases = [
     date: new Date(),
     driver: 'Carlos Pérez',
     transport: 'Transporte Cruz del Sur',
-    userId: 3,
-    createdAt: now.plus({ minutes: 1 }).toString(),
-    updatedAt: now.plus({ minutes: 1 }).toString(),
+    userId: 1,
+    createdAt: now.plus({ seconds: 1 }).toString(),
+    updatedAt: now.plus({ seconds: 1 }).toString(),
   },
 ];

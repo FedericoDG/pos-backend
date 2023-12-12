@@ -1,5 +1,5 @@
 import { NextFunction, Response, Request } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { Prices, PrismaClient } from '@prisma/client';
 import createHttpError from 'http-errors';
 
 import { asyncHandler } from '../helpers/asyncHandler';
@@ -14,7 +14,16 @@ export const create = asyncHandler(
     try {
       const data = req.body;
 
-      const price = await prisma.prices.create({ data });
+      const oldPrice = await prisma.prices.findFirst({
+        where: { productId: data.productId, pricelistId: data.pricelistId },
+        orderBy: { id: 'desc' },
+      });
+
+      let price: Prices | null = null;
+
+      if (oldPrice?.price !== data.price) {
+        price = await prisma.prices.create({ data });
+      }
 
       endpointResponse({
         res,

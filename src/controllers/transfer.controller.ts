@@ -1,5 +1,5 @@
 import { NextFunction, Response, Request } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { MovementType, PrismaClient } from '@prisma/client';
 import createHttpError from 'http-errors';
 
 import { asyncHandler } from '../helpers/asyncHandler';
@@ -108,6 +108,18 @@ export const create = asyncHandler(
       const cartWithTransferId = cart.map((el) => ({ ...el, transferId: transfer.id }));
       await prisma.transferDetails.createMany({ data: cartWithTransferId });
 
+      // Create Balance
+      const movement = await prisma.movements.create({
+        data: {
+          amount: 0,
+          type: MovementType.TRANSFER_OUT,
+          concept: 'Transferencia enviada',
+          paymentMethodId: 1,
+          userId,
+          transferId: transfer.id,
+        },
+      });
+
       // Stock Origin
       const productsIds = cart.map((item) => item.productId);
       const stocksOrigin = await prisma.stocks.findMany({
@@ -149,6 +161,16 @@ export const create = asyncHandler(
         ),
       );
 
+      // Stock Details Origin
+      const stockDetailsOrigin = newStockOrigin.map((item) => ({
+        productId: item.productId,
+        warehouseId: item.warehouseId,
+        stock: item.stock,
+        movementId: movement.id,
+      }));
+
+      await prisma.stocksDetails.createMany({ data: stockDetailsOrigin });
+
       // Stock Destination
       const stocksDestination = await prisma.stocks.findMany({
         where: { productId: { in: productsIds }, warehouseId: rest.warehouseDestinationId },
@@ -187,6 +209,28 @@ export const create = asyncHandler(
             }),
         ),
       );
+
+      // Create Balance
+      const movement2 = await prisma.movements.create({
+        data: {
+          amount: 0,
+          type: MovementType.TRANSFER_IN,
+          concept: 'Transferencia recibida',
+          paymentMethodId: 1,
+          userId,
+          transferId: transfer.id,
+        },
+      });
+
+      // Stock Details Destination
+      const stockDetailsDestination = newStockDestination.map((item) => ({
+        productId: item.productId,
+        warehouseId: item.warehouseId,
+        stock: item.stock,
+        movementId: movement2.id,
+      }));
+
+      await prisma.stocksDetails.createMany({ data: stockDetailsDestination });
 
       endpointResponse({
         res,

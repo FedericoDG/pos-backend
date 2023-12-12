@@ -13,7 +13,7 @@ export const settings = [
     invoceName: 'Presupuesto',
     invoceNumber: 3,
     imageURL: 'https://live.pystatic.com/webassets/pwa/icons/icon-384x384.png',
-    createdAt: now.plus({ minutes: 1 }).toString(),
-    updatedAt: now.plus({ minutes: 1 }).toString(),
+    createdAt: now.plus({ seconds: 1 }).toString(),
+    updatedAt: now.plus({ seconds: 1 }).toString(),
   },
 ];

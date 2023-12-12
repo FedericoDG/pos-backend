@@ -208,7 +208,6 @@ export const createAfipInvoce = async (props: CreateCashMovementsType) => {
       error: null,
     };
   } catch (error) {
-    console.log(error);
     return {
       invoceIdAfip: null,
       cbteTipo: null,

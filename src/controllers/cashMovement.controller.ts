@@ -5,7 +5,7 @@ import createHttpError from 'http-errors';
 import { asyncHandler } from '../helpers/asyncHandler';
 import { endpointResponse } from '../helpers/endpointResponse';
 
-import { CreateCashMovementsType } from '../schemas/cashMovement.schema';
+import { CreateCashMovementsType, LibroIVAType } from '../schemas/cashMovement.schema';
 
 const prisma = new PrismaClient();
 
@@ -21,7 +21,7 @@ export const getAll = asyncHandler(
         res,
         code: 200,
         status: true,
-        message: 'Cajas recuperadas',
+        message: 'Movimientos Recuperados',
         body: {
           cashMovements,
         },
@@ -29,6 +29,162 @@ export const getAll = asyncHandler(
     } catch (error) {
       if (error instanceof Error) {
         const httpError = createHttpError(500, `[Cash Movements - GET ALL]: ${error.message}`);
+        next(httpError);
+      }
+    }
+  },
+);
+
+export const getAllDetails = asyncHandler(
+  async (req: Request<unknown, unknown, unknown, LibroIVAType>, res: Response, next: NextFunction) => {
+    try {
+      const { from, to, invoices } = req.query;
+
+      const invoicesIds: number[] = JSON.parse(invoices!);
+      if (invoicesIds.includes(1)) invoicesIds.push(5);
+      if (invoicesIds.includes(2)) invoicesIds.push(6);
+      if (invoicesIds.includes(3)) invoicesIds.push(7);
+
+      const parsedFrom = new Date(from!.concat(' 00:00:00'));
+      const parsedTo = new Date(to!.concat(' 23:59:59'));
+
+      const creditNotesIds = [5, 6, 7, 8];
+
+      const cashMovements = await prisma.cashMovements.findMany({
+        where: {
+          iva: true,
+          invoceTypeId: { in: invoicesIds },
+          createdAt: {
+            gte: parsedFrom,
+            lte: parsedTo,
+          },
+        },
+        include: { cashMovementsDetails: true, client: true },
+        orderBy: [{ id: 'desc' }],
+      });
+
+      const libroIva = cashMovements.map((el) => {
+        const reduced = el.cashMovementsDetails.reduce((acc: any, curr: any) => {
+          const key = curr.tax;
+
+          if (acc[key]) {
+            if (creditNotesIds.includes(el.invoceTypeId)) {
+              acc[key] += curr.tax * curr.price * curr.quantity;
+            } else {
+              acc[key] += curr.tax * curr.price * curr.quantity;
+            }
+          } else {
+            if (creditNotesIds.includes(el.invoceTypeId)) {
+              acc[key] = curr.tax * curr.price * curr.quantity;
+            } else {
+              acc[key] = curr.tax * curr.price * curr.quantity;
+            }
+          }
+          return acc;
+        }, {});
+
+        if (!reduced['0']) reduced['0'] = 0;
+        if (!reduced['0.025']) reduced['0.025'] = 0;
+        if (!reduced['0.05']) reduced['0.05'] = 0;
+        if (!reduced['0.105']) reduced['0.105'] = 0;
+        if (!reduced['0.21']) reduced['0.21'] = 0;
+        if (!reduced['0.27']) reduced['0.27'] = 0;
+
+        const iva =
+          reduced['0'] + reduced['0.025'] + reduced['0.05'] + reduced['0.105'] + reduced['0.21'] + reduced['0.27'];
+        const subTotal = el.total - iva;
+        const total = subTotal + iva;
+
+        const obj: any = {
+          id: el.id,
+          isCreditNote: false,
+          subTotal,
+          iva,
+          total,
+          invoceTypeId: el.invoceTypeId,
+          posNumber: el.posNumber,
+          invoceNumberAfip: el.invoceNumberAfip,
+          cae: el.cae,
+          vtoCae: el.vtoCae,
+          creditNote: el.creditNote,
+          cbteTipo: el.cbteTipo,
+          info: el.info,
+          ivaDetails: reduced,
+          createdAt: el.createdAt,
+          client: el.client,
+        };
+
+        if (creditNotesIds.includes(el.invoceTypeId)) {
+          obj.isCreditNote = true;
+        }
+
+        return obj;
+      });
+
+      const totalSubTotal = libroIva.reduce((acc, curr) => {
+        if (curr.isCreditNote) {
+          return acc - curr.subTotal;
+        } else {
+          return acc + curr.subTotal;
+        }
+      }, 0);
+
+      const totalIva = libroIva.reduce((acc, curr) => {
+        if (curr.isCreditNote) {
+          return acc - curr.iva;
+        } else {
+          return acc + curr.iva;
+        }
+      }, 0);
+
+      const totalTotal = libroIva.reduce((acc, curr) => {
+        if (curr.isCreditNote) {
+          return acc - curr.total;
+        } else {
+          return acc + curr.total;
+        }
+      }, 0);
+
+      const total0 = libroIva.filter((el) => el.ivaDetails['0']).reduce((acc, curr) => acc + curr.ivaDetails['0'], 0);
+      const total0025 = libroIva
+        .filter((el) => el.ivaDetails['0.025'])
+        .reduce((acc, curr) => acc + curr.ivaDetails['0.025'], 0);
+      const total005 = libroIva
+        .filter((el) => el.ivaDetails['0.05'])
+        .reduce((acc, curr) => acc + curr.ivaDetails['0.05'], 0);
+      const total0105 = libroIva
+        .filter((el) => el.ivaDetails['0.105'])
+        .reduce((acc, curr) => acc + curr.ivaDetails['0.105'], 0);
+      const total021 = libroIva
+        .filter((el) => el.ivaDetails['0.21'])
+        .reduce((acc, curr) => acc + curr.ivaDetails['0.21'], 0);
+      const total027 = libroIva
+        .filter((el) => el.ivaDetails['0.27'])
+        .reduce((acc, curr) => acc + curr.ivaDetails['0.27'], 0);
+
+      endpointResponse({
+        res,
+        code: 200,
+        status: true,
+        message: 'Libro IVA Recuperado',
+        body: {
+          from: parsedFrom,
+          to: parsedTo,
+          totalSubTotal,
+          totalIva,
+          totalTotal,
+          total0,
+          total0025,
+          total005,
+          total0105,
+          total021,
+          total027,
+          movements: libroIva,
+        },
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        const httpError = createHttpError(500, `[Libro IVA - GET ALL]: ${error.message}`);
         next(httpError);
       }
     }
@@ -217,25 +373,27 @@ export const create = asyncHandler(
       await prisma.settings.update({ where: { id: 1 }, data: { invoceNumber: { increment: 1 } } });
 
       // Create Balance
-      const mappedMovements = reducedPaymentsArray.map((item) => ({
-        amount: item.amount,
-        type: MovementType.IN,
-        concept: 'Venta',
-        paymentMethodId: item.paymentMethodId,
-        userId: req.user.id,
-        clientId,
-        cashMovementId,
+      const movement = await prisma.movements.create({
+        data: {
+          amount: subtotal + subtotalOtherTributes,
+          type: MovementType.IN,
+          concept: 'Venta',
+          userId,
+          clientId,
+          paymentMethodId: 1,
+          cashMovementId,
+        },
+      });
+
+      // Stock Details
+      const stockDetails = newStock.map((item) => ({
+        productId: item.productId,
+        warehouseId: item.warehouseId,
+        stock: item.stock,
+        movementId: movement.id,
       }));
 
-      // wait prisma.movements.createMany({ data: mappedMovements });
-      const ids: number[] = [];
-
-      await Promise.all(
-        mappedMovements.map(async (data) => {
-          const movement = await prisma.movements.create({ data });
-          ids.push(movement.id);
-        }),
-      );
+      await prisma.stocksDetails.createMany({ data: stockDetails });
 
       endpointResponse({
         res,
@@ -244,7 +402,6 @@ export const create = asyncHandler(
         message: 'Movimiento creado',
         body: {
           cashMovement,
-          ids,
         },
       });
     } catch (error) {
@@ -276,9 +433,6 @@ export const createCreditNote = asyncHandler(
         data: { finalBalance: finalBalance },
       });
 
-      // Create Cash Movement
-      // INVOCE TYPE
-      //const invoceId = 555;
       const invId = 8;
 
       const afipSettings = await prisma.afip.findFirst();
@@ -287,13 +441,13 @@ export const createCreditNote = asyncHandler(
         data: {
           iva: false,
           cashRegisterId: Number(cashRegister?.id),
-          subtotal: importeTotal, // OJO
+          subtotal: importeTotal,
           discount: 0,
           discountPercent: 0,
           recharge: 0,
           rechargePercent: 0,
           otherTributes: 0,
-          total: importeTotal + 0, // OJO
+          total: importeTotal + 0,
           warehouseId,
           clientId,
           userId: req.user.id,
@@ -311,7 +465,6 @@ export const createCreditNote = asyncHandler(
       });
 
       // UpdateInvoceNumber
-      // OJOACA
       await prisma.settings.update({ where: { id: 1 }, data: { invoceNumber: { increment: 1 } } });
 
       // Create Cash Movement Details
@@ -352,17 +505,17 @@ export const createCreditNote = asyncHandler(
       await prisma.paymentMethodDetails.createMany({ data: mappedPayments });
 
       // Create Balance
-      const mappedMovements = reducedPaymentsArray.map((item) => ({
-        amount: item.amount,
-        type: MovementType.OUT,
-        concept: 'N. de Crédito',
-        paymentMethodId: 1,
-        userId: req.user.id,
-        clientId,
-        cashMovementId,
-      }));
-
-      await prisma.movements.createMany({ data: mappedMovements });
+      const movement = await prisma.movements.create({
+        data: {
+          amount: importeTotal,
+          type: MovementType.OUT,
+          concept: 'N. de Crédito',
+          paymentMethodId: 1,
+          userId: req.user.id,
+          clientId,
+          cashMovementId,
+        },
+      });
 
       //Update Warehouse
       const productIds = cart.map((item) => item.productId);
@@ -372,8 +525,23 @@ export const createCreditNote = asyncHandler(
         orderBy: [{ id: 'asc' }],
       });
       const updatedStock = stock.map((item, idx) => ({ id: item.id, stock: item.stock + sortedCart[idx].quantity }));
+      const updatedStock2 = stock.map((item, idx) => ({
+        id: item.id,
+        productId: item.productId,
+        stock: item.stock + sortedCart[idx].quantity,
+      }));
 
       await Promise.all(updatedStock.map((el) => prisma.stocks.update({ where: { id: el.id }, data: { ...el } })));
+
+      // Stock Details
+      const stockDetails = updatedStock2.map((item) => ({
+        productId: item.productId,
+        warehouseId,
+        stock: item.stock,
+        movementId: movement.id,
+      }));
+
+      await prisma.stocksDetails.createMany({ data: stockDetails });
 
       endpointResponse({
         res,

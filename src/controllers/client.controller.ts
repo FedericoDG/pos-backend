@@ -3,7 +3,6 @@ import { PrismaClient } from '@prisma/client';
 import createHttpError from 'http-errors';
 
 import { asyncHandler } from '../helpers/asyncHandler';
-// import { bcHash } from '../helpers/bcrypt';
 import { endpointResponse } from '../helpers/endpointResponse';
 
 import { CreateClientType, UpdateClientType } from '../schemas/client.schema';
@@ -14,7 +13,7 @@ export const getAll = asyncHandler(
   async (_req: Request<unknown, unknown, unknown>, res: Response, next: NextFunction) => {
     try {
       const clients = await prisma.clients.findMany({
-        include: { identification: true, ivaType: true },
+        include: { identification: true, ivaType: true, state: true },
         orderBy: [
           {
             updatedAt: 'desc',
@@ -96,7 +95,7 @@ export const update = asyncHandler(
   async (req: Request<{ id?: number }, unknown, UpdateClientType>, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
-      const { name, phone, mobile, address, info, identificationId, document, ivaTypeId } = req.body;
+      const { name, phone, mobile, address, info, identificationId, document, ivaTypeId, stateId, city } = req.body;
 
       const data: UpdateClientType = {
         name,
@@ -107,6 +106,8 @@ export const update = asyncHandler(
         identificationId,
         document,
         ivaTypeId,
+        stateId,
+        city,
       };
 
       /*  if (password) {

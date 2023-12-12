@@ -6,11 +6,11 @@ export const dischargeDetails = [
   {
     dischargeId: 1,
     productId: 4,
-    quantity: 10,
-    cost: 413.35,
+    quantity: 3,
+    cost: 480.35,
     reasonId: 1,
     info: 'Entraron a robar',
-    createdAt: now.plus({ minutes: 1 }).toString(),
-    updatedAt: now.plus({ minutes: 1 }).toString(),
+    createdAt: now.plus({ seconds: 1 }).toString(),
+    updatedAt: now.plus({ seconds: 1 }).toString(),
   },
 ];

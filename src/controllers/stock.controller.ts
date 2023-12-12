@@ -6,6 +6,7 @@ import { asyncHandler } from '../helpers/asyncHandler';
 import { endpointResponse } from '../helpers/endpointResponse';
 
 import { CreateUnitType, UpdateUnitType } from '../schemas/unit.schema';
+import { DateTime } from 'luxon';
 
 const prisma = new PrismaClient();
 
@@ -186,6 +187,57 @@ export const getByWarehouseId = asyncHandler(
     } catch (error) {
       if (error instanceof Error) {
         const httpError = createHttpError(500, `[Stocks - GET ALL]: ${error.message}`);
+        next(httpError);
+      }
+    }
+  },
+);
+
+export const getByWarehouseIdAndProductId = asyncHandler(
+  async (
+    req: Request<{ id?: number }, unknown, { from; to; productId: number }>,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    try {
+      const { id: warehouseId } = req.params;
+      const { from, to, productId } = req.body;
+
+      const parsedFrom = new Date(from!.concat(' 00:00:00'));
+      const parsedTo = new Date(to!.concat(' 23:59:59'));
+
+      const stock = await prisma.stocksDetails.findMany({
+        where: {
+          productId: Number(productId),
+          warehouseId: Number(warehouseId),
+          createdAt: {
+            gte: parsedFrom,
+            lte: parsedTo,
+          },
+        },
+        include: { movement: { include: { purchase: true, cashMovement: true, discharge: true, transfer: true } } },
+        orderBy: [{ id: 'desc' }],
+      });
+
+      const desde = DateTime.fromJSDate(parsedFrom);
+      const hasta = DateTime.fromJSDate(parsedTo);
+
+      endpointResponse({
+        res,
+        code: 200,
+        status: true,
+        message: 'Unidades recuperadas',
+        body: {
+          from: parsedFrom,
+          desde,
+          to: parsedTo,
+          hasta,
+          stock,
+        },
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        const httpError = createHttpError(500, `[Stocks - GET By WarehouseId and ProductId]: ${error.message}`);
         next(httpError);
       }
     }

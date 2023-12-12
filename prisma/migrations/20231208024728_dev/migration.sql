@@ -10,6 +10,7 @@ CREATE TABLE `settings` (
     `invoceName` VARCHAR(191) NOT NULL,
     `invoceNumber` INTEGER NOT NULL,
     `imageURL` VARCHAR(191) NOT NULL,
+    `showOtherTaxes` INTEGER NOT NULL DEFAULT 1,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
@@ -168,6 +169,19 @@ CREATE TABLE `stock` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
+CREATE TABLE `stock_details` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `productId` INTEGER NOT NULL,
+    `warehouseId` INTEGER NOT NULL,
+    `movementId` INTEGER NOT NULL,
+    `stock` DOUBLE NOT NULL DEFAULT 0,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
 CREATE TABLE `price_lists` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `code` VARCHAR(191) NOT NULL,
@@ -212,6 +226,8 @@ CREATE TABLE `suppliers` (
     `mobile` VARCHAR(191) NULL,
     `address` VARCHAR(191) NULL,
     `info` VARCHAR(191) NULL,
+    `stateId` INTEGER NOT NULL,
+    `city` VARCHAR(191) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
@@ -238,7 +254,9 @@ CREATE TABLE `clients` (
     `document` VARCHAR(191) NOT NULL,
     `email` VARCHAR(191) NOT NULL,
     `password` VARCHAR(191) NOT NULL,
+    `stateId` INTEGER NOT NULL,
     `phone` VARCHAR(191) NULL,
+    `city` VARCHAR(191) NULL,
     `mobile` VARCHAR(191) NULL,
     `address` VARCHAR(191) NULL,
     `info` VARCHAR(191) NULL,
@@ -287,10 +305,13 @@ CREATE TABLE `movements` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `amount` DOUBLE NOT NULL,
     `concept` VARCHAR(191) NOT NULL,
-    `type` ENUM('IN', 'OUT') NOT NULL,
+    `type` ENUM('CREATION', 'IN', 'OUT', 'TRANSFER_IN', 'TRANSFER_OUT') NOT NULL,
     `userId` INTEGER NOT NULL,
     `clientId` INTEGER NULL,
+    `purchaseId` INTEGER NULL,
     `cashMovementId` INTEGER NULL,
+    `dischargeId` INTEGER NULL,
+    `transferId` INTEGER NULL,
     `paymentMethodId` INTEGER NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
@@ -477,6 +498,16 @@ CREATE TABLE `other_tribute_details` (
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+-- CreateTable
+CREATE TABLE `states` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(191) NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
 -- AddForeignKey
 ALTER TABLE `users` ADD CONSTRAINT `users_roleId_fkey` FOREIGN KEY (`roleId`) REFERENCES `roles`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
@@ -511,6 +542,15 @@ ALTER TABLE `stock` ADD CONSTRAINT `stock_productId_fkey` FOREIGN KEY (`productI
 ALTER TABLE `stock` ADD CONSTRAINT `stock_warehouseId_fkey` FOREIGN KEY (`warehouseId`) REFERENCES `warehouses`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE `stock_details` ADD CONSTRAINT `stock_details_movementId_fkey` FOREIGN KEY (`movementId`) REFERENCES `movements`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `stock_details` ADD CONSTRAINT `stock_details_productId_fkey` FOREIGN KEY (`productId`) REFERENCES `products`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `stock_details` ADD CONSTRAINT `stock_details_warehouseId_fkey` FOREIGN KEY (`warehouseId`) REFERENCES `warehouses`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE `prices` ADD CONSTRAINT `prices_productId_fkey` FOREIGN KEY (`productId`) REFERENCES `products`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -520,7 +560,13 @@ ALTER TABLE `prices` ADD CONSTRAINT `prices_pricelistId_fkey` FOREIGN KEY (`pric
 ALTER TABLE `costs` ADD CONSTRAINT `costs_productId_fkey` FOREIGN KEY (`productId`) REFERENCES `products`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE `suppliers` ADD CONSTRAINT `suppliers_stateId_fkey` FOREIGN KEY (`stateId`) REFERENCES `states`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE `clients` ADD CONSTRAINT `clients_roleId_fkey` FOREIGN KEY (`roleId`) REFERENCES `roles`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `clients` ADD CONSTRAINT `clients_stateId_fkey` FOREIGN KEY (`stateId`) REFERENCES `states`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `clients` ADD CONSTRAINT `clients_identificationId_fkey` FOREIGN KEY (`identificationId`) REFERENCES `identifications`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -553,7 +599,16 @@ ALTER TABLE `movements` ADD CONSTRAINT `movements_paymentMethodId_fkey` FOREIGN 
 ALTER TABLE `movements` ADD CONSTRAINT `movements_clientId_fkey` FOREIGN KEY (`clientId`) REFERENCES `clients`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE `movements` ADD CONSTRAINT `movements_purchaseId_fkey` FOREIGN KEY (`purchaseId`) REFERENCES `purchases`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE `movements` ADD CONSTRAINT `movements_cashMovementId_fkey` FOREIGN KEY (`cashMovementId`) REFERENCES `cash_movements`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `movements` ADD CONSTRAINT `movements_dischargeId_fkey` FOREIGN KEY (`dischargeId`) REFERENCES `discharges`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `movements` ADD CONSTRAINT `movements_transferId_fkey` FOREIGN KEY (`transferId`) REFERENCES `transfer`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `discharges` ADD CONSTRAINT `discharges_warehouseId_fkey` FOREIGN KEY (`warehouseId`) REFERENCES `warehouses`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;

@@ -1,9 +1,11 @@
+/* eslint-disable no-prototype-builtins */
 import { NextFunction, Response, Request } from 'express';
-import { MovementType, PrismaClient } from '@prisma/client';
+import { MovementType, PrismaClient, Products } from '@prisma/client';
 import createHttpError from 'http-errors';
 
 import { asyncHandler } from '../helpers/asyncHandler';
 import { endpointResponse } from '../helpers/endpointResponse';
+import { cashMovements } from '../../prisma/seeders/cashMovements';
 
 import {
   CreateCashRegisterType,
@@ -45,6 +47,7 @@ export const getById = asyncHandler(
   async (req: Request<{ id?: number }, unknown, unknown>, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
+
       const cashRegister = await prisma.cashRegisters.findFirst({
         where: { id: Number(id) },
         include: {
@@ -64,6 +67,30 @@ export const getById = asyncHandler(
           },
         },
         orderBy: [{ id: 'desc' }],
+      });
+
+      const uniques: any[] = [];
+      cashRegister?.cashMovements.forEach((el) => el.cashMovementsDetails.forEach((elx) => uniques.push(elx)));
+
+      const uniqueValues = Object.values(
+        uniques.reduce((acc: any, curr: any) => {
+          if (acc.hasOwnProperty(curr.productId)) {
+            acc[curr.productId] = { ...curr, quantity: acc[curr.productId].quantity + curr.quantity };
+          } else {
+            acc[curr.productId] = { ...curr, quantity: curr.quantity };
+          }
+          return acc;
+        }, {}),
+      );
+
+      const uniqueValuesSorted = uniqueValues.sort((a: any, b: any) => {
+        if (a.product.name > b.product.name) {
+          return 1;
+        }
+        if (a.product.name < b.product.name) {
+          return -1;
+        }
+        return 0;
       });
 
       const incomes = cashRegister?.cashMovements.filter(
@@ -116,6 +143,7 @@ export const getById = asyncHandler(
         body: {
           cashRegister: {
             ...cashRegister,
+            uniques: uniqueValuesSorted,
             total: cash + debit + credit + transfer + mercadoPago + recharges + otherTributes - discounts - creditNotes,
             sales: cash + debit + credit + transfer + mercadoPago,
             creditNotes,
@@ -299,16 +327,21 @@ export const closeById = asyncHandler(
         cart.sort((a, b) => a.productId - b.productId);
         const cost = cart.reduce((acc, item) => acc + Number(item.quantity) * Number(item.cost), 0);
         const { id } = await prisma.discharges.create({ data: { warehouseId, userId: Number(userId), cost } });
-        await prisma.movements.create({
+
+        // Create Balance
+        const movement = await prisma.movements.create({
           data: {
             amount: cost,
             type: MovementType.OUT,
             concept: 'Baja/Pérdida',
             paymentMethodId: 1,
             userId: Number(userId),
+            dischargeId: id,
           },
         });
+
         const productsIds = cart.map((item) => item.productId).sort();
+
         const cartWithWarehouseId = cart
           .map((item) => ({
             dischargeId: id,
@@ -319,7 +352,9 @@ export const closeById = asyncHandler(
             info: item.info,
           }))
           .sort((a, b) => a.productId - b.productId);
+
         await prisma.dischargeDetails.createMany({ data: cartWithWarehouseId });
+
         const stocks = await prisma.stocks.findMany({
           where: { productId: { in: productsIds }, warehouseId: warehouseId },
           orderBy: [{ id: 'asc' }],
@@ -345,6 +380,16 @@ export const closeById = asyncHandler(
               }),
           ),
         );
+
+        // Stock Details
+        const stockDetails = newStock.map((item) => ({
+          productId: item.productId,
+          warehouseId: item.warehouseId,
+          stock: item.stock,
+          movementId: movement.id,
+        }));
+
+        await prisma.stocksDetails.createMany({ data: stockDetails });
       }
 
       // TRANSFER
@@ -354,6 +399,7 @@ export const closeById = asyncHandler(
       const transfer = await prisma.transfer.create({
         data: { warehouseOriginId: warehouseId, warehouseDestinationId, userId: Number(userId) },
       });
+
       const cartWithTransferId = cart2.map((el) => ({ ...el, transferId: transfer.id }));
       await prisma.transferDetails.createMany({ data: cartWithTransferId });
 
@@ -396,10 +442,32 @@ export const closeById = asyncHandler(
         ),
       );
 
+      // Create Balance
+      const movement = await prisma.movements.create({
+        data: {
+          amount: 0,
+          type: MovementType.TRANSFER_OUT,
+          concept: 'Transferencia enviada',
+          paymentMethodId: 1,
+          userId: Number(userId),
+          transferId: transfer.id,
+        },
+      });
+
+      // Stock Details Origin
+      const stockDetailsOrigin = newStockOrigin.map((item) => ({
+        productId: item.productId,
+        warehouseId: item.warehouseId,
+        stock: item.stock,
+        movementId: movement.id,
+      }));
+
       const stocksDestination = await prisma.stocks.findMany({
         where: { productId: { in: productsIds2 }, warehouseId: warehouseDestinationId },
         orderBy: [{ createdAt: 'asc' }],
       });
+
+      await prisma.stocksDetails.createMany({ data: stockDetailsOrigin });
 
       const uniqueStocksDestination = stocksDestination.reduce((acc: any[], current) => {
         const existingStock = acc.find((stock) => stock.productId === current.productId);
@@ -433,6 +501,28 @@ export const closeById = asyncHandler(
             }),
         ),
       );
+
+      // Create Balance
+      const movement2 = await prisma.movements.create({
+        data: {
+          amount: 0,
+          type: MovementType.TRANSFER_IN,
+          concept: 'Transferencia recibida',
+          paymentMethodId: 1,
+          userId: Number(userId),
+          transferId: transfer.id,
+        },
+      });
+
+      // Stock Details Destination
+      const stockDetailsDestination = newStockDestination.map((item) => ({
+        productId: item.productId,
+        warehouseId: item.warehouseId,
+        stock: item.stock,
+        movementId: movement2.id,
+      }));
+
+      await prisma.stocksDetails.createMany({ data: stockDetailsDestination });
 
       // CLOSE CASH REGISTER
       const actualCashRegister = await prisma.cashRegisters.findFirst({
