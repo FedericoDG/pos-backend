@@ -11,6 +11,7 @@ export const createCashMovementsSchema = z.object({
       price: z.number().nonnegative(),
       quantity: z.number().nonnegative(),
       tax: z.number().nonnegative(),
+      totalDiscount: z.number().nonnegative(),
     }),
   ),
   otherTributes: z.array(

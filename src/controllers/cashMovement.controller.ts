@@ -256,7 +256,10 @@ export const create = asyncHandler(
 
       const productsIds = cart.map((item) => item.productId);
       const subtotalOtherTributes = otherTributes.reduce((acc, item) => acc + item.amount, 0);
-      const subtotal = cart.reduce((acc, item) => acc + item.quantity * item.price * (1 + item.tax), 0);
+      const subtotal = cart.reduce(
+        (acc, item) => acc + (item.quantity * item.price - item.totalDiscount) * (1 + item.tax),
+        0,
+      );
       const cashRegisterId = cashRegister?.id || 1;
       const cashRegisterFinalBalance = cashRegister?.finalBalance || 0;
       const finalBalance = cashRegisterFinalBalance + subtotal + subtotalOtherTributes;
@@ -298,6 +301,7 @@ export const create = asyncHandler(
         quantity: item.quantity,
         tax: item.tax,
         cashMovementId,
+        totalDiscount: item.totalDiscount,
       }));
 
       await prisma.cashMovementsDetails.createMany({ data: cartWithcashMovementId });

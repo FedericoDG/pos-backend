@@ -552,6 +552,7 @@ model CashMovementsDetails {
   price          Float
   tax            Float
   quantity       Int
+  totalDiscount  Float         @default(0)
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @default(now()) @updatedAt
   // Relations
