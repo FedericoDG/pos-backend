@@ -75,10 +75,46 @@ const calcId = (num: number): number => {
 const toTwoDigits = (num: number): number => Math.round(num * 100) / 100;
 
 const prisma = new PrismaClient();
+export const siteSettings = asyncHandler(
+  async (_req: Request<unknown, unknown, unknown>, res: Response, next: NextFunction) => {
+    const settings = await prisma.afip.findFirst({ where: { id: 1 } });
+
+    try {
+      endpointResponse({
+        res,
+        code: 200,
+        status: true,
+        message: 'Parámetros de AFIP recuperados',
+        body: {
+          afip: {
+            ...settings,
+          },
+        },
+      });
+    } catch (error) {
+      endpointResponse({
+        res,
+        code: 200,
+        status: true,
+        message: 'Parámetros de AFIP recuperados',
+        body: {
+          afip: {
+            ...settings,
+          },
+        },
+      });
+      if (error instanceof Error) {
+        const httpError = createHttpError(500, `[AFIP - GET ONE]: ${error.message}`);
+        next(httpError);
+      }
+    }
+  },
+);
 
 export const settings = asyncHandler(
   async (_req: Request<unknown, unknown, unknown>, res: Response, next: NextFunction) => {
     const afip = new Afip({ CUIT: process.env.CUIT, cert: './cert.crt', key: './key.key' });
+
     const settings = await prisma.afip.findFirst({ where: { id: 1 } });
 
     try {
@@ -156,7 +192,7 @@ export const editSettings = asyncHandler(
 export const create = asyncHandler(
   async (req: Request<unknown, unknown, CreateAfipInvoce>, res: Response, next: NextFunction) => {
     try {
-      const { clientId, cart, invoceTypeId, otherTributes, cashMovementId } = req.body;
+      const { clientId, cart, invoceTypeId, otherTributes, cashMovementId, discount, recharge } = req.body;
 
       const afip = new Afip({
         CUIT: process.env.CUIT,
@@ -169,26 +205,57 @@ export const create = asyncHandler(
       const fecha = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
 
       // TOTALS
-      const subtotal = cart.reduce((acc, item) => acc + item.quantity * item.price, 0);
-      const importeNeto = toTwoDigits(subtotal);
+      const subtotal = cart.reduce((acc, item) => acc + (item.quantity * item.price - item.totalDiscount), 0);
+      const importeNeto = toTwoDigits(subtotal - discount + recharge);
 
       const otrosImpuestos = otherTributes.reduce((acc, item) => acc + item.amount, 0);
 
       // IVA TYPES
       const iva: Array<{ Id: number; BaseImp: number; Importe: number }> = [];
 
-      const fede = cart.reduce((acc, el) => {
-        acc[el.tax] ??= el.tax;
-        return acc;
-      }, {});
+      let ivaArray: Record<string, number>;
+      if (discount > 0) {
+        cart.push({
+          productId: 999,
+          quantity: 1,
+          tax: 0,
+          price: discount * -1,
+          totalDiscount: 0,
+        });
 
-      const porcentajes: Array<number> = Object.values(fede);
+        ivaArray = cart.reduce((acc, el) => {
+          acc[el.tax] ??= el.tax;
+          return acc;
+        }, {});
+      } else if (recharge > 0) {
+        cart.push({
+          productId: 999,
+          quantity: 1,
+          tax: 0,
+          price: recharge,
+          totalDiscount: 0,
+        });
+
+        ivaArray = cart.reduce((acc, el) => {
+          acc[el.tax] ??= el.tax;
+          return acc;
+        }, {});
+      } else {
+        ivaArray = cart.reduce((acc, el) => {
+          acc[el.tax] ??= el.tax;
+          return acc;
+        }, {});
+      }
+
+      const porcentajes: Array<number> = Object.values(ivaArray);
 
       porcentajes.forEach((item) => {
         const filteredCart = cart.filter((el) => el.tax === item);
-        const cartSubtotal = toTwoDigits(filteredCart.reduce((acc, item) => acc + item.quantity * item.price, 0));
+        const cartSubtotal = toTwoDigits(
+          filteredCart.reduce((acc, item) => acc + (item.quantity * item.price - item.totalDiscount), 0),
+        );
         const cartTotalIva = toTwoDigits(
-          filteredCart.reduce((acc, item) => acc + item.quantity * item.price * item.tax, 0),
+          filteredCart.reduce((acc, item) => acc + (item.quantity * item.price - item.totalDiscount) * item.tax, 0),
         );
         const id = calcId(item);
         const iva0 = {
@@ -221,6 +288,14 @@ export const create = asyncHandler(
       // GET LAST VOUCHER NUMBER
       const lastVoucher = await afip.ElectronicBilling.getLastVoucher(afipSettings?.posNumber, invoceId);
 
+      console.log('**********************************');
+      console.log(cart);
+      console.log({ importeNeto: importeNeto });
+      console.log({ totalIva });
+      console.log({ importeTotal: importeTotal });
+      console.log({ iva });
+      console.log('**********************************');
+
       const data: Data = {
         CantReg: 1, // Cantidad de facturas a registrar
         PtoVta: afipSettings?.posNumber,
@@ -234,7 +309,7 @@ export const create = asyncHandler(
         FchServDesde: null,
         FchServHasta: null,
         FchVtoPago: null,
-        ImpTotal: importeTotal,
+        ImpTotal: importeTotal, // NETO + IMPUESTOS + IVA
         ImpTotConc: 0, // Importe neto no gravado
         ImpNeto: importeNeto,
         ImpOpEx: importe_exento_iva,
@@ -349,12 +424,12 @@ export const creditNote = asyncHandler(
       // IVA TYPES
       const iva: Array<{ Id: number; BaseImp: number; Importe: number }> = [];
 
-      const fede = cart.reduce((acc, el) => {
+      const ivaArray = cart.reduce((acc, el) => {
         acc[el.tax] ??= el.tax;
         return acc;
       }, {});
 
-      const porcentajes: Array<number> = Object.values(fede);
+      const porcentajes: Array<number> = Object.values(ivaArray);
 
       porcentajes.forEach((item) => {
         const filteredCart = cart.filter((el) => el.tax === item);

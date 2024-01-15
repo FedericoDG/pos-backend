@@ -279,7 +279,7 @@ export const create = asyncHandler(
         recharge,
         rechargePercent,
         otherTributes: subtotalOtherTributes,
-        total: subtotal + subtotalOtherTributes,
+        total: subtotal + subtotalOtherTributes - discount + recharge,
         warehouseId,
         clientId,
         userId,
