@@ -192,7 +192,17 @@ export const editSettings = asyncHandler(
 export const create = asyncHandler(
   async (req: Request<unknown, unknown, CreateAfipInvoce>, res: Response, next: NextFunction) => {
     try {
-      const { clientId, cart, invoceTypeId, otherTributes, cashMovementId, discount, recharge } = req.body;
+      const {
+        clientId,
+        cart,
+        invoceTypeId,
+        otherTributes,
+        cashMovementId,
+        discount,
+        discountPercent,
+        recharge,
+        rechargePercent,
+      } = req.body;
 
       const afip = new Afip({
         CUIT: process.env.CUIT,
@@ -211,9 +221,14 @@ export const create = asyncHandler(
       const otrosImpuestos = otherTributes.reduce((acc, item) => acc + item.amount, 0);
 
       // IVA TYPES
-      const iva: Array<{ Id: number; BaseImp: number; Importe: number }> = [];
+      let iva: Array<{ Id: number; BaseImp: number; Importe: number }> = [];
 
-      let ivaArray: Record<string, number>;
+      const ivaArray = cart.reduce((acc, el) => {
+        acc[el.tax] ??= el.tax;
+        return acc;
+      }, {});
+
+      /*  let ivaArray: Record<string, number>;
       if (discount > 0) {
         cart.push({
           productId: 999,
@@ -245,7 +260,7 @@ export const create = asyncHandler(
           acc[el.tax] ??= el.tax;
           return acc;
         }, {});
-      }
+      } */
 
       const porcentajes: Array<number> = Object.values(ivaArray);
 
@@ -266,10 +281,21 @@ export const create = asyncHandler(
         iva.push(iva0);
       });
 
-      const totalIva = toTwoDigits(iva.reduce((acc, item) => acc + item.Importe, 0));
-      const importeTotal = toTwoDigits(importeNeto + otrosImpuestos + totalIva);
+      let totalIva = toTwoDigits(iva.reduce((acc, item) => acc + item.Importe, 0));
+      let importeTotal = toTwoDigits(importeNeto + otrosImpuestos + totalIva);
 
       const importe_exento_iva = 0;
+
+      if (discountPercent > 0 || rechargePercent > 0) {
+        iva = iva.map((iva) => ({
+          ...iva,
+          BaseImp: toTwoDigits(iva.BaseImp * (1 - discountPercent / 100 + rechargePercent / 100)),
+          Importe: toTwoDigits(iva.Importe * (1 - discountPercent / 100 + rechargePercent / 100)),
+        }));
+
+        (totalIva = toTwoDigits(totalIva * (1 - discountPercent / 100 + rechargePercent / 100))),
+          (importeTotal = toTwoDigits(importeNeto + otrosImpuestos + totalIva));
+      }
 
       // INVOCE TYPE
       let invoceId: number;
@@ -289,6 +315,8 @@ export const create = asyncHandler(
       const lastVoucher = await afip.ElectronicBilling.getLastVoucher(afipSettings?.posNumber, invoceId);
 
       console.log('**********************************');
+      console.log({ discountPercent });
+      console.log({ rechargePercent });
       console.log(cart);
       console.log({ importeNeto: importeNeto });
       console.log({ totalIva });
@@ -434,9 +462,7 @@ export const creditNote = asyncHandler(
       porcentajes.forEach((item) => {
         const filteredCart = cart.filter((el) => el.tax === item);
         const cartSubtotal = toTwoDigits(filteredCart.reduce((acc, item) => acc + item.quantity * item.price, 0));
-        const cartTotalIva = toTwoDigits(
-          filteredCart.reduce((acc, item) => acc + item.quantity * item.price * item.tax, 0),
-        );
+        const cartTotalIva = toTwoDigits(filteredCart.reduce((acc, item) => acc + item.totalIVA!, 0));
         const id = calcId(item);
         const iva0 = {
           Id: id,
@@ -503,6 +529,8 @@ export const creditNote = asyncHandler(
         ],
         Iva: iva,
       };
+
+      console.log(data);
 
       // CREATE AFIP INVOCE
       const response = await afip.ElectronicBilling.createVoucher(data);

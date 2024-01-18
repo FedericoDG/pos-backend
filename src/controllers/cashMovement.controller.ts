@@ -66,18 +66,19 @@ export const getAllDetails = asyncHandler(
       const libroIva = cashMovements.map((el) => {
         const reduced = el.cashMovementsDetails.reduce((acc: any, curr: any) => {
           const key = curr.tax;
+          console.log(curr);
 
           if (acc[key]) {
             if (creditNotesIds.includes(el.invoceTypeId)) {
-              acc[key] += curr.tax * curr.price * curr.quantity;
+              acc[key] += curr.totalIVA;
             } else {
-              acc[key] += curr.tax * curr.price * curr.quantity;
+              acc[key] += curr.totalIVA;
             }
           } else {
             if (creditNotesIds.includes(el.invoceTypeId)) {
-              acc[key] = curr.tax * curr.price * curr.quantity;
+              acc[key] = curr.totalIVA;
             } else {
-              acc[key] = curr.tax * curr.price * curr.quantity;
+              acc[key] = curr.totalIVA;
             }
           }
           return acc;
@@ -254,12 +255,28 @@ export const create = asyncHandler(
       const settings = await prisma.settings.findFirst({ select: { invoceNumber: true } });
       const afip = await prisma.afip.findFirst({ select: { posNumber: true } });
 
-      const productsIds = cart.map((item) => item.productId);
+      const cartWithIVA = cart.map((el) => ({
+        ...el,
+        totalIVA:
+          (el.price * el.quantity - el.totalDiscount) * (el.tax * (1 - discountPercent / 100 + rechargePercent / 100)),
+      }));
+
+      const productsIds = cartWithIVA.map((item) => item.productId);
       const subtotalOtherTributes = otherTributes.reduce((acc, item) => acc + item.amount, 0);
-      const subtotal = cart.reduce(
-        (acc, item) => acc + (item.quantity * item.price - item.totalDiscount) * (1 + item.tax),
+      //
+      const subtotal = cartWithIVA.reduce(
+        (acc, item) => acc + (item.quantity * item.price - item.totalDiscount) + item.totalIVA,
         0,
       );
+
+      /*    if (discountPercent > 0) {
+        subtotal = cartWithIVA.reduce(
+          (acc, item) =>
+            acc + (item.quantity * item.price - item.totalDiscount) * (1 + item.tax * (1 - discountPercent / 100)),
+          0,
+        );
+      } */
+
       const cashRegisterId = cashRegister?.id || 1;
       const cashRegisterFinalBalance = cashRegister?.finalBalance || 0;
       const finalBalance = cashRegisterFinalBalance + subtotal + subtotalOtherTributes;
@@ -295,13 +312,14 @@ export const create = asyncHandler(
       // Create Cash Movement Details
       const cashMovementId = cashMovement.id;
 
-      const cartWithcashMovementId = cart.map((item) => ({
+      const cartWithcashMovementId = cartWithIVA.map((item) => ({
         productId: item.productId,
         price: item.price,
         quantity: item.quantity,
         tax: item.tax,
         cashMovementId,
         totalDiscount: item.totalDiscount,
+        totalIVA: item.totalIVA,
       }));
 
       await prisma.cashMovementsDetails.createMany({ data: cartWithcashMovementId });
@@ -350,14 +368,14 @@ export const create = asyncHandler(
       }, []);
 
       uniqueStocksOrigin.sort((a, b) => a.productId - b.productId);
-      cart.sort((a, b) => a.productId - b.productId);
+      cartWithIVA.sort((a, b) => a.productId - b.productId);
 
       const newStock = uniqueStocksOrigin.map((item, idx) => {
         return {
           id: item.id,
           productId: item.productId,
           warehouseId: warehouseId,
-          stock: item.stock - cart[idx].quantity,
+          stock: item.stock - cartWithIVA[idx].quantity,
           prevstock: item.stock,
           prevdate: item.createdAt,
         };

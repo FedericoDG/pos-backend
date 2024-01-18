@@ -435,6 +435,7 @@ CREATE TABLE `cash_movements_details` (
     `tax` DOUBLE NOT NULL,
     `quantity` INTEGER NOT NULL,
     `totalDiscount` DOUBLE NOT NULL DEFAULT 0,
+    `totalIVA` DOUBLE NOT NULL DEFAULT 0,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 

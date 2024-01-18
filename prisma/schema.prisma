@@ -24,9 +24,9 @@ generator client {
 }
 
 datasource db {
-  provider          = "mysql"
-  url               = env("DATABASE_URL")
-  shadowDatabaseUrl = env("SHADOW_URL")
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+  //shadowDatabaseUrl = env("SHADOW_URL")
   //url      = env("SHADOW_URL")
 }
 
@@ -553,6 +553,7 @@ model CashMovementsDetails {
   tax            Float
   quantity       Int
   totalDiscount  Float         @default(0)
+  totalIVA       Float         @default(0)
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @default(now()) @updatedAt
   // Relations
