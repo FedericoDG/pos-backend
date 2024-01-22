@@ -29,7 +29,7 @@ user.post(
 user.put('/:id', [validToken, accessLevel('ADMIN'), schemaValidator(updateUserSchema)], update);
 user.put(
   '/resetpassword/:id',
-  [validToken, accessLevel('ADMIN'), schemaValidator(resetPasswordUserSchema)],
+  [validToken, accessLevel('DRIVER'), schemaValidator(resetPasswordUserSchema)],
   resetPassword,
 );
 user.delete('/:id', [validToken, accessLevel('ADMIN')], remove);
