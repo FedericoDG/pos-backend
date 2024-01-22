@@ -228,40 +228,6 @@ export const create = asyncHandler(
         return acc;
       }, {});
 
-      /*  let ivaArray: Record<string, number>;
-      if (discount > 0) {
-        cart.push({
-          productId: 999,
-          quantity: 1,
-          tax: 0,
-          price: discount * -1,
-          totalDiscount: 0,
-        });
-
-        ivaArray = cart.reduce((acc, el) => {
-          acc[el.tax] ??= el.tax;
-          return acc;
-        }, {});
-      } else if (recharge > 0) {
-        cart.push({
-          productId: 999,
-          quantity: 1,
-          tax: 0,
-          price: recharge,
-          totalDiscount: 0,
-        });
-
-        ivaArray = cart.reduce((acc, el) => {
-          acc[el.tax] ??= el.tax;
-          return acc;
-        }, {});
-      } else {
-        ivaArray = cart.reduce((acc, el) => {
-          acc[el.tax] ??= el.tax;
-          return acc;
-        }, {});
-      } */
-
       const porcentajes: Array<number> = Object.values(ivaArray);
 
       porcentajes.forEach((item) => {
@@ -313,16 +279,6 @@ export const create = asyncHandler(
 
       // GET LAST VOUCHER NUMBER
       const lastVoucher = await afip.ElectronicBilling.getLastVoucher(afipSettings?.posNumber, invoceId);
-
-      console.log('**********************************');
-      console.log({ discountPercent });
-      console.log({ rechargePercent });
-      console.log(cart);
-      console.log({ importeNeto: importeNeto });
-      console.log({ totalIva });
-      console.log({ importeTotal: importeTotal });
-      console.log({ iva });
-      console.log('**********************************');
 
       const data: Data = {
         CantReg: 1, // Cantidad de facturas a registrar
@@ -430,7 +386,17 @@ export const create = asyncHandler(
 export const creditNote = asyncHandler(
   async (req: Request<unknown, unknown, CreateAfipCreditNote>, res: Response, next: NextFunction) => {
     try {
-      const { clientId, warehouseId, invoceTypeId, invoceNumber, cart, payments, cashMovementId: cashMId } = req.body;
+      const {
+        clientId,
+        warehouseId,
+        invoceTypeId,
+        invoceNumber,
+        cart,
+        payments,
+        cashMovementId: cashMId,
+        discount,
+        recharge,
+      } = req.body;
 
       const afip = new Afip({
         CUIT: process.env.CUIT,
@@ -443,10 +409,9 @@ export const creditNote = asyncHandler(
       const fecha = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
 
       // TOTALS
-      const subtotal = cart.reduce((acc, item) => acc + item.quantity * item.price, 0);
-      const importeNeto = toTwoDigits(subtotal);
+      const subtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
+      const importeNeto = toTwoDigits(subtotal - discount + recharge);
 
-      //const otrosImpuestos = otherTributes.reduce((acc, item) => acc + item.amount, 0);
       const otrosImpuestos = 0;
 
       // IVA TYPES
@@ -529,8 +494,6 @@ export const creditNote = asyncHandler(
         ],
         Iva: iva,
       };
-
-      console.log(data);
 
       // CREATE AFIP INVOCE
       const response = await afip.ElectronicBilling.createVoucher(data);

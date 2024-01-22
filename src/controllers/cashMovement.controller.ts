@@ -66,7 +66,6 @@ export const getAllDetails = asyncHandler(
       const libroIva = cashMovements.map((el) => {
         const reduced = el.cashMovementsDetails.reduce((acc: any, curr: any) => {
           const key = curr.tax;
-          console.log(curr);
 
           if (acc[key]) {
             if (creditNotesIds.includes(el.invoceTypeId)) {
@@ -96,7 +95,7 @@ export const getAllDetails = asyncHandler(
         const subTotal = el.total - iva;
         const total = subTotal + iva;
 
-        const obj: any = {
+        const obj = {
           id: el.id,
           isCreditNote: false,
           subTotal,
@@ -458,7 +457,9 @@ export const createCreditNote = asyncHandler(
       const invId = 8;
 
       const afipSettings = await prisma.afip.findFirst();
+
       const settings = await prisma.settings.findFirst({ select: { invoceNumber: true } });
+
       const cashMovement = await prisma.cashMovements.create({
         data: {
           iva: false,
