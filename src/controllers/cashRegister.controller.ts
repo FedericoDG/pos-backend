@@ -129,11 +129,26 @@ export const getById = asyncHandler(
       const discounts = incomes?.reduce((acc, el) => acc + el.discount, 0) || 0;
       const recharges = incomes?.reduce((acc, el) => acc + el.recharge, 0) || 0;
       const otherTributes = incomes?.reduce((acc, el) => acc + el.otherTributes, 0) || 0;
-      const creditNotes =
+      /* const creditNotes =
         outcomes
           ?.map((movement) => movement.paymentMethodDetails)
           .flat()
           .reduce((acc, el) => acc + el.amount, 0) || 0;
+
+      console.log(creditNotes); */
+
+      const fede = outcomes?.map((movement) => ({
+        paymentMethodDetails: movement.paymentMethodDetails,
+        recharge: movement.recharge,
+        discount: movement.discount,
+      }));
+
+      const creditNotes =
+        fede
+          ?.map((el) => ({
+            subTotal: el.paymentMethodDetails.reduce((acc, el) => acc + el.amount, 0) - el.discount + el.recharge,
+          }))
+          .reduce((acc, el) => acc + el.subTotal, 0) || 0;
 
       endpointResponse({
         res,
