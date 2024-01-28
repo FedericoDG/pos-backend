@@ -459,6 +459,7 @@ CREATE TABLE `payment_method_details` (
     `cashMovementId` INTEGER NOT NULL,
     `amount` DOUBLE NOT NULL,
     `paymentMethodId` INTEGER NOT NULL,
+    `isCreditNote` INTEGER NOT NULL DEFAULT 0,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 

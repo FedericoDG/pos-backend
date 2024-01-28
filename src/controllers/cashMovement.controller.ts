@@ -525,7 +525,7 @@ export const createCreditNote = asyncHandler(
       const reducedPaymentsArray: Array<{ amount: number; paymentMethodId: number }> = Object.values(reducedPayments);
       const mappedPayments = reducedPaymentsArray.map((item) => ({ ...item, cashMovementId }));
 
-      await prisma.paymentMethodDetails.createMany({ data: mappedPayments });
+      await prisma.paymentMethodDetails.createMany({ data: { ...mappedPayments, isCreditNote: 1 } });
 
       // Create Balance
       const movement = await prisma.movements.create({

@@ -56,6 +56,20 @@ export const getAll = asyncHandler(
         delete data.paymentMethodId;
       }
 
+      const paymentMethodDetails = await prisma.paymentMethodDetails.findMany({
+        where: {
+          createdAt: {
+            gte: parsedFrom,
+            lte: parsedTo,
+          },
+          isCreditNote: 0,
+        },
+        select: {
+          amount: true,
+          paymentMethodId: true,
+        },
+      });
+
       let mappedCashMovements = await prisma.cashMovements.findMany({
         where: {
           invoceTypeId: { in: invoicesIds },
@@ -222,16 +236,19 @@ export const getAll = asyncHandler(
         outcomes.filter((el) => el.concept === 'Baja/Pérdida').reduce((acc, el) => acc + el.amount, 0) || 0;
       const totalOutcomes = purchases + destroys;
 
-      const incomes = movements.filter((el) => el.type === MovementType.IN);
-      const totalCash =
-        incomes.filter((el) => el.paymentMethodId === 1).reduce((acc, el) => acc + el.amount, 0) -
-          (invoiceNCATotal + invoiceNCBTotal + invoiceNCMTotal + invoiceNCXTotal) || 0;
-      const totalDebit = incomes.filter((el) => el.paymentMethodId === 2).reduce((acc, el) => acc + el.amount, 0) || 0;
-      const totalCredit = incomes.filter((el) => el.paymentMethodId === 3).reduce((acc, el) => acc + el.amount, 0) || 0;
+      // const incomes = movements.filter((el) => el.type === MovementType.IN);
+
+      const totalCash = paymentMethodDetails
+        .filter((el) => el.paymentMethodId === 1)
+        .reduce((acc, el) => acc + el.amount, 0);
+      const totalDebit =
+        paymentMethodDetails.filter((el) => el.paymentMethodId === 2).reduce((acc, el) => acc + el.amount, 0) || 0;
+      const totalCredit =
+        paymentMethodDetails.filter((el) => el.paymentMethodId === 3).reduce((acc, el) => acc + el.amount, 0) || 0;
       const totalTransfer =
-        incomes.filter((el) => el.paymentMethodId === 4).reduce((acc, el) => acc + el.amount, 0) || 0;
+        paymentMethodDetails.filter((el) => el.paymentMethodId === 4).reduce((acc, el) => acc + el.amount, 0) || 0;
       const totalMercadoPago =
-        incomes.filter((el) => el.paymentMethodId === 5).reduce((acc, el) => acc + el.amount, 0) || 0;
+        paymentMethodDetails.filter((el) => el.paymentMethodId === 5).reduce((acc, el) => acc + el.amount, 0) || 0;
       const totalIncomes = totalCash + totalDebit + totalCredit + totalTransfer + totalMercadoPago;
 
       endpointResponse({
