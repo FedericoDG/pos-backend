@@ -582,9 +582,9 @@ export const creditNote = asyncHandler(
       }, {});
 
       const reducedPaymentsArray: Array<{ amount: number; paymentMethodId: number }> = Object.values(reducedPayments);
-      const mappedPayments = reducedPaymentsArray.map((item) => ({ ...item, cashMovementId }));
+      const mappedPayments = reducedPaymentsArray.map((item) => ({ ...item, cashMovementId, isCreditNote: 1 }));
 
-      await prisma.paymentMethodDetails.createMany({ data: { ...mappedPayments, isCreditNote: 1 } });
+      await prisma.paymentMethodDetails.createMany({ data: mappedPayments });
 
       //Update Warehouse
       const productIds = cart.map((item) => item.productId);
