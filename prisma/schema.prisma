@@ -38,6 +38,7 @@ model Settings {
   province       String
   ivaCondition   String
   cuit           String
+  start          String
   invoceName     String
   invoceNumber   Int
   imageURL       String

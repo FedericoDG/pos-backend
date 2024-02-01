@@ -10,6 +10,7 @@ export const settings = [
     province: 'Córdoba',
     ivaCondition: 'Responsable Inscripto',
     cuit: '30-15128459-9',
+    start: '01/01/2000',
     invoceName: 'Presupuesto',
     invoceNumber: 3,
     imageURL: 'https://live.pystatic.com/webassets/pwa/icons/icon-384x384.png',

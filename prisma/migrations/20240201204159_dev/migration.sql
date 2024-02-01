@@ -7,6 +7,7 @@ CREATE TABLE `settings` (
     `province` VARCHAR(191) NOT NULL,
     `ivaCondition` VARCHAR(191) NOT NULL,
     `cuit` VARCHAR(191) NOT NULL,
+    `start` VARCHAR(191) NOT NULL,
     `invoceName` VARCHAR(191) NOT NULL,
     `invoceNumber` INTEGER NOT NULL,
     `imageURL` VARCHAR(191) NOT NULL,

@@ -564,6 +564,7 @@ export const creditNote = asyncHandler(
         quantity: item.quantity,
         tax: item.tax,
         cashMovementId,
+        totalIVA: (item.price * item.quantity - item.totalDiscount) * item.tax * -1,
       }));
 
       await prisma.cashMovementsDetails.createMany({ data: cartWithcashMovementId });

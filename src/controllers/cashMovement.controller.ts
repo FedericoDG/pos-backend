@@ -64,24 +64,27 @@ export const getAllDetails = asyncHandler(
       });
 
       const libroIva = cashMovements.map((el) => {
-        const reduced = el.cashMovementsDetails.reduce((acc: any, curr: any) => {
-          const key = curr.tax;
+        const reduced = el.cashMovementsDetails.reduce(
+          (acc: any, curr: any) => {
+            const key = curr.tax;
+            console.log('key', curr.tax);
+            console.log('acc[key]', acc[key]);
+            console.log(curr.totalIVA);
 
-          if (acc[key]) {
-            if (creditNotesIds.includes(el.invoceTypeId)) {
-              acc[key] += curr.totalIVA;
-            } else {
-              acc[key] += curr.totalIVA;
-            }
-          } else {
-            if (creditNotesIds.includes(el.invoceTypeId)) {
-              acc[key] = curr.totalIVA;
-            } else {
-              acc[key] = curr.totalIVA;
-            }
-          }
-          return acc;
-        }, {});
+            acc[key] += curr.totalIVA;
+            console.log(acc);
+
+            return acc;
+          },
+          {
+            '0': 0,
+            '0.025': 0,
+            '0.05': 0,
+            '0.105': 0,
+            '0.21': 0,
+            '0.27': 0,
+          },
+        );
 
         if (!reduced['0']) reduced['0'] = 0;
         if (!reduced['0.025']) reduced['0.025'] = 0;
@@ -92,8 +95,19 @@ export const getAllDetails = asyncHandler(
 
         const iva =
           reduced['0'] + reduced['0.025'] + reduced['0.05'] + reduced['0.105'] + reduced['0.21'] + reduced['0.27'];
-        const subTotal = el.total - iva;
-        const total = subTotal + iva;
+        let subTotal;
+        if (iva > 0) {
+          subTotal = el.total - iva;
+        } else {
+          subTotal = el.total + iva;
+        }
+
+        let total;
+        if (iva > 0) {
+          total = subTotal + iva;
+        } else {
+          total = (subTotal - iva) * -1;
+        }
 
         const obj = {
           id: el.id,
@@ -131,7 +145,7 @@ export const getAllDetails = asyncHandler(
 
       const totalIva = libroIva.reduce((acc, curr) => {
         if (curr.isCreditNote) {
-          return acc - curr.iva;
+          return acc + curr.iva;
         } else {
           return acc + curr.iva;
         }
@@ -139,7 +153,7 @@ export const getAllDetails = asyncHandler(
 
       const totalTotal = libroIva.reduce((acc, curr) => {
         if (curr.isCreditNote) {
-          return acc - curr.total;
+          return acc + curr.total;
         } else {
           return acc + curr.total;
         }
@@ -499,13 +513,16 @@ export const createCreditNote = asyncHandler(
       // Udate Original CashMovemnet
       await prisma.cashMovements.update({ where: { id: cashMId }, data: { creditNote: cashMovementId } });
 
-      const cartWithcashMovementId = cart.map((item) => ({
-        productId: item.productId,
-        price: item.price,
-        quantity: item.quantity,
-        tax: item.tax,
-        cashMovementId,
-      }));
+      const cartWithcashMovementId = cart.map((item) => {
+        return {
+          productId: item.productId,
+          price: item.price,
+          quantity: item.quantity,
+          tax: item.tax,
+          cashMovementId,
+          // totalIVA: (item.price * item.quantity - item.totalDiscount) * item.tax * -1,
+        };
+      });
 
       await prisma.cashMovementsDetails.createMany({ data: cartWithcashMovementId });
 
