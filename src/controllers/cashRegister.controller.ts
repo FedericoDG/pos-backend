@@ -72,7 +72,8 @@ export const getById = asyncHandler(
       const totDisc = cashRegister?.cashMovements.reduce((acc, curr) => acc + curr.discount, 0) || 0;
       const totDiscInd =
         cashRegister?.cashMovements.reduce(
-          (acc, curr) => acc + curr.cashMovementsDetails.reduce((acc, curr) => acc + curr.totalDiscount, 0),
+          (acc, curr) =>
+            acc + curr.cashMovementsDetails.reduce((acc, curr) => acc + curr.totalDiscount * (1 + curr.tax), 0),
           0,
         ) || 0;
 
@@ -133,7 +134,7 @@ export const getById = asyncHandler(
           ?.map((movement) => movement.paymentMethodDetails.filter((el) => el.paymentMethodId === 5))
           .flat()
           .reduce((acc, el) => acc + el.amount, 0) || 0;
-      const discounts = incomes?.reduce((acc, el) => acc + el.discount, 0) || 0;
+
       const recharges = incomes?.reduce((acc, el) => acc + el.recharge, 0) || 0;
       const otherTributes = incomes?.reduce((acc, el) => acc + el.otherTributes, 0) || 0;
 
@@ -159,7 +160,17 @@ export const getById = asyncHandler(
           cashRegister: {
             ...cashRegister,
             uniques: uniqueValuesSorted,
-            total: cash + debit + credit + transfer + mercadoPago + recharges + otherTributes - discounts - creditNotes,
+            total:
+              cash +
+              debit +
+              credit +
+              transfer +
+              mercadoPago +
+              recharges +
+              otherTributes -
+              totDisc -
+              totDiscInd +
+              creditNotes,
             sales: cash + debit + credit + transfer + mercadoPago,
             creditNotes,
             cash: cash - creditNotes,
