@@ -69,6 +69,13 @@ export const getById = asyncHandler(
         orderBy: [{ id: 'desc' }],
       });
 
+      const totDisc = cashRegister?.cashMovements.reduce((acc, curr) => acc + curr.discount, 0) || 0;
+      const totDiscInd =
+        cashRegister?.cashMovements.reduce(
+          (acc, curr) => acc + curr.cashMovementsDetails.reduce((acc, curr) => acc + curr.totalDiscount, 0),
+          0,
+        ) || 0;
+
       const uniques: any[] = [];
       cashRegister?.cashMovements.forEach((el) => el.cashMovementsDetails.forEach((elx) => uniques.push(elx)));
 
@@ -162,7 +169,7 @@ export const getById = asyncHandler(
             mercadoPago,
             recharges,
             otherTributes,
-            discounts,
+            discounts: totDisc + totDiscInd,
           },
         },
       });
