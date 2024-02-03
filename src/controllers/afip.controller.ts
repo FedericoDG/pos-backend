@@ -215,7 +215,7 @@ export const create = asyncHandler(
       const fecha = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
 
       // TOTALS
-      const subtotal = cart.reduce((acc, item) => acc + (item.quantity * item.price - item.totalDiscount), 0);
+      const subtotal = cart.reduce((acc, item) => acc + item.quantity * item.price - item.totalDiscount, 0);
       const importeNeto = toTwoDigits(subtotal - discount + recharge);
 
       const otrosImpuestos = otherTributes.reduce((acc, item) => acc + item.amount, 0);

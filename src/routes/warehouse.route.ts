@@ -21,13 +21,13 @@ warehouse.post(
   '/',
   [
     validToken,
-    accessLevel('SUPERADMIN'),
+    accessLevel('ADMIN'),
     schemaValidator(createWarehouseSchema),
     valueIsAlreadyInUse({ model: 'warehouses', column: 'code' }),
   ],
   create,
 );
-warehouse.put('/:id', [validToken, accessLevel('SUPERADMIN'), schemaValidator(updateWarehouseSchema)], update);
-warehouse.delete('/:id', [validToken, accessLevel('SUPERADMIN')], remove);
+warehouse.put('/:id', [validToken, accessLevel('ADMIN'), schemaValidator(updateWarehouseSchema)], update);
+warehouse.delete('/:id', [validToken, accessLevel('ADMIN')], remove);
 
 export default warehouse;

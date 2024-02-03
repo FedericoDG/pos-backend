@@ -7,7 +7,7 @@ export const createClientSchema = z.object({
   stateId: z.coerce.number().min(1),
   city: z.string().optional(),
   ivaTypeId: z.coerce.number().min(1),
-  email: z.string().email().nonempty(),
+  email: z.string().email().optional(),
   password: z.string().nonempty().min(6),
   phone: z.string().optional(),
   mobile: z.string().optional(),

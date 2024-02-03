@@ -23,7 +23,7 @@ client.post(
     accessLevel('ADMIN'),
     schemaValidator(createClientSchema),
     valueIsAlreadyInUse({ model: 'clients', column: 'document' }),
-    valueIsAlreadyInUse({ model: 'clients', column: 'email' }),
+    /* valueIsAlreadyInUse({ model: 'clients', column: 'email' }), */
   ],
   create,
 );

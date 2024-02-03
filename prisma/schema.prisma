@@ -324,7 +324,7 @@ model Clients {
   id               Int               @id @default(autoincrement())
   name             String
   document         String            @unique
-  email            String            @unique
+  email            String?
   password         String
   stateId          Int
   phone            String?
