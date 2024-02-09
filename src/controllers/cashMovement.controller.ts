@@ -388,7 +388,7 @@ export const create = asyncHandler(
           id: item.id,
           productId: item.productId,
           warehouseId: warehouseId,
-          stock: item.stock - cartWithIVA[idx].quantity,
+          stock: item.stock - cartWithIVA[idx]!.quantity,
           prevstock: item.stock,
           prevdate: item.createdAt,
         };
@@ -617,7 +617,7 @@ export const checkCart = asyncHandler(
       const error: number[] = [];
 
       for (let index = 0; index < filteredCart.length; index++) {
-        if (filteredCart[index].quantity > stocks[index].stock) error.push(filteredCart[index].productId);
+        if (filteredCart[index].quantity > stocks[index]!.stock) error.push(filteredCart[index].productId);
       }
 
       endpointResponse({
