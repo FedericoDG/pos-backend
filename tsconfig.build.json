@@ -1,6 +1,7 @@
 {
   "extends": "./tsconfig.json",
-  "include": ["src"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"],
-  "externalDependencies": "none"
+  //"externalDependencies": "none",
+  "importHelpers": false
 }
