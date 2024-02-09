@@ -290,6 +290,7 @@ export const open = asyncHandler(
     try {
       const data = req.body;
       const { id: userId } = req.user;
+      console.log('CASH REGISTER OPEN');
 
       const cashRegister = await prisma.cashRegisters.create({ data: { ...data, finalBalance: 0, userId } });
 

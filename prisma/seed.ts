@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { settings } from './seeders/settings';
+
 import {
   afip,
   cashMovementDetails,
@@ -25,6 +25,7 @@ import {
   purchases,
   reasons,
   roles,
+  settings,
   states,
   stockDetails,
   stocks,
