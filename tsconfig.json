@@ -6,7 +6,7 @@
     "alwaysStrict": true,
     "baseUrl": ".",
     "forceConsistentCasingInFileNames": true,
-    "importHelpers": true,
+    "importHelpers": false,
     "jsx": "react",
     "module": "CommonJS",
     "moduleResolution": "node",
