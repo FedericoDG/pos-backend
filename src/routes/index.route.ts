@@ -1,5 +1,6 @@
 import { Router } from 'express';
 
+import test from './test.route';
 import auth from './auth.route';
 import user from './user.route';
 import role from './role.route';
@@ -32,6 +33,7 @@ import states from './states.route';
 
 const router = Router();
 
+router.use('/test', test);
 router.use('/auth', auth);
 router.use('/users', user);
 router.use('/roles', role);
