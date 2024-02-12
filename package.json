@@ -6,7 +6,7 @@
     "start": "ts-node -r tsconfig-paths/register -r dotenv/config src/index",
     "dev": "nodemon --config restart.json",
     "prebuild": "npm run lint",
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json && cp package*.json dist/src && cd dist/src && npm install --omit=dev",
     "build:watch": "tsc -w -p tsconfig.json",
     "lint": "eslint . --ext .ts,.tsx",
     "prepare": "husky install",
@@ -20,7 +20,7 @@
   "author": "Federico González <fede@nazgul.com.ar>",
   "license": "Apache-2.0",
   "dependencies": {
-    "@afipsdk/afip.js": "^1.1.0",
+    "@afipsdk/afip.js": "0.7.11",
     "@prisma/client": "^4.14.1",
     "bcryptjs": "^2.4.3",
     "commander": "^10.0.1",
