@@ -77,9 +77,9 @@ const toTwoDigits = (num: number): number => Math.round(num * 100) / 100;
 const prisma = new PrismaClient();
 export const siteSettings = asyncHandler(
   async (_req: Request<unknown, unknown, unknown>, res: Response, next: NextFunction) => {
-    const settings = await prisma.afip.findFirst({ where: { id: 1 } });
-
     try {
+      const settings = await prisma.afip.findFirst({ where: { id: 1 } });
+
       endpointResponse({
         res,
         code: 200,

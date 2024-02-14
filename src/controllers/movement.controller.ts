@@ -4,7 +4,7 @@ import createHttpError from 'http-errors';
 
 import { asyncHandler } from '../helpers/asyncHandler';
 import { endpointResponse } from '../helpers/endpointResponse';
-import { getMovementsType } from 'src/schemas/movement.schema';
+import { getMovementsType } from '../schemas/movement.schema';
 
 const prisma = new PrismaClient();
 

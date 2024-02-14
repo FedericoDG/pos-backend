@@ -110,9 +110,33 @@ export const getById = asyncHandler(
 );
 
 export const getByUserId = asyncHandler(
-  async (req: Request<{ id?: number }, unknown, unknown>, res: Response, next: NextFunction) => {
+  async (req: Request<{ id?: number }, unknown, unknown, { nostock?: string }>, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
+      const { nostock } = req.query;
+
+      if (nostock) {
+        const warehouse = await prisma.warehouses.findFirst({
+          where: { userId: Number(id) },
+          include: { user: true },
+          orderBy: [
+            {
+              id: 'asc',
+            },
+          ],
+        });
+
+        return endpointResponse({
+          res,
+          code: 200,
+          status: true,
+          message: 'Depósito/Almacén recuperado',
+          body: {
+            warehouse,
+          },
+        });
+      }
+
       const warehouse = await prisma.warehouses.findFirst({
         where: { userId: Number(id) },
         include: {

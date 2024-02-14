@@ -6,7 +6,7 @@
     "start": "ts-node -r tsconfig-paths/register -r dotenv/config src/index",
     "dev": "nodemon --config restart.json",
     "prebuild": "npm run lint",
-    "build": "tsc -p tsconfig.json && cp package*.json dist/src && cd dist/src && npm install --omit=dev",
+    "build": "tsc -p tsconfig.json",
     "build:watch": "tsc -w -p tsconfig.json",
     "lint": "eslint . --ext .ts,.tsx",
     "prepare": "husky install",
