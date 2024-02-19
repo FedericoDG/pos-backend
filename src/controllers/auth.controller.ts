@@ -63,20 +63,19 @@ export const loginDriver = asyncHandler(
         ],
       });
 
-      // PRICELIST
-      const pricelists = await prisma.pricelists.findMany({
-        orderBy: [
-          {
-            updatedAt: 'asc',
-          },
-        ],
-      });
-
       // INVOICE TYPES
       const invoceTypes = await prisma.invoceTypes.findMany();
 
       // AFIP SETTINGS
       const afip = await prisma.afip.findFirst({ where: { id: 1 } });
+
+      // SETTINGS
+      const settings = await prisma.settings.findFirst({ select: { defaultPriceListDriver: true } });
+
+      // PRICELIST
+      const pricelist = await prisma.pricelists.findFirst({
+        where: { id: settings?.defaultPriceListDriver },
+      });
 
       endpointResponse({
         res,
@@ -86,10 +85,10 @@ export const loginDriver = asyncHandler(
         body: {
           user,
           token,
-          warehouse,
-          clients,
-          pricelists,
-          invoceTypes,
+          warehouse: { ...warehouse, value: warehouse?.id, label: warehouse?.code },
+          clients: clients.map((el) => ({ ...el, value: el.id, label: `${el.document} - ${el.name}` })),
+          pricelist: { ...pricelist, value: pricelist?.id, label: pricelist?.code },
+          invoceTypes: invoceTypes.map((el) => ({ ...el, value: el.id, label: `${el.code} ${el.description}` })),
           afip,
         },
       });
