@@ -6,6 +6,6 @@ const afip = Router();
 import { test } from '../controllers/test.controller';
 
 // Routes
-afip.get('/test/', [], test);
+afip.get('/', [], test);
 
 export default afip;
