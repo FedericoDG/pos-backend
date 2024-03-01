@@ -77,6 +77,15 @@ export const loginDriver = asyncHandler(
         where: { id: settings?.defaultPriceListDriver },
       });
 
+      // CASHREGISTER
+      const cashRegister = await prisma.cashRegisters.findFirst({
+        where: { userId: user.id, closingDate: null },
+      });
+
+      const cashRegisterId = cashRegister?.id || null;
+
+      console.log({ cashRegisterId });
+
       endpointResponse({
         res,
         code: 200,
@@ -85,6 +94,7 @@ export const loginDriver = asyncHandler(
         body: {
           user,
           token,
+          cashRegisterId,
           warehouse: { ...warehouse, value: warehouse?.id, label: warehouse?.code },
           clients: clients.map((el) => ({ ...el, value: el.id, label: `${el.document} - ${el.name}` })),
           pricelist: { ...pricelist, value: pricelist?.id, label: pricelist?.code },
