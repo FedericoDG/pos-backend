@@ -22,6 +22,7 @@ export const updateClientSchema = z.object({
   stateId: z.coerce.number().min(1),
   city: z.string().optional(),
   ivaTypeId: z.coerce.number().min(1),
+  email: z.string().email().optional(),
   password: z.string().optional(),
   phone: z.string().optional(),
   mobile: z.string().optional(),

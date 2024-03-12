@@ -84,8 +84,6 @@ export const loginDriver = asyncHandler(
 
       const cashRegisterId = cashRegister?.id || null;
 
-      console.log({ cashRegisterId });
-
       endpointResponse({
         res,
         code: 200,
