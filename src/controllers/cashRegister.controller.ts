@@ -1,19 +1,17 @@
 /* eslint-disable no-prototype-builtins */
 import { NextFunction, Response, Request } from 'express';
-import { MovementType, PrismaClient, Products } from '@prisma/client';
+import { MovementType } from '@prisma/client';
 import createHttpError from 'http-errors';
 
 import { asyncHandler } from '../helpers/asyncHandler';
 import { endpointResponse } from '../helpers/endpointResponse';
-import { cashMovements } from '../../prisma/seeders/cashMovements';
 
 import {
   CreateCashRegisterType,
   UpdateCashRegisterByIdType,
   UpdateCashRegisterType,
 } from '../schemas/cashRegister.schema';
-
-const prisma = new PrismaClient();
+import prisma from '../helpers/prisma';
 
 export const getAll = asyncHandler(
   async (_req: Request<unknown, unknown, unknown>, res: Response, next: NextFunction) => {

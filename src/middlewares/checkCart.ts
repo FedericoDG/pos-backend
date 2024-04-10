@@ -1,9 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
 import createHttpError from 'http-errors';
 import { endpointResponse } from '../helpers/endpointResponse';
-
-const prisma = new PrismaClient();
+import prisma from '../helpers/prisma';
 
 export const userExistMidd = async (req: Request, res: Response, next: NextFunction) => {
   try {

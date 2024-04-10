@@ -1,6 +1,6 @@
-import { PrismaClient } from '@prisma/client';
 import { CreateCashMovementsType } from '../schemas/cashMovement.schema';
 import Afip from '@afipsdk/afip.js';
+import prisma from '../helpers/prisma';
 
 type Iva = {
   Id: number;
@@ -51,8 +51,6 @@ const calcId = (num: number): number => {
 };
 
 const toTwoDigits = (num: number): number => Math.round(num * 100) / 100;
-
-const prisma = new PrismaClient();
 
 export const createAfipInvoce = async (props: CreateCashMovementsType) => {
   const { clientId, discount, recharge, cart, invoceTypeId, otherTributes } = props;

@@ -8,6 +8,7 @@ import {
   getAll,
   getById,
   getByIdAndWarehouseId,
+  getByIdAndWarehouseIdQuery,
   getByIdWarehouseIdAndProductId,
   remove,
   report,
@@ -20,7 +21,7 @@ import { schemaValidator } from '../middlewares/schemaValidator.middleware';
 import { valueIsAlreadyInUse } from '../middlewares/valueIsAlreadyInUse';
 
 // Schema
-import { createPriceListSchema, updatePriceListSchema } from '../schemas/pricelist.schema';
+import { createPriceListSchema, queryPriceListSchema, updatePriceListSchema } from '../schemas/pricelist.schema';
 
 // Routes
 priceList.get('/', [validToken, accessLevel('USER')], getAll);
@@ -37,6 +38,11 @@ priceList.post(
     valueIsAlreadyInUse({ model: 'pricelists', column: 'code' }),
   ],
   create,
+);
+priceList.post(
+  '/query',
+  [validToken, accessLevel('USER'), schemaValidator(queryPriceListSchema)],
+  getByIdAndWarehouseIdQuery,
 );
 priceList.put('/:id', [validToken, accessLevel('SUPERADMIN'), schemaValidator(updatePriceListSchema)], update);
 priceList.delete('/:id', [validToken, accessLevel('SUPERADMIN')], remove);

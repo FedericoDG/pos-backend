@@ -4,11 +4,9 @@ import createHttpError from 'http-errors';
 import { asyncHandler } from '../helpers/asyncHandler';
 import { endpointResponse } from '../helpers/endpointResponse';
 import { jwtSign } from '../helpers/jwt';
-import { PrismaClient } from '@prisma/client';
 
 import { LoginType } from '../schemas/auth.schema';
-
-const prisma = new PrismaClient();
+import prisma from '../helpers/prisma';
 
 export const login = asyncHandler(
   async (req: Request<unknown, unknown, LoginType>, res: Response, next: NextFunction) => {

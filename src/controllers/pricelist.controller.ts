@@ -1,14 +1,12 @@
 import { NextFunction, Response, Request } from 'express';
-import { PrismaClient } from '@prisma/client';
 import createHttpError from 'http-errors';
 
 import { asyncHandler } from '../helpers/asyncHandler';
 import { endpointResponse } from '../helpers/endpointResponse';
 
-import { CreatePriceListType, UpdatePriceListType } from '../schemas/pricelist.schema';
+import { CreatePriceListType, QueryPriceListType, UpdatePriceListType } from '../schemas/pricelist.schema';
 import { getList } from '../helpers/getList';
-
-const prisma = new PrismaClient();
+import prisma from '../helpers/prisma';
 
 interface Result {
   pricelists: {
@@ -118,7 +116,56 @@ export const getById = asyncHandler(
 export const getByIdAndWarehouseId = asyncHandler(
   async (req: Request<{ id?: number; warehouseId?: number }, unknown, unknown>, res: Response, next: NextFunction) => {
     try {
+      console.log('Es ACA');
       const { id, warehouseId } = req.params;
+
+      const pricelist = await prisma.pricelists.findFirst({
+        where: { id: Number(id) },
+        include: {
+          prices: {
+            include: { products: { include: { unit: true, category: true, ivaCondition: true } } },
+            orderBy: [{ createdAt: 'desc' }],
+          },
+        },
+      });
+
+      const stocks = await prisma.stocks.findMany({
+        where: { warehouseId: Number(warehouseId) },
+        include: {
+          warehouse: true,
+        },
+      });
+
+      const list = getList(pricelist, stocks, 'products');
+
+      const filteredList = {
+        ...list,
+        products: list.products?.filter((item: any) => item.price > 0).sort((a, b) => a!.name.localeCompare(b!.name)),
+      };
+
+      endpointResponse({
+        res,
+        code: 200,
+        status: true,
+        message: 'Lista de precio recuperada',
+        body: {
+          pricelist: filteredList,
+        },
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        const httpError = createHttpError(500, `[PriceLists - GET ONE]: ${error.message}`);
+        next(httpError);
+      }
+    }
+  },
+);
+
+export const getByIdAndWarehouseIdQuery = asyncHandler(
+  async (req: Request<unknown, unknown, QueryPriceListType>, res: Response, next: NextFunction) => {
+    try {
+      const { id, warehouseId, query } = req.body;
+      console.log(query);
 
       const pricelist = await prisma.pricelists.findFirst({
         where: { id: Number(id) },

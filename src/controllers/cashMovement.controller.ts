@@ -1,13 +1,12 @@
 import { NextFunction, Response, Request } from 'express';
-import { MovementType, PrismaClient } from '@prisma/client';
+import { MovementType } from '@prisma/client';
 import createHttpError from 'http-errors';
 
 import { asyncHandler } from '../helpers/asyncHandler';
 import { endpointResponse } from '../helpers/endpointResponse';
 
 import { CreateCashMovementsType, LibroIVAType } from '../schemas/cashMovement.schema';
-
-const prisma = new PrismaClient();
+import prisma from '../helpers/prisma';
 
 export const getAll = asyncHandler(
   async (_req: Request<unknown, unknown, unknown>, res: Response, next: NextFunction) => {

@@ -1,13 +1,11 @@
 import { NextFunction, Response, Request } from 'express';
-import { PrismaClient } from '@prisma/client';
 import createHttpError from 'http-errors';
 
 import { asyncHandler } from '../helpers/asyncHandler';
 import { endpointResponse } from '../helpers/endpointResponse';
 
 import { CreateCostType } from '../schemas/cost.schema';
-
-const prisma = new PrismaClient();
+import prisma from '../helpers/prisma';
 
 export const create = asyncHandler(
   async (req: Request<unknown, unknown, CreateCostType>, res: Response, next: NextFunction) => {

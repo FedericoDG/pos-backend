@@ -1,5 +1,5 @@
 import { NextFunction, Response, Request } from 'express';
-import { MovementType, Prices, PrismaClient } from '@prisma/client';
+import { MovementType, Prices } from '@prisma/client';
 import createHttpError from 'http-errors';
 
 import { asyncHandler } from '../helpers/asyncHandler';
@@ -7,7 +7,7 @@ import { endpointResponse } from '../helpers/endpointResponse';
 
 import { CreateProductType, UpdateProductType } from '../schemas/product.schema';
 
-const prisma = new PrismaClient();
+import prisma from '../helpers/prisma';
 
 export const getAll = asyncHandler(
   async (req: Request<unknown, unknown, unknown, { nostock?: string }>, res: Response, next: NextFunction) => {

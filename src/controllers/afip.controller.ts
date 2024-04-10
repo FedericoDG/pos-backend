@@ -1,5 +1,5 @@
 import { NextFunction, Response, Request } from 'express';
-import { MovementType, PrismaClient } from '@prisma/client';
+import { MovementType } from '@prisma/client';
 import createHttpError from 'http-errors';
 import Afip from '@afipsdk/afip.js';
 
@@ -8,6 +8,7 @@ import { endpointResponse } from '../helpers/endpointResponse';
 
 import { afipEditSttingsType } from '../schemas/afip.schema';
 import { CreateCashMovementsType } from '../schemas/cashMovement.schema';
+import prisma from '../helpers/prisma';
 
 type Iva = {
   Id: number;
@@ -74,7 +75,6 @@ const calcId = (num: number): number => {
 
 const toTwoDigits = (num: number): number => Math.round(num * 100) / 100;
 
-const prisma = new PrismaClient();
 export const siteSettings = asyncHandler(
   async (_req: Request<unknown, unknown, unknown>, res: Response, next: NextFunction) => {
     try {

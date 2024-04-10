@@ -1,13 +1,11 @@
 import { NextFunction, Response, Request } from 'express';
-import { PrismaClient } from '@prisma/client';
 import createHttpError from 'http-errors';
 
 import { asyncHandler } from '../helpers/asyncHandler';
 import { endpointResponse } from '../helpers/endpointResponse';
 
 import { updateSettingsType } from '../schemas/settings.schema';
-
-const prisma = new PrismaClient();
+import prisma from '../helpers/prisma';
 
 export const getById = asyncHandler(
   async (req: Request<{ id?: number }, unknown, unknown>, res: Response, next: NextFunction) => {

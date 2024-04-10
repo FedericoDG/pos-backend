@@ -1,12 +1,10 @@
 import { NextFunction, Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
 import createHttpError from 'http-errors';
 
 import { bcCompare } from '../helpers/bcrypt';
 
 import { Client } from '../types';
-
-const prisma = new PrismaClient();
+import prisma from '../helpers/prisma';
 
 export const userExist = async (req: Request, res: Response, next: NextFunction) => {
   const { email, password } = req.body;

@@ -1,12 +1,11 @@
 import { NextFunction, Response, Request } from 'express';
-import { Clients, MovementType, PrismaClient, Users } from '@prisma/client';
+import { Clients, MovementType, Users } from '@prisma/client';
 import createHttpError from 'http-errors';
 
 import { asyncHandler } from '../helpers/asyncHandler';
 import { endpointResponse } from '../helpers/endpointResponse';
 import { getMovementsType } from '../schemas/movement.schema';
-
-const prisma = new PrismaClient();
+import prisma from '../helpers/prisma';
 
 interface Data {
   userId?: number;
