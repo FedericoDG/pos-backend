@@ -116,7 +116,6 @@ export const getById = asyncHandler(
 export const getByIdAndWarehouseId = asyncHandler(
   async (req: Request<{ id?: number; warehouseId?: number }, unknown, unknown>, res: Response, next: NextFunction) => {
     try {
-      console.log('Es ACA');
       const { id, warehouseId } = req.params;
 
       const pricelist = await prisma.pricelists.findFirst({
