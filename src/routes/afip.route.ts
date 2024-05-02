@@ -17,6 +17,6 @@ afip.get('/settings/', [validToken, accessLevel('DRIVER')], settings);
 afip.get('/site-settings/', [validToken, accessLevel('DRIVER')], siteSettings);
 afip.put('/settings/', [validToken, accessLevel('SUPERADMIN'), schemaValidator(afipEditSttingsSchema)], editSettings);
 afip.post('/', [validToken, accessLevel('SELLER')], create);
-afip.post('/nota-credito', [validToken, accessLevel('SELLER')], creditNote);
+afip.post('/nota-credito', [validToken, accessLevel('DRIVER')], creditNote);
 
 export default afip;

@@ -29,7 +29,7 @@ purchase.post(
   [validToken, accessLevel('DRIVER'), schemaValidator(createCashMovementsSchema), userExistMidd],
   create,
 );
-purchase.post('/nota-credito', [validToken, accessLevel('ADMIN')], createCreditNote);
+purchase.post('/nota-credito', [validToken, accessLevel('DRIVER')], createCreditNote);
 purchase.post('/check-cart', [validToken, accessLevel('DRIVER')], checkCart);
 
 export default purchase;
