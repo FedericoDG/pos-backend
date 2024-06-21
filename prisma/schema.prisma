@@ -22,6 +22,7 @@ enum MovementType {
 generator client {
   provider      = "prisma-client-js"
   binaryTargets = ["native", "debian-openssl-1.1.x", "debian-openssl-3.0.x", "linux-musl", "linux-musl-openssl-3.0.x"]
+  // binaryTargets = ["windows"]
 }
 
 datasource db {
@@ -37,13 +38,14 @@ model Settings {
   address                String
   cp                     String
   province               String
-  ivaCondition           String
+  ivaCondition           String   @default("Responsable Inscripto")
   cuit                   String
   start                  String
   invoceName             String
   invoceNumber           Int
   imageURL               String
   showOtherTaxes         Int      @default(1)
+  responsableInscripto   Int      @default(0)
   defaultPriceListDriver Int      @default(1)
   createdAt              DateTime @default(now())
   updatedAt              DateTime @default(now()) @updatedAt

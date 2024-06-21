@@ -45,8 +45,15 @@ type Data = {
   ImpTrib: number;
   MonId: string;
   MonCotiz: number;
-  Iva: Iva[];
+  Iva?: Iva[];
   Tributos?: Tribute[];
+  CbtesAsoc?: [
+    {
+      Tipo: number;
+      PtoVta: number;
+      Nro: number;
+    },
+  ];
 };
 
 type CashMovementId = {
@@ -120,9 +127,11 @@ export const settings = asyncHandler(
     try {
       const last_voucherA = await afip.ElectronicBilling.getLastVoucher(settings?.posNumber, 1);
       const last_voucherB = await afip.ElectronicBilling.getLastVoucher(settings?.posNumber, 6);
+      const last_voucherC = await afip.ElectronicBilling.getLastVoucher(settings?.posNumber, 11);
       const last_voucherM = await afip.ElectronicBilling.getLastVoucher(settings?.posNumber, 51);
       const last_voucherNCA = await afip.ElectronicBilling.getLastVoucher(settings?.posNumber, 3);
       const last_voucherNCB = await afip.ElectronicBilling.getLastVoucher(settings?.posNumber, 8);
+      const last_voucherNCC = await afip.ElectronicBilling.getLastVoucher(settings?.posNumber, 13);
       const last_voucherNCM = await afip.ElectronicBilling.getLastVoucher(settings?.posNumber, 53);
 
       endpointResponse({
@@ -135,9 +144,11 @@ export const settings = asyncHandler(
             ...settings,
             nextInvoceNumberA: last_voucherA + 1,
             nextInvoceNumberB: last_voucherB + 1,
+            nextInvoceNumberC: last_voucherC + 1,
             nextInvoceNumberM: last_voucherM + 1,
             nextInvoceNumberNCA: last_voucherNCA + 1,
             nextInvoceNumberNCB: last_voucherNCB + 1,
+            nextInvoceNumberNCC: last_voucherNCC + 1,
             nextInvoceNumberNCM: last_voucherNCM + 1,
           },
         },
@@ -272,6 +283,9 @@ export const create = asyncHandler(
       } else if (invoceTypeId === 2) {
         console.log('FACTURA B');
         invoceId = 6;
+      } else if (invoceTypeId === 9) {
+        console.log('FACTURA C');
+        invoceId = 11;
       } else {
         console.log('FACTURA M');
         invoceId = 51;
@@ -297,12 +311,16 @@ export const create = asyncHandler(
         ImpTotConc: 0, // Importe neto no gravado
         ImpNeto: importeNeto,
         ImpOpEx: importe_exento_iva,
-        ImpIVA: totalIva,
+        ImpIVA: invoceId === 11 ? 0 : totalIva,
         ImpTrib: otrosImpuestos, //Importe total de tributos
         MonId: 'PES',
         MonCotiz: 1,
-        Iva: iva,
+        // Iva: invoceId === 11 ? [] : iva,
       };
+
+      if (invoceId !== 11) {
+        data.Iva = iva;
+      }
 
       // TRIBUTES
       if (otherTributes.length > 0) {
@@ -447,6 +465,7 @@ export const creditNote = asyncHandler(
       let invoceId: number;
       let invId: number;
 
+      console.log({ invoceTypeId });
       if (invoceTypeId === 1) {
         console.log('NOTA DE CRÉDITO A');
         invoceId = 3;
@@ -455,6 +474,10 @@ export const creditNote = asyncHandler(
         console.log('NOTA DE CRÉDITO B');
         invoceId = 8;
         invId = 6;
+      } else if (invoceTypeId === 11) {
+        console.log('NOTA DE CRÉDITO C');
+        invoceId = 13;
+        invId = 10;
       } else {
         console.log('NOTA DE CRÉDITO M');
         invoceId = 53;
@@ -464,7 +487,7 @@ export const creditNote = asyncHandler(
       // GET LAST VOUCHER NUMBER
       const lastVoucher = await afip.ElectronicBilling.getLastVoucher(afipSettings?.posNumber, invoceId);
 
-      const data = {
+      const data: Data = {
         CantReg: 1,
         PtoVta: afipSettings?.posNumber,
         CbteTipo: invoceId,
@@ -488,12 +511,16 @@ export const creditNote = asyncHandler(
         CbtesAsoc: [
           {
             Tipo: invoceId,
-            PtoVta: afipSettings?.posNumber,
+            PtoVta: afipSettings?.posNumber || 1,
             Nro: invoceNumber,
           },
         ],
-        Iva: iva,
+        // Iva: iva,
       };
+
+      if (invoceId !== 13) {
+        data.Iva = iva;
+      }
 
       // CREATE AFIP INVOCE
       const response = await afip.ElectronicBilling.createVoucher(data);

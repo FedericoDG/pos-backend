@@ -8,7 +8,6 @@ export const settings = [
     address: 'Av. Brasil, 123',
     cp: '5000',
     province: 'Córdoba',
-    ivaCondition: 'Responsable Inscripto',
     cuit: '30-15128459-9',
     start: '01/01/2000',
     invoceName: 'Presupuesto',

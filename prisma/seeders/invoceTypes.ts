@@ -609,4 +609,16 @@ export const invoceTypes = [
     createdAt: now.plus({ seconds: 101 }).toString(),
     updatedAt: now.plus({ seconds: 101 }).toString(),
   },
+  {
+    code: '011',
+    description: 'FACTURA C',
+    createdAt: now.plus({ seconds: 11 }).toString(),
+    updatedAt: now.plus({ seconds: 11 }).toString(),
+  },
+  {
+    code: '013',
+    description: 'NOTAS DE CRÉDITO C',
+    createdAt: now.plus({ seconds: 13 }).toString(),
+    updatedAt: now.plus({ seconds: 13 }).toString(),
+  },
 ];

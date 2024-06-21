@@ -263,6 +263,9 @@ export const create = asyncHandler(
       } = req.body;
       const { id: userId } = req.user;
 
+      const isCheckingAccount = payments.some((el) => el.paymentMethodId === 6);
+      console.log({ isCheckingAccount });
+
       const cashRegister = await prisma.cashRegisters.findFirst({ where: { userId }, orderBy: [{ id: 'desc' }] });
       const settings = await prisma.settings.findFirst({ select: { invoceNumber: true } });
       const afip = await prisma.afip.findFirst({ select: { posNumber: true } });
@@ -428,6 +431,8 @@ export const create = asyncHandler(
       }));
 
       await prisma.stocksDetails.createMany({ data: stockDetails });
+
+      // TODO: Create checking account
 
       endpointResponse({
         res,

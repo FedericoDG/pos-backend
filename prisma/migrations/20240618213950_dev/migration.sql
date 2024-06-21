@@ -12,6 +12,7 @@ CREATE TABLE `settings` (
     `invoceNumber` INTEGER NOT NULL,
     `imageURL` VARCHAR(191) NOT NULL,
     `showOtherTaxes` INTEGER NOT NULL DEFAULT 1,
+    `responsableInscripto` INTEGER NOT NULL DEFAULT 1,
     `defaultPriceListDriver` INTEGER NOT NULL DEFAULT 1,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),

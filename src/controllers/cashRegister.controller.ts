@@ -100,11 +100,21 @@ export const getById = asyncHandler(
       });
 
       const incomes = cashRegister?.cashMovements.filter(
-        (el) => el.invoceTypeId === 1 || el.invoceTypeId === 2 || el.invoceTypeId === 3 || el.invoceTypeId === 4,
+        (el) =>
+          el.invoceTypeId === 1 ||
+          el.invoceTypeId === 2 ||
+          el.invoceTypeId === 3 ||
+          el.invoceTypeId === 4 ||
+          el.invoceTypeId === 9,
       );
 
       const outcomes = cashRegister?.cashMovements.filter(
-        (el) => el.invoceTypeId === 5 || el.invoceTypeId === 6 || el.invoceTypeId === 7 || el.invoceTypeId === 8,
+        (el) =>
+          el.invoceTypeId === 5 ||
+          el.invoceTypeId === 6 ||
+          el.invoceTypeId === 7 ||
+          el.invoceTypeId === 8 ||
+          el.invoceTypeId === 10,
       );
 
       const cash =

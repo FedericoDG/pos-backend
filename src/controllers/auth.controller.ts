@@ -13,6 +13,7 @@ export const login = asyncHandler(
     try {
       const { user } = req;
       const token = jwtSign(user);
+      const settings = await prisma.settings.findFirst();
 
       endpointResponse({
         res,
@@ -22,6 +23,7 @@ export const login = asyncHandler(
         body: {
           user,
           token,
+          responsableInscripto: settings?.responsableInscripto,
         },
       });
     } catch (error) {

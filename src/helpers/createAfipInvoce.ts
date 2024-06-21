@@ -142,6 +142,9 @@ export const createAfipInvoce = async (props: CreateCashMovementsType) => {
   } else if (invoceTypeId === 2) {
     console.log('FACTURA B');
     invoceId = 6;
+  } else if (invoceTypeId === 9) {
+    console.log('FACTURA C');
+    invoceId = 11;
   } else {
     console.log('FACTURA M');
     invoceId = 51;
