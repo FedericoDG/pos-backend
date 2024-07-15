@@ -30,6 +30,7 @@ import otherTributes from './otherTributes.route';
 import settings from './settings.route';
 import afip from './afip.route';
 import states from './states.route';
+import currentAccount from './currentAccount';
 
 const router = Router();
 
@@ -63,5 +64,6 @@ router.use('/othertributes', otherTributes);
 router.use('/settings', settings);
 router.use('/afip', afip);
 router.use('/states', states);
+router.use('/currentaccount', currentAccount);
 
 export default router;

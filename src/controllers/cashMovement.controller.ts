@@ -66,12 +66,8 @@ export const getAllDetails = asyncHandler(
         const reduced = el.cashMovementsDetails.reduce(
           (acc: any, curr: any) => {
             const key = curr.tax;
-            console.log('key', curr.tax);
-            console.log('acc[key]', acc[key]);
-            console.log(curr.totalIVA);
 
             acc[key] += curr.totalIVA;
-            console.log(acc);
 
             return acc;
           },
@@ -94,18 +90,21 @@ export const getAllDetails = asyncHandler(
 
         const iva =
           reduced['0'] + reduced['0.025'] + reduced['0.05'] + reduced['0.105'] + reduced['0.21'] + reduced['0.27'];
-        let subTotal;
+
+        let subTotal: number;
+        let total: number;
+
         if (iva > 0) {
           subTotal = el.total - iva;
         } else {
           subTotal = el.total + iva;
         }
 
-        let total;
         if (iva > 0) {
           total = subTotal + iva;
         } else {
-          total = (subTotal - iva) * -1;
+          total = subTotal; // OJO
+          // total = (subTotal - iva) * -1;
         }
 
         const obj = {
@@ -264,7 +263,6 @@ export const create = asyncHandler(
       const { id: userId } = req.user;
 
       const isCheckingAccount = payments.some((el) => el.paymentMethodId === 6);
-      console.log({ isCheckingAccount });
 
       const cashRegister = await prisma.cashRegisters.findFirst({ where: { userId }, orderBy: [{ id: 'desc' }] });
       const settings = await prisma.settings.findFirst({ select: { invoceNumber: true } });
@@ -320,6 +318,30 @@ export const create = asyncHandler(
         invoceNumber: settings?.invoceNumber || 0,
         info,
       };
+
+      // Update Current Account
+      if (isCheckingAccount) {
+        await prisma.currentAccount.update({
+          where: { clientId: clientId },
+          data: {
+            balance: {
+              increment: data.total,
+            },
+          },
+        });
+
+        const currentAccount = await prisma.currentAccount.findFirst({ where: { id: clientId } });
+
+        await prisma.currentAccountDetails.create({
+          data: {
+            amount: data.total,
+            paymentMethodId: 6,
+            type: 'CHARGE',
+            details: '',
+            currentAccountId: currentAccount?.id || 1,
+          },
+        });
+      }
 
       // Create Cash Movement
       const cashMovement = await prisma.cashMovements.create({ data });
@@ -641,5 +663,3 @@ export const checkCart = asyncHandler(
     }
   },
 );
-
-//TODO Undo Cash Movement

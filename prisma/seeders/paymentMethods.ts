@@ -28,9 +28,9 @@ export const paymentMethods = [
     createdAt: now.plus({ seconds: 5 }).toString(),
     updatedAt: now.plus({ seconds: 5 }).toString(),
   },
-  /* {
+  {
     code: 'Cuenta Corriente',
     createdAt: now.plus({ seconds: 6 }).toString(),
     updatedAt: now.plus({ seconds: 6 }).toString(),
-  }, */
+  },
 ];

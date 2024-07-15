@@ -13,6 +13,7 @@ export const createClientSchema = z.object({
   mobile: z.string().optional(),
   address: z.string().optional(),
   info: z.string().optional(),
+  currentAccountActive: z.coerce.number(),
 });
 
 export const updateClientSchema = z.object({
@@ -28,6 +29,7 @@ export const updateClientSchema = z.object({
   mobile: z.string().optional(),
   address: z.string().optional(),
   info: z.string().optional(),
+  currentAccountActive: z.coerce.number().optional(),
 });
 
 export type CreateClientType = z.infer<typeof createClientSchema>;

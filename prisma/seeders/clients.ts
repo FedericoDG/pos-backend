@@ -32,6 +32,7 @@ export const clients = [
     mobile: '3517564940',
     address: '',
     info: '',
+    currentAccountActive: 1,
     createdAt: now.plus({ seconds: 2 }).toString(),
     updatedAt: now.plus({ seconds: 2 }).toString(),
   },

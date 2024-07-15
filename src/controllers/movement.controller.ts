@@ -19,7 +19,9 @@ type Client = Clients & { total: number };
 export const getAll = asyncHandler(
   async (req: Request<unknown, unknown, unknown, getMovementsType>, res: Response, next: NextFunction) => {
     try {
+      // TODO: Include cuenta corriente
       const { userId, clientId, paymentMethodId, invoices, from, to } = req.query;
+
       const invoicesIds: number[] = JSON.parse(invoices!);
 
       if (invoicesIds.includes(1)) invoicesIds.push(5);
@@ -248,7 +250,10 @@ export const getAll = asyncHandler(
         paymentMethodDetails.filter((el) => el.paymentMethodId === 4).reduce((acc, el) => acc + el.amount, 0) || 0;
       const totalMercadoPago =
         paymentMethodDetails.filter((el) => el.paymentMethodId === 5).reduce((acc, el) => acc + el.amount, 0) || 0;
-      const totalIncomes = totalCash + totalDebit + totalCredit + totalTransfer + totalMercadoPago;
+      const totalCurrentAccount =
+        paymentMethodDetails.filter((el) => el.paymentMethodId === 6).reduce((acc, el) => acc + el.amount, 0) || 0;
+      const totalIncomes =
+        totalCash + totalDebit + totalCredit + totalTransfer + totalMercadoPago + totalCurrentAccount;
 
       endpointResponse({
         res,
@@ -266,6 +271,7 @@ export const getAll = asyncHandler(
             totalCredit,
             totalTransfer,
             totalMercadoPago,
+            totalCurrentAccount,
           },
           outcomes: {
             purchases,

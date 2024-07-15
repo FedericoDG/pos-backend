@@ -19,6 +19,11 @@ enum MovementType {
   TRANSFER_OUT
 }
 
+enum CurrentAccountMovementType {
+  CHARGE
+  PAYMENT
+}
+
 generator client {
   provider      = "prisma-client-js"
   binaryTargets = ["native", "debian-openssl-1.1.x", "debian-openssl-3.0.x", "linux-musl", "linux-musl-openssl-3.0.x"]
@@ -325,30 +330,32 @@ model Identifications {
 }
 
 model Clients {
-  id               Int               @id @default(autoincrement())
-  name             String
-  document         String            @unique
-  email            String?
-  password         String
-  stateId          Int
-  phone            String?
-  city             String?
-  mobile           String?
-  address          String?
-  info             String?
-  roleId           Int               @default(5)
-  identificationId Int               @default(36)
-  ivaTypeId        Int               @default(5)
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @default(now()) @updatedAt
+  id                   Int               @id @default(autoincrement())
+  name                 String
+  document             String            @unique
+  email                String?
+  password             String
+  stateId              Int
+  phone                String?
+  city                 String?
+  mobile               String?
+  address              String?
+  info                 String?
+  roleId               Int               @default(5)
+  identificationId     Int               @default(36)
+  ivaTypeId            Int               @default(5)
+  currentAccountActive Int               @default(0)
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @default(now()) @updatedAt
   // Relations
-  role             Roles             @relation(fields: [roleId], references: [id])
-  state            States            @relation(fields: [stateId], references: [id])
-  identification   Identifications   @relation(fields: [identificationId], references: [id])
-  ivaType          IvaType           @relation(fields: [ivaTypeId], references: [id])
-  cashMovements    CashMovements[]
-  userPreferences  UserPreferences[]
-  movements        Movements[] // M
+  role                 Roles             @relation(fields: [roleId], references: [id])
+  state                States            @relation(fields: [stateId], references: [id])
+  identification       Identifications   @relation(fields: [identificationId], references: [id])
+  ivaType              IvaType           @relation(fields: [ivaTypeId], references: [id])
+  cashMovements        CashMovements[]
+  userPreferences      UserPreferences[]
+  movements            Movements[] // M
+  currentAccount       CurrentAccount?
 
   @@map(name: "clients")
 }
@@ -569,14 +576,15 @@ model CashMovementsDetails {
 }
 
 model PaymentMethods {
-  id                   Int                    @id @default(autoincrement())
-  code                 String
-  description          String?
-  createdAt            DateTime               @default(now())
-  updatedAt            DateTime               @default(now()) @updatedAt
+  id                    Int                     @id @default(autoincrement())
+  code                  String
+  description           String?
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @default(now()) @updatedAt
   // Relations
-  paymentMethodDetails PaymentMethodDetails[]
-  movements            Movements[]
+  paymentMethodDetails  PaymentMethodDetails[]
+  movements             Movements[]
+  CurrentAccountDetails CurrentAccountDetails[]
 
   @@map(name: "payment_methods")
 }
@@ -640,8 +648,38 @@ model States {
   name      String
   createdAt DateTime    @default(now())
   updatedAt DateTime    @default(now()) @updatedAt
+  // Relations
   clients   Clients[]
   suppliers Suppliers[]
 
   @@map(name: "states")
+}
+
+model CurrentAccount {
+  id                    Int                     @id @default(autoincrement())
+  clientId              Int                     @unique
+  balance               Float                   @default(0)
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @default(now()) @updatedAt
+  // Relations
+  client                Clients                 @relation(fields: [clientId], references: [id])
+  CurrentAccountDetails CurrentAccountDetails[]
+
+  @@map(name: "current_account")
+}
+
+model CurrentAccountDetails {
+  id               Int                        @id @default(autoincrement())
+  currentAccountId Int
+  paymentMethodId  Int?
+  amount           Float
+  type             CurrentAccountMovementType @default(CHARGE)
+  details          String?
+  createdAt        DateTime                   @default(now())
+  updatedAt        DateTime                   @default(now()) @updatedAt
+  // Relations
+  currentAccount   CurrentAccount             @relation(fields: [currentAccountId], references: [id])
+  paymentMethod    PaymentMethods?            @relation(fields: [paymentMethodId], references: [id])
+
+  @@map(name: "current_account_details")
 }

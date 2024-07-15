@@ -5,14 +5,14 @@ CREATE TABLE `settings` (
     `address` VARCHAR(191) NOT NULL,
     `cp` VARCHAR(191) NOT NULL,
     `province` VARCHAR(191) NOT NULL,
-    `ivaCondition` VARCHAR(191) NOT NULL,
+    `ivaCondition` VARCHAR(191) NOT NULL DEFAULT 'Responsable Inscripto',
     `cuit` VARCHAR(191) NOT NULL,
     `start` VARCHAR(191) NOT NULL,
     `invoceName` VARCHAR(191) NOT NULL,
     `invoceNumber` INTEGER NOT NULL,
     `imageURL` VARCHAR(191) NOT NULL,
     `showOtherTaxes` INTEGER NOT NULL DEFAULT 1,
-    `responsableInscripto` INTEGER NOT NULL DEFAULT 1,
+    `responsableInscripto` INTEGER NOT NULL DEFAULT 0,
     `defaultPriceListDriver` INTEGER NOT NULL DEFAULT 1,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
@@ -266,6 +266,7 @@ CREATE TABLE `clients` (
     `roleId` INTEGER NOT NULL DEFAULT 5,
     `identificationId` INTEGER NOT NULL DEFAULT 36,
     `ivaTypeId` INTEGER NOT NULL DEFAULT 5,
+    `currentAccountActive` INTEGER NOT NULL DEFAULT 0,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
@@ -513,6 +514,32 @@ CREATE TABLE `states` (
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+-- CreateTable
+CREATE TABLE `current_account` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `clientId` INTEGER NOT NULL,
+    `balance` DOUBLE NOT NULL DEFAULT 0,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    UNIQUE INDEX `current_account_clientId_key`(`clientId`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `current_account_details` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `currentAccountId` INTEGER NOT NULL,
+    `paymentMethodId` INTEGER NULL,
+    `amount` DOUBLE NOT NULL,
+    `type` ENUM('CHARGE', 'PAYMENT') NOT NULL DEFAULT 'CHARGE',
+    `details` VARCHAR(191) NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
 -- AddForeignKey
 ALTER TABLE `users` ADD CONSTRAINT `users_roleId_fkey` FOREIGN KEY (`roleId`) REFERENCES `roles`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
@@ -680,3 +707,12 @@ ALTER TABLE `other_tribute_details` ADD CONSTRAINT `other_tribute_details_cashMo
 
 -- AddForeignKey
 ALTER TABLE `other_tribute_details` ADD CONSTRAINT `other_tribute_details_otherTributeId_fkey` FOREIGN KEY (`otherTributeId`) REFERENCES `other_tributes`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `current_account` ADD CONSTRAINT `current_account_clientId_fkey` FOREIGN KEY (`clientId`) REFERENCES `clients`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `current_account_details` ADD CONSTRAINT `current_account_details_currentAccountId_fkey` FOREIGN KEY (`currentAccountId`) REFERENCES `current_account`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `current_account_details` ADD CONSTRAINT `current_account_details_paymentMethodId_fkey` FOREIGN KEY (`paymentMethodId`) REFERENCES `payment_methods`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;

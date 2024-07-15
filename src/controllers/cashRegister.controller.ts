@@ -45,7 +45,6 @@ export const getById = asyncHandler(
   async (req: Request<{ id?: number }, unknown, unknown>, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
-
       const cashRegister = await prisma.cashRegisters.findFirst({
         where: { id: Number(id) },
         include: {
@@ -142,6 +141,11 @@ export const getById = asyncHandler(
           ?.map((movement) => movement.paymentMethodDetails.filter((el) => el.paymentMethodId === 5))
           .flat()
           .reduce((acc, el) => acc + el.amount, 0) || 0;
+      const currentAccount =
+        incomes
+          ?.map((movement) => movement.paymentMethodDetails.filter((el) => el.paymentMethodId === 6))
+          .flat()
+          .reduce((acc, el) => acc + el.amount, 0) || 0;
 
       const recharges = incomes?.reduce((acc, el) => acc + el.recharge, 0) || 0;
       const otherTributes = incomes?.reduce((acc, el) => acc + el.otherTributes, 0) || 0;
@@ -174,18 +178,20 @@ export const getById = asyncHandler(
               credit +
               transfer +
               mercadoPago +
+              currentAccount +
               recharges +
               otherTributes -
               totDisc -
               totDiscInd +
               creditNotes,
-            sales: cash + debit + credit + transfer + mercadoPago,
+            sales: cash + debit + credit + transfer + mercadoPago + currentAccount,
             creditNotes,
             cash: cash - creditNotes,
             debit,
             credit,
             transfer,
             mercadoPago,
+            currentAccount,
             recharges,
             otherTributes,
             discounts: totDisc + totDiscInd,

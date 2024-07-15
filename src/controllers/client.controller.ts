@@ -75,6 +75,8 @@ export const create = asyncHandler(
 
       const client = await prisma.clients.create({ data });
 
+      await prisma.currentAccount.create({ data: { clientId: client.id } });
+
       endpointResponse({
         res,
         code: 200,
@@ -97,8 +99,20 @@ export const update = asyncHandler(
   async (req: Request<{ id?: number }, unknown, UpdateClientType>, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
-      const { name, phone, mobile, address, info, identificationId, document, ivaTypeId, stateId, city, email } =
-        req.body;
+      const {
+        name,
+        phone,
+        mobile,
+        address,
+        info,
+        identificationId,
+        document,
+        ivaTypeId,
+        stateId,
+        city,
+        email,
+        currentAccountActive,
+      } = req.body;
 
       const data: UpdateClientType = {
         name,
@@ -112,6 +126,7 @@ export const update = asyncHandler(
         stateId,
         city,
         email,
+        currentAccountActive,
       };
 
       /*  if (password) {

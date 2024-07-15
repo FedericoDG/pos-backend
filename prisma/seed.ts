@@ -37,6 +37,7 @@ import {
   users,
   warehouses,
 } from './seeders';
+import { currentAccounts } from './seeders/currentAccount';
 
 const prisma = new PrismaClient();
 
@@ -110,6 +111,8 @@ async function main() {
   await prisma.otherTributes.createMany({ data: otherTributes });
 
   await prisma.stocksDetails.createMany({ data: stockDetails });
+
+  await prisma.currentAccount.createMany({ data: currentAccounts });
 }
 
 main()
