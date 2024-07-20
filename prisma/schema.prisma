@@ -549,10 +549,11 @@ model CashMovements {
   client           Clients       @relation(fields: [clientId], references: [id])
   invoceType       InvoceTypes   @relation(fields: [invoceTypeId], references: [id])
 
-  cashMovementsDetails CashMovementsDetails[]
-  paymentMethodDetails PaymentMethodDetails[]
-  otherTributesDetails OtherTributesDetails[]
-  movements            Movements[]
+  cashMovementsDetails  CashMovementsDetails[]
+  paymentMethodDetails  PaymentMethodDetails[]
+  otherTributesDetails  OtherTributesDetails[]
+  movements             Movements[]
+  CurrentAccountDetails CurrentAccountDetails[]
 
   @@map(name: "cash_movements")
 }
@@ -673,13 +674,16 @@ model CurrentAccountDetails {
   currentAccountId Int
   paymentMethodId  Int?
   amount           Float
+  prevAmount       Float                      @default(0)
   type             CurrentAccountMovementType @default(CHARGE)
   details          String?
+  cashMovementId   Int?
   createdAt        DateTime                   @default(now())
   updatedAt        DateTime                   @default(now()) @updatedAt
   // Relations
   currentAccount   CurrentAccount             @relation(fields: [currentAccountId], references: [id])
   paymentMethod    PaymentMethods?            @relation(fields: [paymentMethodId], references: [id])
+  cashMovement     CashMovements?             @relation(fields: [cashMovementId], references: [id])
 
   @@map(name: "current_account_details")
 }

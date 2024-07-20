@@ -9,4 +9,12 @@ export const createPayment = z.object({
   details: z.string(),
 });
 
+export const getCurrentAccountMovementsSchema = z.object({
+  clientId: z.string().optional(),
+  from: z.string().optional(),
+  to: z.string().optional(),
+});
+
 export type CreatePaymentType = z.infer<typeof createPayment>;
+
+export type CurrentAccountMovementsSchema = z.infer<typeof getCurrentAccountMovementsSchema>;

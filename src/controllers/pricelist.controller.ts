@@ -163,8 +163,7 @@ export const getByIdAndWarehouseId = asyncHandler(
 export const getByIdAndWarehouseIdQuery = asyncHandler(
   async (req: Request<unknown, unknown, QueryPriceListType>, res: Response, next: NextFunction) => {
     try {
-      const { id, warehouseId, query } = req.body;
-      console.log(query);
+      const { id, warehouseId } = req.body;
 
       const pricelist = await prisma.pricelists.findFirst({
         where: { id: Number(id) },

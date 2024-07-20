@@ -282,14 +282,6 @@ export const create = asyncHandler(
         0,
       );
 
-      /*    if (discountPercent > 0) {
-        subtotal = cartWithIVA.reduce(
-          (acc, item) =>
-            acc + (item.quantity * item.price - item.totalDiscount) * (1 + item.tax * (1 - discountPercent / 100)),
-          0,
-        );
-      } */
-
       const cashRegisterId = cashRegister?.id || 1;
       const cashRegisterFinalBalance = cashRegister?.finalBalance || 0;
       const finalBalance = cashRegisterFinalBalance + subtotal + subtotalOtherTributes;
@@ -319,30 +311,6 @@ export const create = asyncHandler(
         info,
       };
 
-      // Update Current Account
-      if (isCheckingAccount) {
-        await prisma.currentAccount.update({
-          where: { clientId: clientId },
-          data: {
-            balance: {
-              increment: data.total,
-            },
-          },
-        });
-
-        const currentAccount = await prisma.currentAccount.findFirst({ where: { id: clientId } });
-
-        await prisma.currentAccountDetails.create({
-          data: {
-            amount: data.total,
-            paymentMethodId: 6,
-            type: 'CHARGE',
-            details: '',
-            currentAccountId: currentAccount?.id || 1,
-          },
-        });
-      }
-
       // Create Cash Movement
       const cashMovement = await prisma.cashMovements.create({ data });
 
@@ -360,6 +328,32 @@ export const create = asyncHandler(
       }));
 
       await prisma.cashMovementsDetails.createMany({ data: cartWithcashMovementId });
+
+      // Update Current Account
+      if (isCheckingAccount) {
+        await prisma.currentAccount.update({
+          where: { clientId: clientId },
+          data: {
+            balance: {
+              increment: data.total,
+            },
+          },
+        });
+
+        const currentAccount = await prisma.currentAccount.findFirst({ where: { clientId: clientId } });
+
+        await prisma.currentAccountDetails.create({
+          data: {
+            amount: data.total,
+            prevAmount: currentAccount?.balance && currentAccount.balance - data.total,
+            paymentMethodId: 6,
+            type: 'CHARGE',
+            details: '',
+            currentAccountId: currentAccount?.id || 1,
+            cashMovementId: cashMovement.id,
+          },
+        });
+      }
 
       // Create Payments Details
       const reducedPayments = payments.reduce((accumulator, payment) => {
@@ -477,7 +471,7 @@ export const create = asyncHandler(
 export const createCreditNote = asyncHandler(
   async (req: Request<unknown, unknown, any>, res: Response, next: NextFunction) => {
     try {
-      const { clientId, warehouseId, cart, payments, cashMovementId: cashMId } = req.body;
+      const { clientId, warehouseId, cart, payments, cashMovementId: cashMId, isCurrentAccount } = req.body;
 
       // Update Cash Register
       const importeTotal = cart.reduce((acc, item) => acc + item.quantity * item.price, 0);
@@ -532,6 +526,32 @@ export const createCreditNote = asyncHandler(
 
       // Create Cash Movement Details
       const cashMovementId = cashMovement.id;
+
+      // Create Current Account Movement
+      if (isCurrentAccount) {
+        await prisma.currentAccount.update({
+          where: { clientId: clientId },
+          data: {
+            balance: {
+              decrement: importeTotal,
+            },
+          },
+        });
+
+        const currentAccount = await prisma.currentAccount.findFirst({ where: { clientId: clientId } });
+
+        await prisma.currentAccountDetails.create({
+          data: {
+            amount: importeTotal,
+            prevAmount: currentAccount?.balance && currentAccount.balance + importeTotal,
+            paymentMethodId: 1,
+            type: 'PAYMENT',
+            details: 'Devolución Nota de Crédito',
+            currentAccountId: currentAccount?.id || 1,
+            cashMovementId,
+          },
+        });
+      }
 
       // Udate Original CashMovemnet
       await prisma.cashMovements.update({ where: { id: cashMId }, data: { creditNote: cashMovementId } });

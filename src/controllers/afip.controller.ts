@@ -69,6 +69,7 @@ type CreateAfipInvoce = CreateCashMovementsType & CashMovementId & MovementIds;
 interface CreateAfipCreditNote extends CreateAfipInvoce {
   invoceTypeId: number;
   invoceNumber: number;
+  isCurrentAccount: boolean;
 }
 
 const calcId = (num: number): number => {
@@ -414,6 +415,7 @@ export const creditNote = asyncHandler(
         cashMovementId: cashMId,
         discount,
         recharge,
+        isCurrentAccount,
       } = req.body;
 
       const afip = new Afip({
@@ -465,7 +467,6 @@ export const creditNote = asyncHandler(
       let invoceId: number;
       let invId: number;
 
-      console.log({ invoceTypeId });
       if (invoceTypeId === 1) {
         console.log('NOTA DE CRÉDITO A');
         invoceId = 3;
@@ -581,6 +582,32 @@ export const creditNote = asyncHandler(
 
       // Create Cash Movement Details
       const cashMovementId = cashMovement.id;
+
+      // Create Current Account Movement
+      if (isCurrentAccount) {
+        await prisma.currentAccount.update({
+          where: { clientId: clientId },
+          data: {
+            balance: {
+              decrement: importeTotal,
+            },
+          },
+        });
+
+        const currentAccount = await prisma.currentAccount.findFirst({ where: { clientId: clientId } });
+
+        await prisma.currentAccountDetails.create({
+          data: {
+            amount: importeTotal,
+            prevAmount: currentAccount?.balance && currentAccount.balance + importeTotal,
+            paymentMethodId: 1,
+            type: 'PAYMENT',
+            details: 'Devolución Nota de Crédito',
+            currentAccountId: currentAccount?.id || 1,
+            cashMovementId,
+          },
+        });
+      }
 
       // Udate Original CashMovemnet
       await prisma.cashMovements.update({ where: { id: cashMId }, data: { creditNote: cashMovementId } });
