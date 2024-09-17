@@ -160,7 +160,7 @@ export const getRecibo = asyncHandler(
       });
     } catch (error) {
       if (error instanceof Error) {
-        const httpError = createHttpError(500, `[Current Account - GET ONE]: ${error.message}`);
+        const httpError = createHttpError(500, `[Current Account - GET ONE2]: ${error.message}`);
         next(httpError);
       }
     }
@@ -199,6 +199,36 @@ export const createPaymnet = asyncHandler(
     } catch (error) {
       if (error instanceof Error) {
         const httpError = createHttpError(500, `[Current Account - CREATE]: ${error.message}`);
+        next(httpError);
+      }
+    }
+  },
+);
+
+export const getResume = asyncHandler(
+  async (_req: Request<unknown, unknown, unknown>, res: Response, next: NextFunction) => {
+    try {
+      const currentAccount = await prisma.currentAccount.findMany({
+        include: { client: true },
+        orderBy: [
+          {
+            updatedAt: 'desc',
+          },
+        ],
+      });
+
+      endpointResponse({
+        res,
+        code: 200,
+        status: true,
+        message: 'Cuentas Corrientes recuperadas',
+        body: {
+          currentAccount,
+        },
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        const httpError = createHttpError(500, `[Cuenta Corriente - GET ALL]: ${error.message}`);
         next(httpError);
       }
     }
