@@ -14,7 +14,7 @@ export const getAll = asyncHandler(
         include: { identification: true, ivaType: true, state: true },
         orderBy: [
           {
-            updatedAt: 'desc',
+            updatedAt: 'asc',
           },
         ],
       });
@@ -45,11 +45,13 @@ export const getById = asyncHandler(
       const currentAccount = await prisma.currentAccount.findFirst({
         where: { clientId: Number(id) },
         include: { client: true },
+        orderBy: [{ id: 'desc' }],
       });
 
       const currentAccountDetails = await prisma.currentAccountDetails.findMany({
         where: { currentAccountId: currentAccount?.id },
         include: { paymentMethod: true },
+        orderBy: [{ id: 'desc' }],
       });
 
       const charges = currentAccountDetails
@@ -82,6 +84,46 @@ export const getById = asyncHandler(
   },
 );
 
+export const getByCashRegisterId = asyncHandler(
+  async (req: Request<{ id?: number }, unknown, unknown>, res: Response, next: NextFunction) => {
+    try {
+      const { id } = req.params;
+
+      const currentAccountDetails = await prisma.currentAccountDetails.findMany({
+        where: { cashRegisterId: Number(id), type: 'PAYMENT' },
+        include: { paymentMethod: true },
+        orderBy: [{ id: 'desc' }],
+      });
+
+      const charges = currentAccountDetails
+        .filter((item) => item.type === 'CHARGE')
+        .reduce((total, item) => total + item.amount, 0);
+
+      const payments = currentAccountDetails
+        .filter((item) => item.type === 'PAYMENT')
+        .reduce((total, item) => total + item.amount, 0);
+
+      endpointResponse({
+        res,
+        code: 200,
+        status: true,
+        message: 'Cuenta Corriente recuperada',
+        body: {
+          currentAccountDetails,
+          charges,
+          payments,
+          total: payments - charges,
+        },
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        const httpError = createHttpError(500, `[Current Account Details- GET MANY]: ${error.message}`);
+        next(httpError);
+      }
+    }
+  },
+);
+
 export const getByIdAndDate = asyncHandler(
   async (req: Request<unknown, unknown, unknown, CurrentAccountMovementsSchema>, res: Response, next: NextFunction) => {
     try {
@@ -104,6 +146,7 @@ export const getByIdAndDate = asyncHandler(
           },
         },
         include: { paymentMethod: true, cashMovement: true },
+        orderBy: [{ id: 'desc' }],
       });
 
       const charges = currentAccountDetails
@@ -170,6 +213,8 @@ export const getRecibo = asyncHandler(
 export const createPaymnet = asyncHandler(
   async (req: Request<unknown, unknown, CreatePaymentType>, res: Response, next: NextFunction) => {
     try {
+      const { id: userId } = req.user;
+      const cashRegister = await prisma.cashRegisters.findFirst({ where: { userId }, orderBy: [{ id: 'desc' }] });
       const data = req.body;
 
       const currentAccount = await prisma.currentAccount.update({
@@ -184,7 +229,7 @@ export const createPaymnet = asyncHandler(
       const { balance } = currentAccount;
 
       const payment = await prisma.currentAccountDetails.create({
-        data: { ...data, prevAmount: balance + data.amount },
+        data: { ...data, cashRegisterId: cashRegister?.id || 1, prevAmount: balance + data.amount },
       });
 
       endpointResponse({
@@ -212,7 +257,7 @@ export const getResume = asyncHandler(
         include: { client: true },
         orderBy: [
           {
-            updatedAt: 'desc',
+            updatedAt: 'asc',
           },
         ],
       });

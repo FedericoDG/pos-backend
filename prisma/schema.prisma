@@ -500,17 +500,18 @@ model TransferDetails {
 }
 
 model CashRegisters {
-  id             Int             @id @default(autoincrement())
-  openingDate    DateTime
-  closingDate    DateTime?
-  initialBalance Float
-  finalBalance   Float
-  userId         Int
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @default(now()) @updatedAt
+  id                    Int                     @id @default(autoincrement())
+  openingDate           DateTime
+  closingDate           DateTime?
+  initialBalance        Float
+  finalBalance          Float
+  userId                Int
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @default(now()) @updatedAt
   //Relations
-  user           Users           @relation(fields: [userId], references: [id])
-  cashMovements  CashMovements[]
+  user                  Users                   @relation(fields: [userId], references: [id])
+  cashMovements         CashMovements[]
+  currentAccountDetails CurrentAccountDetails[]
 
   @@map(name: "cash_registers")
 }
@@ -672,6 +673,7 @@ model CurrentAccount {
 model CurrentAccountDetails {
   id               Int                        @id @default(autoincrement())
   currentAccountId Int
+  cashRegisterId   Int
   paymentMethodId  Int?
   amount           Float
   prevAmount       Float                      @default(0)
@@ -684,6 +686,7 @@ model CurrentAccountDetails {
   currentAccount   CurrentAccount             @relation(fields: [currentAccountId], references: [id])
   paymentMethod    PaymentMethods?            @relation(fields: [paymentMethodId], references: [id])
   cashMovement     CashMovements?             @relation(fields: [cashMovementId], references: [id])
+  cashRegister     CashRegisters              @relation(fields: [cashRegisterId], references: [id])
 
   @@map(name: "current_account_details")
 }

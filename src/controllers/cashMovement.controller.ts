@@ -351,6 +351,7 @@ export const create = asyncHandler(
             details: '',
             currentAccountId: currentAccount?.id || 1,
             cashMovementId: cashMovement.id,
+            cashRegisterId: cashRegisterId,
           },
         });
       }
@@ -549,6 +550,7 @@ export const createCreditNote = asyncHandler(
             details: 'Devolución Nota de Crédito',
             currentAccountId: currentAccount?.id || 1,
             cashMovementId,
+            cashRegisterId: cashRegister?.id || 1,
           },
         });
       }

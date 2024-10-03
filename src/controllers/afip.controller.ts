@@ -605,6 +605,7 @@ export const creditNote = asyncHandler(
             details: 'Devolución Nota de Crédito',
             currentAccountId: currentAccount?.id || 1,
             cashMovementId,
+            cashRegisterId: cashRegister?.id || 1,
           },
         });
       }

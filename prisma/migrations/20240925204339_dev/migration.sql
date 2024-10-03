@@ -530,10 +530,13 @@ CREATE TABLE `current_account` (
 CREATE TABLE `current_account_details` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `currentAccountId` INTEGER NOT NULL,
+    `cashRegisterId` INTEGER NOT NULL,
     `paymentMethodId` INTEGER NULL,
     `amount` DOUBLE NOT NULL,
+    `prevAmount` DOUBLE NOT NULL DEFAULT 0,
     `type` ENUM('CHARGE', 'PAYMENT') NOT NULL DEFAULT 'CHARGE',
     `details` VARCHAR(191) NULL,
+    `cashMovementId` INTEGER NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
@@ -716,3 +719,9 @@ ALTER TABLE `current_account_details` ADD CONSTRAINT `current_account_details_cu
 
 -- AddForeignKey
 ALTER TABLE `current_account_details` ADD CONSTRAINT `current_account_details_paymentMethodId_fkey` FOREIGN KEY (`paymentMethodId`) REFERENCES `payment_methods`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `current_account_details` ADD CONSTRAINT `current_account_details_cashMovementId_fkey` FOREIGN KEY (`cashMovementId`) REFERENCES `cash_movements`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `current_account_details` ADD CONSTRAINT `current_account_details_cashRegisterId_fkey` FOREIGN KEY (`cashRegisterId`) REFERENCES `cash_registers`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
