@@ -544,7 +544,7 @@ export const createCreditNote = asyncHandler(
         await prisma.currentAccountDetails.create({
           data: {
             amount: importeTotal,
-            prevAmount: currentAccount?.balance && currentAccount.balance + importeTotal,
+            prevAmount: currentAccount!.balance + importeTotal,
             paymentMethodId: 1,
             type: 'PAYMENT',
             details: 'Devolución Nota de Crédito',
@@ -598,7 +598,7 @@ export const createCreditNote = asyncHandler(
           amount: importeTotal,
           type: MovementType.OUT,
           concept: 'N. de Crédito',
-          paymentMethodId: 1,
+          paymentMethodId: payments.length > 1 ? 1 : payments[0].paymentMethodId,
           userId: req.user.id,
           clientId,
           cashMovementId,
