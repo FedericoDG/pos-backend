@@ -276,7 +276,6 @@ export const create = asyncHandler(
 
       const productsIds = cartWithIVA.map((item) => item.productId);
       const subtotalOtherTributes = otherTributes.reduce((acc, item) => acc + item.amount, 0);
-      //
       const subtotal = cartWithIVA.reduce(
         (acc, item) => acc + (item.quantity * item.price - item.totalDiscount) + item.totalIVA,
         0,
@@ -284,7 +283,7 @@ export const create = asyncHandler(
 
       const cashRegisterId = cashRegister?.id || 1;
       const cashRegisterFinalBalance = cashRegister?.finalBalance || 0;
-      const finalBalance = cashRegisterFinalBalance + subtotal + subtotalOtherTributes;
+      const finalBalance = cashRegisterFinalBalance + subtotal + subtotalOtherTributes - discount + recharge;
 
       // Update Cash Register
       await prisma.cashRegisters.update({
