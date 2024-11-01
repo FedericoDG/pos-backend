@@ -52,6 +52,7 @@ model Settings {
   showOtherTaxes         Int      @default(1)
   responsableInscripto   Int      @default(0)
   defaultPriceListDriver Int      @default(1)
+  posEnabled             Boolean  @default(false)
   createdAt              DateTime @default(now())
   updatedAt              DateTime @default(now()) @updatedAt
 

@@ -24,6 +24,7 @@ export const login = asyncHandler(
           user,
           token,
           responsableInscripto: settings?.responsableInscripto,
+          posEnabled: settings?.posEnabled,
         },
       });
     } catch (error) {
