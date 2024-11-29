@@ -471,10 +471,19 @@ export const create = asyncHandler(
 export const createCreditNote = asyncHandler(
   async (req: Request<unknown, unknown, any>, res: Response, next: NextFunction) => {
     try {
-      const { clientId, warehouseId, cart, payments, cashMovementId: cashMId, isCurrentAccount } = req.body;
+      const {
+        clientId,
+        warehouseId,
+        cart,
+        payments,
+        cashMovementId: cashMId,
+        isCurrentAccount,
+        discount,
+        recharge,
+      } = req.body;
 
       // Update Cash Register
-      const importeTotal = cart.reduce((acc, item) => acc + item.quantity * item.price, 0);
+      const importeTotal = cart.reduce((acc, item) => acc + item.quantity * item.price, 0) - discount + recharge;
       const cashRegister = await prisma.cashRegisters.findFirst({
         where: { userId: req.user.id },
         orderBy: [{ id: 'desc' }],
@@ -561,14 +570,34 @@ export const createCreditNote = asyncHandler(
       await prisma.cashMovements.update({ where: { id: cashMId }, data: { creditNote: cashMovementId } });
 
       const cartWithcashMovementId = cart.map((item) => {
-        return {
-          productId: item.productId,
-          price: item.price,
-          quantity: item.quantity,
-          tax: item.tax,
-          cashMovementId,
-          // totalIVA: (item.price * item.quantity - item.totalDiscount) * item.tax * -1,
-        };
+        if (item.discountedPrice > 0) {
+          return {
+            productId: item.productId,
+            price: item.discountedPrice,
+            quantity: item.quantity,
+            tax: item.tax,
+            cashMovementId,
+            // totalIVA: (item.price * item.quantity - item.totalDiscount) * item.tax * -1,
+          };
+        } else if (item.surchargedPrice > 0) {
+          return {
+            productId: item.productId,
+            price: item.surchargedPrice,
+            quantity: item.quantity,
+            tax: item.tax,
+            cashMovementId,
+            // totalIVA: (item.price * item.quantity - item.totalDiscount) * item.tax * -1,
+          };
+        } else {
+          return {
+            productId: item.productId,
+            price: item.price,
+            quantity: item.quantity,
+            tax: item.tax,
+            cashMovementId,
+            // totalIVA: (item.price * item.quantity - item.totalDiscount) * item.tax * -1,
+          };
+        }
       });
 
       await prisma.cashMovementsDetails.createMany({ data: cartWithcashMovementId });

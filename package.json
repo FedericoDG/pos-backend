@@ -12,7 +12,7 @@
     "prepare": "husky install",
     "prisma:migrate": "npx prisma migrate dev",
     "prisma:deploy": "npx prisma migrate deploy",
-    "prisma:seed": "npx prisma migrate reset --preview-feature"
+    "prisma:seed": "npx prisma migrate reset --preview-feature --force"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"

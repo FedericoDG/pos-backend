@@ -75,7 +75,24 @@ export const getById = asyncHandler(
         ) || 0;
 
       const uniques: any[] = [];
-      cashRegister?.cashMovements.forEach((el) => el.cashMovementsDetails.forEach((elx) => uniques.push(elx)));
+      cashRegister?.cashMovements.forEach((el) => {
+        if (el.invoceTypeId !== 8) {
+          el.cashMovementsDetails.forEach((elx) => uniques.push(elx));
+        } else {
+          el.cashMovementsDetails.forEach((elx) => {
+            const fede = {
+              ...elx,
+              quantity: elx.quantity * -1,
+            };
+            uniques.push(fede);
+          });
+        }
+      });
+
+      /*   const uniques: any[] = [];
+      cashRegister?.cashMovements.forEach((el) => {
+        el.cashMovementsDetails.forEach((elx) => uniques.push(elx));
+      }); */
 
       const uniqueValues = Object.values(
         uniques.reduce((acc: any, curr: any) => {
@@ -88,7 +105,7 @@ export const getById = asyncHandler(
         }, {}),
       );
 
-      const uniqueValuesSorted = uniqueValues.sort((a: any, b: any) => {
+      let uniqueValuesSorted = uniqueValues.sort((a: any, b: any) => {
         if (a.product.name > b.product.name) {
           return 1;
         }
@@ -97,6 +114,8 @@ export const getById = asyncHandler(
         }
         return 0;
       });
+
+      uniqueValuesSorted = uniqueValuesSorted.filter((el: any) => el.quantity > 0);
 
       const incomes = cashRegister?.cashMovements.filter(
         (el) =>
@@ -121,6 +140,7 @@ export const getById = asyncHandler(
           ?.map((movement) => movement.paymentMethodDetails.filter((el) => el.paymentMethodId === 1))
           .flat()
           .reduce((acc, el) => acc + el.amount, 0) || 0;
+
       const debit =
         incomes
           ?.map((movement) => movement.paymentMethodDetails.filter((el) => el.paymentMethodId === 2))
@@ -147,21 +167,49 @@ export const getById = asyncHandler(
           .flat()
           .reduce((acc, el) => acc + el.amount, 0) || 0;
 
+      const cashOut =
+        outcomes
+          ?.map((movement) => movement.paymentMethodDetails.filter((el) => el.paymentMethodId === 1))
+          .flat()
+          .reduce((acc, el) => acc + el.amount, 0) || 0;
+
+      const debitOut =
+        outcomes
+          ?.map((movement) => movement.paymentMethodDetails.filter((el) => el.paymentMethodId === 2))
+          .flat()
+          .reduce((acc, el) => acc + el.amount, 0) || 0;
+      const creditOut =
+        outcomes
+          ?.map((movement) => movement.paymentMethodDetails.filter((el) => el.paymentMethodId === 3))
+          .flat()
+          .reduce((acc, el) => acc + el.amount, 0) || 0;
+      const transferOut =
+        outcomes
+          ?.map((movement) => movement.paymentMethodDetails.filter((el) => el.paymentMethodId === 4))
+          .flat()
+          .reduce((acc, el) => acc + el.amount, 0) || 0;
+      const mercadoPagoOut =
+        outcomes
+          ?.map((movement) => movement.paymentMethodDetails.filter((el) => el.paymentMethodId === 5))
+          .flat()
+          .reduce((acc, el) => acc + el.amount, 0) || 0;
+
+      const currentAccountOut =
+        outcomes
+          ?.map((movement) => movement.paymentMethodDetails.filter((el) => el.paymentMethodId === 6))
+          .flat()
+          .reduce((acc, el) => acc + el.amount, 0) || 0;
+
       const recharges = incomes?.reduce((acc, el) => acc + el.recharge, 0) || 0;
       const otherTributes = incomes?.reduce((acc, el) => acc + el.otherTributes, 0) || 0;
 
       const mappedOutcomes = outcomes?.map((movement) => ({
-        paymentMethodDetails: movement.paymentMethodDetails,
+        total: movement.total,
         recharge: movement.recharge,
         discount: movement.discount,
       }));
 
-      const creditNotes =
-        mappedOutcomes
-          ?.map((el) => ({
-            subTotal: el.paymentMethodDetails.reduce((acc, el) => acc + el.amount, 0) - el.discount + el.recharge,
-          }))
-          .reduce((acc, el) => acc + el.subTotal, 0) || 0;
+      const creditNotes = mappedOutcomes?.reduce((acc, el) => acc + el.total, 0) || 0;
 
       endpointResponse({
         res,
@@ -186,12 +234,12 @@ export const getById = asyncHandler(
               creditNotes,
             sales: cash + debit + credit + transfer + mercadoPago + currentAccount,
             creditNotes,
-            cash: cash - creditNotes,
-            debit,
-            credit,
-            transfer,
-            mercadoPago,
-            currentAccount,
+            cash: cash - cashOut,
+            debit: debit - debitOut,
+            credit: credit - creditOut,
+            transfer: transfer - transferOut,
+            mercadoPago: mercadoPago - mercadoPagoOut,
+            currentAccount: currentAccount - currentAccountOut,
             recharges,
             otherTributes,
             discounts: totDisc + totDiscInd,

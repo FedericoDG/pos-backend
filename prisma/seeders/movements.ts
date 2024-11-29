@@ -123,7 +123,7 @@ export const movements = [
     updatedAt: now.plus({ seconds: 13 }).toString(),
   },
   {
-    amount: 9770.25,
+    amount: 9450,
     type: MovementType.IN,
     concept: 'Venta',
     userId: 1,
@@ -134,7 +134,7 @@ export const movements = [
     updatedAt: now.plus({ seconds: 14 }).toString(),
   },
   {
-    amount: 9770.25,
+    amount: 9450,
     type: MovementType.IN,
     concept: 'Venta',
     userId: 2,

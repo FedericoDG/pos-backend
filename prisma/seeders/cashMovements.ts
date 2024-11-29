@@ -5,8 +5,8 @@ const now = DateTime.now();
 export const cashMovements = [
   {
     cashRegisterId: 1,
-    subtotal: 9770.25,
-    total: 9770.25,
+    subtotal: 9450,
+    total: 9450,
     warehouseId: 1,
     clientId: 1,
     userId: 1,
@@ -20,8 +20,8 @@ export const cashMovements = [
   },
   {
     cashRegisterId: 2,
-    subtotal: 9770.25,
-    total: 9770.25,
+    subtotal: 9450,
+    total: 9450,
     warehouseId: 1,
     clientId: 2,
     userId: 2,
