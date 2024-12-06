@@ -674,13 +674,11 @@ export const getCurrentAccountDetails = asyncHandler(
       const paymentResume = details.reduce((acc, detail) => {
         const code = detail.paymentMethod!.code;
         if (!acc[code]) {
-          acc[code] = 0; // Inicializar el acumulador para este código
+          acc[code] = 0;
         }
-        acc[code] += detail.amount; // Acumular el monto
+        acc[code] += detail.amount;
         return acc;
       }, {});
-
-      console.log(new Date(), ' -> ', paymentResume);
 
       endpointResponse({
         res,
