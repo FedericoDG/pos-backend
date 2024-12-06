@@ -6,6 +6,7 @@ const purchase = Router();
 import {
   close,
   closeById,
+  getCurrentAccountDetails,
   getAll,
   getById,
   open,
@@ -28,6 +29,7 @@ import {
 purchase.get('/', [validToken, accessLevel('ADMIN')], getAll);
 purchase.get('/status', [validToken, accessLevel('DRIVER')], status);
 purchase.get('/statusByUserId/:id', [validToken, accessLevel('DRIVER')], statusByUserId);
+purchase.get('/cobros/:id', [validToken, accessLevel('DRIVER')], getCurrentAccountDetails);
 purchase.get('/:id', [validToken, accessLevel('DRIVER')], getById);
 purchase.post('/', [validToken, accessLevel('DRIVER'), schemaValidator(createCashRegisterSchema)], open);
 purchase.put('/', [validToken, accessLevel('DRIVER'), schemaValidator(updateCashRegisterSchema)], close);

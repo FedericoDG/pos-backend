@@ -639,3 +639,64 @@ export const closeById = asyncHandler(
     }
   },
 );
+
+export const getCurrentAccountDetails = asyncHandler(
+  async (req: Request<{ id?: number }, unknown, unknown>, res: Response, next: NextFunction) => {
+    try {
+      const { id } = req.params;
+
+      const currentAccountDetails = await prisma.currentAccountDetails.findMany({
+        where: {
+          cashRegisterId: Number(id),
+          type: 'PAYMENT',
+          details: { not: 'Devolución Nota de Crédito' },
+        },
+        include: {
+          paymentMethod: true,
+          cashRegister: {
+            include: { user: { include: { role: true } } },
+          },
+          currentAccount: {
+            include: { client: { include: { identification: true } } },
+          },
+        },
+      });
+
+      const transformed = {
+        currentAccountDetails: currentAccountDetails.map((detail) => ({
+          ...detail,
+          client: detail.currentAccount.client,
+        })),
+      };
+
+      const details = transformed.currentAccountDetails;
+
+      const paymentResume = details.reduce((acc, detail) => {
+        const code = detail.paymentMethod!.code;
+        if (!acc[code]) {
+          acc[code] = 0; // Inicializar el acumulador para este código
+        }
+        acc[code] += detail.amount; // Acumular el monto
+        return acc;
+      }, {});
+
+      console.log(new Date(), ' -> ', paymentResume);
+
+      endpointResponse({
+        res,
+        code: 200,
+        status: true,
+        message: 'Caja recuperada',
+        body: {
+          paymentResume,
+          details,
+        },
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        const httpError = createHttpError(500, `[Cash Register - GET ONE]: ${error.message}`);
+        next(httpError);
+      }
+    }
+  },
+);

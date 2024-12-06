@@ -555,7 +555,7 @@ export const createCreditNote = asyncHandler(
             prevAmount: currentAccount!.balance + importeTotal,
             paymentMethodId: 1,
             type: 'PAYMENT',
-            details: 'Devolución Nota de Crédito',
+            details: 'Devolución Nota de Crédito', // NO CAMBIAR NUNCA (SIRVE COMO FILTRO EN getCurrentAccountDetails)
             currentAccountId: currentAccount?.id || 1,
             cashMovementId,
             cashRegisterId: cashRegister?.id || 1,
