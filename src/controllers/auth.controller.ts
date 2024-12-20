@@ -39,9 +39,9 @@ export const login = asyncHandler(
 export const loginDriver = asyncHandler(
   async (req: Request<unknown, unknown, LoginType>, res: Response, next: NextFunction) => {
     try {
-      res.status(401).json({
+     /*  res.status(401).json({
         message: 'Necesitas enviar un token',
-      });
+      }); */
       // USER
       const { user } = req;
       const token = jwtSign(user);
